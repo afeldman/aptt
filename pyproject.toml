@@ -1,0 +1,64 @@
+[project]
+name = "aptt"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "anton feldmann",email = "anton.feldmann@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "toml (>=0.10.2,<0.11.0)"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.11.11"
+mypy = "^1.15.0"
+sphinx = "^8.2.3"
+
+
+[tool.poetry.group.doc.dependencies]
+sphinx = "^8.2.3"
+sphinx-autodoc-typehints = "^3.2.0"
+furo = "^2024.8.6"
+autodoc-pydantic = "^2.2.0"
+pygraphviz = "^1.14"
+recommonmark = "^0.7.1"
+myst-parser = "^4.0.1"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+strict = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = "tattoodb.models"
+ignore_errors = true
+
+[tool.ruff]
+exclude = [
+    "tests/"
+]
+line-length = 100
+target-version = "py311"
+fix = true
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W", "C90", "I", "N", "UP", "D"
+]
+ignore = [
+    "D100", "D104"
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
