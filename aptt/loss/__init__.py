@@ -14,6 +14,8 @@ from aptt.loss.snr import (
     Signal2NoiseRatio,
 )
 from aptt.loss.varifocal import VarifocalLoss
+from aptt.loss.centernet import CenterNetLoss
+from aptt.loss.heat import KeypointHeatmapLoss
 
 
 def get_loss(name: str, **kwargs):
@@ -34,6 +36,8 @@ def get_loss(name: str, **kwargs):
         "si_snr": ScaleInvariantSignal2NoiseRatio,
         "si_sdr": ScaleInvariantSignal2DistortionRatio,
         "varfocal": VarifocalLoss,
+        "centernet": CenterNetLoss,
+        "keypointhearmap": KeypointHeatmapLoss
     }
     if name not in loss_map:
         raise ValueError(f"Loss '{name}' nicht gefunden. Verfügbare: {list(loss_map.keys())}")

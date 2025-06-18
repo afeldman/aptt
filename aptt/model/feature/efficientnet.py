@@ -226,7 +226,7 @@ class EfficientNetBackbone(BackboneAdapter):
         if version not in model_scales:
             raise ValueError(f"Unknown EfficientNet version '{version}'")
 
-        width_coef, depth_coef = model_scales[version]
+        width_coef, depth_coef = model_scales.get(version, "b0")
         args = []
 
         for expand_ratio, channels, repeats, kernel_size, stride, se_ratio in base_blockargs:

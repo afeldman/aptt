@@ -15,7 +15,7 @@ class BeamformingNet(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(32 * 16 * 16, 128),
             nn.ReLU(),
-            nn.Linear(128, 1),  # Richtung oder Gewichtung
+            nn.Linear(128, 1),
         )
 
     def forward(self, x):

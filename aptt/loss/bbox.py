@@ -121,10 +121,11 @@ class RotatedBboxLoss(BboxLoss):
 class AnkerloserBboxLoss(nn.Module):
     """Ankerlose Bounding Box Loss-Funktion mit optionaler logarithmischer Skalierung."""
 
-    def __init__(self, log_reg: bool = False, use_rotated_iou: bool = True):
+    def __init__(self, log_reg: bool = False, use_rotated_iou: bool = True, reduction: str='mean'):
         super().__init__()
         self.log_reg = log_reg
         self.use_rotated_iou = use_rotated_iou
+        self.reduction = reduction
 
     def forward(
         self, bbox_pred: Tensor, target_bboxes: Tensor, weights: tuple[float, float, float] = (0.4, 0.2, 0.4)
@@ -135,6 +136,12 @@ class AnkerloserBboxLoss(nn.Module):
             logger.warning(f"⚠️ `weights` hat {len(weights)} Werte. Ersetze mit Standardwerten (0.4, 0.2, 0.4).")
             weights = (0.4, 0.2, 0.4)
 
+        if bbox_pred.shape[-1] == 4:
+            if self.use_rotated_iou:
+                logger.warning("⚠️ Rotated IoU aktiv, aber Bounding Boxes haben kein Theta! Fallback auf normalen IoU.")
+            loss_theta = 0.0
+            self.use_rotated_iou = False
+
         # Falls die Summe der Gewichte nicht 1.0 ist, normalisieren
         weight_sum = sum(weights)
         norm_weights = [float(w / weight_sum) for w in weights] if weight_sum != 1.0 else weights
@@ -144,13 +151,16 @@ class AnkerloserBboxLoss(nn.Module):
             loss_wh = f.smooth_l1_loss(
                 torch.log1p(bbox_pred[..., 2:4]),
                 torch.log1p(target_bboxes[..., 2:4]),
-                reduction="mean",
+                reduction=self.reduction,
             )
         else:
-            loss_wh = f.smooth_l1_loss(bbox_pred[..., 2:4], target_bboxes[..., 2:4], reduction="mean")
+            loss_wh = f.smooth_l1_loss(bbox_pred[..., 2:4], target_bboxes[..., 2:4], reduction=self.reduction)
 
         # 🔄 **L1-Verlust für die Rotation (θ)**
-        loss_theta = f.smooth_l1_loss(bbox_pred[..., 4], target_bboxes[..., 4], reduction="mean")
+        if bbox_pred.shape[-1] == 4:  # Kein θ vorhanden
+            loss_theta = 0.0
+        else:
+            loss_theta = f.smooth_l1_loss(bbox_pred[..., 4], target_bboxes[..., 4], reduction=self.reduction)
 
         # 📌 **2. IoU-Verlust für Rotation oder Standard-IoU**
         loss_iou = (
