@@ -1,3 +1,5 @@
+"""Hermite module."""
+
 r"""Hermite-Polynome.
 
 Die Hermite-Polynome sind eine Familie von orthogonalen Polynomen, die in der Quantenmechanik und der Wahrscheinlichkeitstheorie verwendet werden. Sie sind definiert durch die Rekursionsformel
@@ -46,7 +48,7 @@ def hermite(n: int, x: torch.Tensor) -> torch.Tensor:
 
     if n == 0:
         return torch.ones_like(x)
-    elif n == 1:
+    if n == 1:
         return 2 * x
 
     # Initialisierung von H_0(x) und H_1(x)

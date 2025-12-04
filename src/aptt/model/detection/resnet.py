@@ -1,3 +1,5 @@
+"""Resnet module."""
+
 import torch
 from torch import nn
 
@@ -20,7 +22,9 @@ class ResNet(ResNetBackbone):
             Layer consisting of conv->batchnorm->relu
 
         """
-        super().__init__(resnet_variant=resnet_variant, in_channels=in_channels, stage_indices=stage_indices)
+        super().__init__(
+            resnet_variant=resnet_variant, in_channels=in_channels, stage_indices=stage_indices
+        )
 
         self.average_pool = nn.AdaptiveAvgPool2d(1)
         self.fc1 = nn.Linear(self.channels_list[3] * self.expansion, num_classes)

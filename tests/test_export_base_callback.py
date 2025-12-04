@@ -1,6 +1,7 @@
+import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-import pytorch_lightning as pl
+
 from aptt.callbacks.base import ExportBaseCallback
 
 

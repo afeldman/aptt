@@ -1,3 +1,5 @@
+"""Embedding module."""
+
 import io
 
 import matplotlib.pyplot as plt
@@ -7,10 +9,9 @@ from sklearn.manifold import TSNE
 from torch import Tensor, isnan
 
 
-def log_embedding_plot_to_mlflow(embeddings: Tensor,
-                                labels: Tensor,
-                                step: int,
-                                components: int = 2):
+def log_embedding_plot_to_mlflow(
+    embeddings: Tensor, labels: Tensor, step: int, components: int = 2
+):
     """Log a TSNE embedding plot to MLflow as an image.
 
     This function reduces high-dimensional embeddings to 2D (or `components`-D),
@@ -36,14 +37,10 @@ def log_embedding_plot_to_mlflow(embeddings: Tensor,
 
     # Reduzieren auf 2D
     tsne = TSNE(n_components=components)
-    reduced = tsne.fit_transform(embeddings.numpy()) 
+    reduced = tsne.fit_transform(embeddings.numpy())
 
     plt.figure(figsize=(6, 6))
-    scatter = plt.scatter(reduced[:, 0],
-                          reduced[:, 1],
-                          c=labels.numpy(),
-                          cmap="tab10",
-                          alpha=0.7)
+    scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=labels.numpy(), cmap="tab10", alpha=0.7)
     plt.colorbar(scatter)
 
     # Als Bild in Buffer

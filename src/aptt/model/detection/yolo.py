@@ -1,11 +1,12 @@
+"""Yolo module."""
+
 from collections.abc import Sequence
 from typing import Any
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from aptt.heads.box import BBoxHead
-from aptt.lightning_base.module import BaseModule
 from aptt.loss.bbox import BboxLoss, RotatedBboxLoss
 from aptt.model.backend_adapter import BackboneAdapter
 from aptt.model.feature.fpn import FPN
@@ -50,7 +51,9 @@ class YOLO(nn.Module):
         self.classification_head = classification_model  # Direktes Modell für Klassifikation
 
         # Wähle den passenden Bbox-Loss
-        self.bbox_loss = RotatedBboxLoss(reg_max=reg_max) if use_rotated_loss else BboxLoss(reg_max=reg_max)
+        self.bbox_loss = (
+            RotatedBboxLoss(reg_max=reg_max) if use_rotated_loss else BboxLoss(reg_max=reg_max)
+        )
 
         self.extra_heads = nn.ModuleDict(extra_heads or {})
 
@@ -121,7 +124,9 @@ class YOLO(nn.Module):
                     device=device,
                 ).unsqueeze(0)
 
-                grid = torch.nn.functional.affine_grid(theta, size=[1, _c, *size], align_corners=False)
+                grid = torch.nn.functional.affine_grid(
+                    theta, size=[1, _c, *size], align_corners=False
+                )
                 crop = torch.nn.functional.grid_sample(img.unsqueeze(0), grid, align_corners=False)
                 crops.append(crop)
                 crop_indices.append((batch_idx, box_idx))

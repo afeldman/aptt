@@ -1,10 +1,12 @@
+"""Doa module."""
+
 import torch
 
 from aptt.layers.dft import ComplexLinear
 
 
 class DoA(torch.nn.Module):
-    def __init__(self, input_dim: int, hidden_dim: int):
+    def __init__(self, input_dim: int, hidden_dim: int) -> None:
         """Initialize the DoA (Direction of Arrival) model using complex numbers.
 
         Args:

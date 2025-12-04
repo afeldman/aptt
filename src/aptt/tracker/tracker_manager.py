@@ -1,3 +1,5 @@
+"""Tracker Manager module."""
+
 from scipy.optimize import linear_sum_assignment
 import torch
 from torch import nn
@@ -8,36 +10,31 @@ from aptt.utils.device import get_best_device
 
 class TrackerManager:
     """Manager for multiple object tracks with various filter types.
-    
+
     Args:
         iou_threshold: Minimum IoU for matching detections to tracks
         max_age: Maximum frames a track can exist without updates
         filter_type: Type of filter ('kalman', 'particle', 'particle_gpu', 'particle_tpu')
         device: Device for computation ('cuda', 'mps', 'cpu', or None for auto-detect)
     """
-    
-    def __init__(self, iou_threshold=0.3, max_age=30, filter_type='kalman', device=None):
+
+    def __init__(self, iou_threshold=0.3, max_age=30, filter_type="kalman", device=None) -> None:
         self.tracks = []
         self.next_id = 0
         self.iou_threshold = iou_threshold
         self.max_age = max_age
         self.filter_type = filter_type
-        
+
         # Auto-detect best device if not specified
         if device is None:
             self.device = str(get_best_device())
         else:
             self.device = device
-        
-        print(f"TrackerManager using device: {self.device}")
-        
 
-    def update(self,
-               detections: list[torch.Tensor],
-               features: list[torch.Tensor] = None):
-        """
-        detections: Tensor [N, 4] – list of bounding boxes [x1, y1, x2, y2]
-        """
+        print(f"TrackerManager using device: {self.device}")
+
+    def update(self, detections: list[torch.Tensor], features: list[torch.Tensor] = None):
+        """detections: Tensor [N, 4] – list of bounding boxes [x1, y1, x2, y2]"""
         detections = [d.to(self.device) for d in detections]
 
         # Step 1: Vorhersagen aller aktuellen Tracks
@@ -71,14 +68,13 @@ class TrackerManager:
                 Track(
                     track_id=self.next_id,
                     initial_box=detections[det_idx],
-                    feature= features[det_idx] if features is not None else None,
+                    feature=features[det_idx] if features is not None else None,
                     filter_type=self.filter_type,
-                    device=self.device
+                    device=self.device,
                 )
-            )   
-            
-            self.next_id += 1
+            )
 
+            self.next_id += 1
 
         # Step 6: Tote Tracks entfernen
         self.tracks = [t for t in self.tracks if t.time_since_update <= self.max_age]
@@ -90,10 +86,10 @@ class TrackerManager:
         gt_boxes: list[torch.Tensor],
         gt_features: list[torch.Tensor],
         alpha: float = 0.5,
-        device='cpu',
+        device="cpu",
     ) -> torch.Tensor:
-        """
-        Compute a similarity matrix that combines IoU and appearance cosine similarity.
+        """Compute a similarity matrix that combines IoU and appearance cosine similarity.
+
         Args:
             predicted_boxes: List of predicted box tensors [4]
             predicted_features: List of feature tensors [D]
@@ -108,7 +104,7 @@ class TrackerManager:
 
         # [G, D] and [P, D] → [G, P]
         if gt_features and predicted_features and gt_features[0] is not None:
-            feats_gt = torch.stack(gt_features).to(device)      # [G, D]
+            feats_gt = torch.stack(gt_features).to(device)  # [G, D]
             feats_pred = torch.stack(predicted_features).to(device)  # [P, D]
             # Normalize for cosine similarity
             feats_gt = nn.functional.normalize(feats_gt, dim=1)
@@ -121,17 +117,15 @@ class TrackerManager:
 
         return alpha * iou_mat + (1 - alpha) * cos_sim
 
-
-
     def get_active_tracks(self):
         return [t for t in self.tracks if t.time_since_update == 0]
 
     @staticmethod
-    def compute_iou_matrix(boxes_a: list[torch.Tensor], 
-                           boxes_b: list[torch.Tensor], 
-                           device='cpu') -> torch.Tensor:
-        """
-        Compute IoU matrix between two sets of boxes using efficient torch operations.
+    def compute_iou_matrix(
+        boxes_a: list[torch.Tensor], boxes_b: list[torch.Tensor], device="cpu"
+    ) -> torch.Tensor:
+        """Compute IoU matrix between two sets of boxes using efficient torch operations.
+
         Args:
             boxes_a (list of Tensors): each [4]
             boxes_b (list of Tensors): each [4]

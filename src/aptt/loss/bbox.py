@@ -13,10 +13,10 @@ Functions:
 
 """
 
-import torch
-import torch.nn.functional as f
 from loguru import logger
+import torch
 from torch import Tensor, nn
+import torch.nn.functional as f
 
 from aptt.loss.dfl import DFLoss
 from aptt.metric.bbox_iou import bbox_iou, rotated_bbox_iou
@@ -35,7 +35,7 @@ class BboxLoss(nn.Module):
         dfl_loss (DFLoss): Instance of the DFLoss class if `reg_max` > 1, else None.
     """
 
-    def __init__(self, reg_max: int = 16):
+    def __init__(self, reg_max: int = 16) -> None:
         """Initialize the BboxLoss module with regularization maximum and DFL settings.
 
         Args:
@@ -69,16 +69,25 @@ class BboxLoss(nn.Module):
             Tuple[Tensor, Tensor]: IoU loss and DFL loss.
         """
         if fg_mask.sum() == 0:
-            return torch.tensor(0.0, device=pred_dist.device), torch.tensor(0.0, device=pred_dist.device)
+            return torch.tensor(0.0, device=pred_dist.device), torch.tensor(
+                0.0, device=pred_dist.device
+            )
 
         weight = target_scores.sum(-1)[fg_mask].unsqueeze(-1)
         iou = bbox_iou(pred_bboxes[fg_mask], target_bboxes[fg_mask], xywh=False, CIoU=True)
-        loss_iou = ((1.0 - iou) * weight).sum() / max(target_scores_sum, 1e-6)  # Schutz gegen Division durch 0
+        loss_iou = ((1.0 - iou) * weight).sum() / max(
+            target_scores_sum, 1e-6
+        )  # Schutz gegen Division durch 0
 
         # DFL loss
         if self.dfl_loss:
             target_ltrb = bbox2dist(anchor_points, target_bboxes, self.dfl_loss.reg_max - 1)
-            loss_dfl = self.dfl_loss(pred_dist[fg_mask].view(-1, self.dfl_loss.reg_max), target_ltrb[fg_mask]) * weight
+            loss_dfl = (
+                self.dfl_loss(
+                    pred_dist[fg_mask].view(-1, self.dfl_loss.reg_max), target_ltrb[fg_mask]
+                )
+                * weight
+            )
             loss_dfl = loss_dfl.sum() / max(target_scores_sum, 1e-6)
         else:
             loss_dfl = torch.tensor(0.0, device=pred_dist.device)
@@ -101,7 +110,9 @@ class RotatedBboxLoss(BboxLoss):
     ) -> tuple[Tensor, Tensor]:
         """Compute the IoU loss and DFL loss for rotated bounding boxes."""
         if fg_mask.sum() == 0:
-            return torch.tensor(0.0, device=pred_dist.device), torch.tensor(0.0, device=pred_dist.device)
+            return torch.tensor(0.0, device=pred_dist.device), torch.tensor(
+                0.0, device=pred_dist.device
+            )
 
         weight = target_scores.sum(-1)[fg_mask].unsqueeze(-1)
         iou = probiou(pred_bboxes[fg_mask], target_bboxes[fg_mask])
@@ -109,8 +120,15 @@ class RotatedBboxLoss(BboxLoss):
 
         # DFL loss
         if self.dfl_loss:
-            target_ltrb = bbox2dist(anchor_points, xywh2xyxy(target_bboxes[..., :4]), self.dfl_loss.reg_max - 1)
-            loss_dfl = self.dfl_loss(pred_dist[fg_mask].view(-1, self.dfl_loss.reg_max), target_ltrb[fg_mask]) * weight
+            target_ltrb = bbox2dist(
+                anchor_points, xywh2xyxy(target_bboxes[..., :4]), self.dfl_loss.reg_max - 1
+            )
+            loss_dfl = (
+                self.dfl_loss(
+                    pred_dist[fg_mask].view(-1, self.dfl_loss.reg_max), target_ltrb[fg_mask]
+                )
+                * weight
+            )
             loss_dfl = loss_dfl.sum() / max(target_scores_sum, 1e-6)
         else:
             loss_dfl = torch.tensor(0.0, device=pred_dist.device)
@@ -121,24 +139,33 @@ class RotatedBboxLoss(BboxLoss):
 class AnkerloserBboxLoss(nn.Module):
     """Ankerlose Bounding Box Loss-Funktion mit optionaler logarithmischer Skalierung."""
 
-    def __init__(self, log_reg: bool = False, use_rotated_iou: bool = True, reduction: str='mean'):
+    def __init__(
+        self, log_reg: bool = False, use_rotated_iou: bool = True, reduction: str = "mean"
+    ) -> None:
         super().__init__()
         self.log_reg = log_reg
         self.use_rotated_iou = use_rotated_iou
         self.reduction = reduction
 
     def forward(
-        self, bbox_pred: Tensor, target_bboxes: Tensor, weights: tuple[float, float, float] = (0.4, 0.2, 0.4)
+        self,
+        bbox_pred: Tensor,
+        target_bboxes: Tensor,
+        weights: tuple[float, float, float] = (0.4, 0.2, 0.4),
     ) -> Tensor:
         """Berechnet den kombinierten Verlust für ankerlose Bounding Box Regression."""
         # Falls `weights` nicht genau 3 Werte hat, Standardwerte setzen
         if len(weights) != 3:
-            logger.warning(f"⚠️ `weights` hat {len(weights)} Werte. Ersetze mit Standardwerten (0.4, 0.2, 0.4).")
+            logger.warning(
+                f"⚠️ `weights` hat {len(weights)} Werte. Ersetze mit Standardwerten (0.4, 0.2, 0.4)."
+            )
             weights = (0.4, 0.2, 0.4)
 
         if bbox_pred.shape[-1] == 4:
             if self.use_rotated_iou:
-                logger.warning("⚠️ Rotated IoU aktiv, aber Bounding Boxes haben kein Theta! Fallback auf normalen IoU.")
+                logger.warning(
+                    "⚠️ Rotated IoU aktiv, aber Bounding Boxes haben kein Theta! Fallback auf normalen IoU."
+                )
             loss_theta = 0.0
             self.use_rotated_iou = False
 
@@ -154,13 +181,17 @@ class AnkerloserBboxLoss(nn.Module):
                 reduction=self.reduction,
             )
         else:
-            loss_wh = f.smooth_l1_loss(bbox_pred[..., 2:4], target_bboxes[..., 2:4], reduction=self.reduction)
+            loss_wh = f.smooth_l1_loss(
+                bbox_pred[..., 2:4], target_bboxes[..., 2:4], reduction=self.reduction
+            )
 
         # 🔄 **L1-Verlust für die Rotation (θ)**
         if bbox_pred.shape[-1] == 4:  # Kein θ vorhanden
             loss_theta = 0.0
         else:
-            loss_theta = f.smooth_l1_loss(bbox_pred[..., 4], target_bboxes[..., 4], reduction=self.reduction)
+            loss_theta = f.smooth_l1_loss(
+                bbox_pred[..., 4], target_bboxes[..., 4], reduction=self.reduction
+            )
 
         # 📌 **2. IoU-Verlust für Rotation oder Standard-IoU**
         loss_iou = (

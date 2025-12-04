@@ -23,7 +23,7 @@ import torch
 
 
 class ArrayCalibration:
-    def __init__(self, num_sensors):
+    def __init__(self, num_sensors) -> None:
         """Initialize the ArrayCalibration class.
 
         Args:
@@ -74,7 +74,9 @@ if __name__ == "__main__":
 
     # Zufällige komplexe Signale für Referenz und Messung
     reference_signals = torch.randn(batch_size, num_sensors, num_samples, dtype=torch.complex64)
-    measured_signals = reference_signals * (1.2 + 0.1j)  # Simulierte Verstärkung & Phasenverschiebung
+    measured_signals = reference_signals * (
+        1.2 + 0.1j
+    )  # Simulierte Verstärkung & Phasenverschiebung
 
     calibration = ArrayCalibration(num_sensors)
     calibration.calibrate(reference_signals, measured_signals)

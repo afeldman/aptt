@@ -1,3 +1,5 @@
+"""Head Expansion module."""
+
 import torch
 
 

@@ -1,3 +1,5 @@
+"""Hermite module."""
+
 r"""Dieses Modul enthält eine PyTorch-Layer-Klasse, die Hermite-Polynome auf die Eingabe anwendet.
 
 Die Hermite-Polynome sind eine Familie von orthogonalen Polynomen, die in der Quantenmechanik und der Wahrscheinlichkeitstheorie verwendet werden. Sie sind definiert durch die Rekursionsformel:
@@ -39,7 +41,7 @@ class HermiteLayer(nn.Module):
                 [ 1.0000,  4.0000, 14.0000,  0.0000]])
     """
 
-    def __init__(self, max_order: int):
+    def __init__(self, max_order: int) -> None:
         super().__init__()
         self.max_order = max_order
 

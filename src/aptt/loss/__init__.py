@@ -1,9 +1,19 @@
+"""Init   module."""
+
 from aptt.loss.bbox import BboxLoss
+from aptt.loss.centernet import CenterNetLoss
 from aptt.loss.detection import DetectionLoss
 from aptt.loss.dfl import DFLoss
 from aptt.loss.distill import Distill
 from aptt.loss.focal import BinaryFocalLoss, FocalLoss, MulticlassFocalLoss
+from aptt.loss.heat import KeypointHeatmapLoss
 from aptt.loss.keypoint import KeypointLoss
+from aptt.loss.language_modeling import (
+    LanguageModelingLoss,
+    MultiTokenPredictionLoss,
+    PerplexityMetric,
+    TokenAccuracyMetric,
+)
 from aptt.loss.lwf import LwF
 from aptt.loss.mel import MelLoss
 from aptt.loss.rmse import RMSE
@@ -14,8 +24,6 @@ from aptt.loss.snr import (
     Signal2NoiseRatio,
 )
 from aptt.loss.varifocal import VarifocalLoss
-from aptt.loss.centernet import CenterNetLoss
-from aptt.loss.heat import KeypointHeatmapLoss
 
 
 def get_loss(name: str, **kwargs):
@@ -37,7 +45,9 @@ def get_loss(name: str, **kwargs):
         "si_sdr": ScaleInvariantSignal2DistortionRatio,
         "varfocal": VarifocalLoss,
         "centernet": CenterNetLoss,
-        "keypointhearmap": KeypointHeatmapLoss
+        "keypointhearmap": KeypointHeatmapLoss,
+        "languagemodeling": LanguageModelingLoss,
+        "mtp": MultiTokenPredictionLoss,
     }
     if name not in loss_map:
         raise ValueError(f"Loss '{name}' nicht gefunden. Verfügbare: {list(loss_map.keys())}")

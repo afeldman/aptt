@@ -1,3 +1,5 @@
+"""Rnn module."""
+
 from enum import IntEnum
 
 from loguru import logger
@@ -23,22 +25,20 @@ class RNNType(IntEnum):
     def choose(self):
         if self == RNNType.GRU:
             return nn.GRU
-        elif self == RNNType.LSTM:
+        if self == RNNType.LSTM:
             return nn.LSTM
-        elif self == RNNType.RNN:
+        if self == RNNType.RNN:
             return nn.RNN
-        else:
-            logger.error(f"Invalid RNN type: {self}, defaulting to GRU")
-            return nn.GRU
+        logger.error(f"Invalid RNN type: {self}, defaulting to GRU")
+        return nn.GRU
 
     @staticmethod
     def from_str(rnn_type: str):
         if rnn_type.lower() == "gru":
             return nn.GRU
-        elif rnn_type.lower() == "lstm":
+        if rnn_type.lower() == "lstm":
             return nn.LSTM
-        elif rnn_type.lower() == "rnn":
+        if rnn_type.lower() == "rnn":
             return nn.RNN
-        else:
-            logger.error(f"Invalid RNN type: {rnn_type}, defaulting to GRU")
-            return nn.GRU
+        logger.error(f"Invalid RNN type: {rnn_type}, defaulting to GRU")
+        return nn.GRU

@@ -1,3 +1,5 @@
+"""Resnet module."""
+
 import torch
 from torch import nn
 
@@ -15,23 +17,32 @@ class ResNetBackbone(BackboneAdapter):
     }
 
     def __init__(self, resnet_variant: str, in_channels: int, stage_indices=(3, 6, 11)):
-        assert resnet_variant in self.model_parameters.keys(), f"{resnet_variant} not in {self.model_parameters.keys()}"
+        assert resnet_variant in self.model_parameters.keys(), (
+            f"{resnet_variant} not in {self.model_parameters.keys()}"
+        )
 
         super().__init__()
         self.set_stage_indices(stage_indices)
 
-        self.channels_list, self.repeatition_list, self.expansion, self.is_bottleneck = self.model_parameters[
-            resnet_variant
-        ]
+        self.channels_list, self.repeatition_list, self.expansion, self.is_bottleneck = (
+            self.model_parameters[resnet_variant]
+        )
 
-        self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(
+            in_channels=in_channels, out_channels=64, kernel_size=7, stride=2, padding=3, bias=False
+        )
         self.batchnorm1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU()
 
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.block1 = self._make_blocks(
-            64, self.channels_list[0], self.repeatition_list[0], self.expansion, self.is_Bottleneck, stride=1
+            64,
+            self.channels_list[0],
+            self.repeatition_list[0],
+            self.expansion,
+            self.is_Bottleneck,
+            stride=1,
         )
 
         self.block2 = self._make_blocks(
@@ -83,7 +94,9 @@ class ResNetBackbone(BackboneAdapter):
 
         return features if return_stages else x
 
-    def _make_blocks(self, in_channels, intermediate_channels, num_repeat, expansion, is_bottleneck, stride):
+    def _make_blocks(
+        self, in_channels, intermediate_channels, num_repeat, expansion, is_bottleneck, stride
+    ):
         """Args:
             in_channels : #channels of the Bottleneck input
             intermediate_channels : #channels of the 3x3 in the Bottleneck
@@ -98,10 +111,18 @@ class ResNetBackbone(BackboneAdapter):
         """
         layers = []
 
-        layers.append(Bottleneck(in_channels, intermediate_channels, expansion, is_bottleneck, stride=stride))
+        layers.append(
+            Bottleneck(in_channels, intermediate_channels, expansion, is_bottleneck, stride=stride)
+        )
         for _ in range(1, num_repeat):
             layers.append(
-                Bottleneck(intermediate_channels * expansion, intermediate_channels, expansion, is_bottleneck, stride=1)
+                Bottleneck(
+                    intermediate_channels * expansion,
+                    intermediate_channels,
+                    expansion,
+                    is_bottleneck,
+                    stride=1,
+                )
             )
 
         return nn.Sequential(*layers)

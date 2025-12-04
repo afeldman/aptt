@@ -1,3 +1,5 @@
+"""Mobile module."""
+
 import torch
 from torch import nn
 
@@ -96,7 +98,9 @@ class MobileNetV2Backbone(BackboneAdapter):
 
 
 class MobileNetV3Backbone(BackboneAdapter):
-    def __init__(self, config: str = "large", stage_indices: tuple = (3, 6, 11), dropout: float = 0.8):
+    def __init__(
+        self, config: str = "large", stage_indices: tuple = (3, 6, 11), dropout: float = 0.8
+    ):
         super().__init__()
         self.set_stage_indices(stage_indices)
 
@@ -155,8 +159,12 @@ class MobileNetV3Backbone(BackboneAdapter):
         hidden_channels = 576 if config == "small" else 960
         _out_channel = 1024 if config == "small" else 1280
 
-        self.model.append(ConvBlock(out_channels, hidden_channels, (1, 1), bias=False, activation=hs))
-        self.head = nn.Sequential(nn.Conv2d(hidden_channels, _out_channel, (1, 1)), nn.Hardswish(), nn.Dropout(dropout))
+        self.model.append(
+            ConvBlock(out_channels, hidden_channels, (1, 1), bias=False, activation=hs)
+        )
+        self.head = nn.Sequential(
+            nn.Conv2d(hidden_channels, _out_channel, (1, 1)), nn.Hardswish(), nn.Dropout(dropout)
+        )
 
     def forward(self, x, return_stages=False, return_pooled=False):
         features = []

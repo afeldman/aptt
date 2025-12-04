@@ -1,5 +1,9 @@
+"""Inference module."""
+
 import torch
+
 from aptt.tracker.tracker_manager import TrackerManager
+
 
 def crop_boxes_from_image(image, boxes, size=128):
     crops = []
@@ -7,18 +11,18 @@ def crop_boxes_from_image(image, boxes, size=128):
         x1, y1, x2, y2 = box.int()
         crop = image[:, y1:y2, x1:x2]
         crop_resized = torch.nn.functional.interpolate(
-            crop.unsqueeze(0), 
-            size=(size, size), 
-            mode='bilinear')
+            crop.unsqueeze(0), size=(size, size), mode="bilinear"
+        )
         crops.append(crop_resized.squeeze(0))
     return torch.stack(crops)
 
-def run_tracking(detector, dataloader, reid_encoder=None, device='cpu'):
-    tracker = TrackerManager(filter_type='kalman', device=device)
+
+def run_tracking(detector, dataloader, reid_encoder=None, device="cpu"):
+    tracker = TrackerManager(filter_type="kalman", device=device)
 
     for batch in dataloader:
-        images = batch['image'].to(device)
-        frame_id = batch['frame_id']
+        images = batch["image"].to(device)
+        frame_id = batch["frame_id"]
 
         # YOLO etc.
         detections = detector(images)  # → boxes [B, N, 4]

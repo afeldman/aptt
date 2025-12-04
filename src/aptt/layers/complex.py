@@ -1,5 +1,7 @@
 # Wir versuchen, complexPyTorch zu importieren.
 # Falls es nicht verfügbar ist (z. B. auf Mobilgeräten), wird eine Fallback-Implementierung genutzt.
+"""Complex module."""
+
 import torch
 from torch import nn
 
@@ -20,7 +22,7 @@ except ImportError:
             torch.Tensor: Gespeicherte und berechnete Phase.
         """
 
-        def __init__(self, hidden_dim: int):
+        def __init__(self, hidden_dim: int) -> None:
             super().__init__()
             self.phase_fc = nn.Linear(hidden_dim, hidden_dim)  # Phase als eigenes Feature lernen
 
@@ -35,18 +37,22 @@ except ImportError:
                 torch.Tensor: Phasenwerte der komplexen Zahlen.
             """
             phase = torch.atan2(imag, real)  # Phase berechnen
-            return self.phase_fc(phase.view(phase.shape[0], -1))  # Phase durch lineare Schicht lernen
+            return self.phase_fc(
+                phase.view(phase.shape[0], -1)
+            )  # Phase durch lineare Schicht lernen
 
     class ComplexLinear(nn.Module):
         """Ersatz für `ComplexLinear`, falls `complexPyTorch` nicht verfügbar ist.
         - Führt separate Berechnungen für Real- und Imaginärteil durch.
         """
 
-        def __init__(self, in_features: int, out_features: int):
+        def __init__(self, in_features: int, out_features: int) -> None:
             super().__init__()
             self.real_linear = nn.Linear(in_features, out_features)  # Realteil
             self.imag_linear = nn.Linear(in_features, out_features)  # Imaginärteil
-            self.phase_layer = nn.Linear(in_features, out_features)  # Phase als zusätzliches Feature
+            self.phase_layer = nn.Linear(
+                in_features, out_features
+            )  # Phase als zusätzliches Feature
 
         def forward(self, signal: torch.Tensor) -> torch.Tensor:
             batch_size, _, _ = signal.shape

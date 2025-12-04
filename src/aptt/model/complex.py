@@ -1,3 +1,5 @@
+"""Complex module."""
+
 import torch
 from torch import nn
 
@@ -13,7 +15,7 @@ class ComplexLearningModel(nn.Module):
         hidden_dim (int): Größe der versteckten Layer.
     """
 
-    def __init__(self, n_fft: int, hidden_dim: int = 128):
+    def __init__(self, n_fft: int, hidden_dim: int = 128) -> None:
         super().__init__()
         self.dft_layer = DFTLayer(n_fft)  # Fourier-Transformation als Feature-Extractor
 
@@ -32,7 +34,9 @@ class ComplexLearningModel(nn.Module):
             torch.Tensor: Vorhergesagte Longitude & Latitude.
         """
         if WITH_COMPLEXPYTORCH:
-            assert signal.dtype == torch.complex128, "Eingabe muss komplexwertig sein (torch.complex128)"
+            assert signal.dtype == torch.complex128, (
+                "Eingabe muss komplexwertig sein (torch.complex128)"
+            )
 
         x = self.dft_layer(signal.to(signal.device))  # DFT ausführen
         x = complex_relu(self.fc1(x.to(signal.device)))  # Komplexe Aktivierung

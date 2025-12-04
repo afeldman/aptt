@@ -5,7 +5,7 @@ Author:
 """
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class RMSE(nn.Module):
@@ -21,14 +21,14 @@ class RMSE(nn.Module):
 
     Examples:
         >>> criterion = RMSE()
-        >>> x = torch.tensor([1., 2., 3.])
-        >>> y = torch.tensor([1., 2., 2.])
+        >>> x = torch.tensor([1.0, 2.0, 3.0])
+        >>> y = torch.tensor([1.0, 2.0, 2.0])
         >>> loss = criterion(x, y)
         >>> loss
         tensor(0.5774)
     """
 
-    def __init__(self, esp: float = 1e-6, criterion: nn.Module | None = None):
+    def __init__(self, esp: float = 1e-6, criterion: nn.Module | None = None) -> None:
         """Root Mean Squared Error (RMSE) Loss.
 
         Args:

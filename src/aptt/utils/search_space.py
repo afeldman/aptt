@@ -1,3 +1,5 @@
+"""Search Space module."""
+
 from ray import tune
 
 

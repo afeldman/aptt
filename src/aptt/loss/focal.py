@@ -1,3 +1,5 @@
+"""Focal module."""
+
 r"""This module contains the FocalLoss class which is a wrapper around the binary cross entropy loss function.
 
 ..math::
@@ -27,8 +29,8 @@ References:
 """
 
 
-import torch
 from loguru import logger
+import torch
 from torch import Tensor, nn
 from torch.nn import functional as f
 
@@ -61,7 +63,6 @@ class FocalLoss(nn.Module):
         self.ignore_index = ignore_index
         self.debug = debug
         self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
     @property
     def alpha(self):
@@ -112,7 +113,9 @@ class BinaryFocalLoss(FocalLoss):
         https://arxiv.org/abs/1708.02002
     """
 
-    def __init__(self, alpha: float = 0.25, gamma: float = 2.0, reduction: str = "mean", debug: bool = False) -> None:
+    def __init__(
+        self, alpha: float = 0.25, gamma: float = 2.0, reduction: str = "mean", debug: bool = False
+    ) -> None:
         """Initialize the BinaryFocalLoss class.
 
         Args:
@@ -154,7 +157,7 @@ class BinaryFocalLoss(FocalLoss):
         if self.reduction == "mean":
             return loss.mean()
 
-        elif self.reduction == "sum":
+        if self.reduction == "sum":
             return loss.sum()
 
         return loss
@@ -194,7 +197,11 @@ class MulticlassFocalLoss(FocalLoss):
                 Defaults to -100.
         """
         super().__init__(
-            alpha=alpha if alpha else 0.0, gamma=gamma, reduction=reduction, ignore_index=ignore_index, debug=debug
+            alpha=alpha if alpha else 0.0,
+            gamma=gamma,
+            reduction=reduction,
+            ignore_index=ignore_index,
+            debug=debug,
         )
 
         self.epsilon = epsilon
@@ -251,6 +258,8 @@ class MulticlassFocalLoss(FocalLoss):
             loss = loss.sum()
 
         if self.debug:
-            logger.debug(f"pt mean: {pt.mean().item():.4f}, focal term mean: {focal_term.mean().item():.4f}")
+            logger.debug(
+                f"pt mean: {pt.mean().item():.4f}, focal term mean: {focal_term.mean().item():.4f}"
+            )
 
         return loss

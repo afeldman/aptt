@@ -1,13 +1,18 @@
+"""Tracking module."""
+
 import torch
 
 from aptt.tracker.rnn_tracker import RNNTracker
 
+
 class Tracker(torch.nn.Module):
-    def __init__(self, detection_model, reid_encoder=None, hidden_dim=128, rnn_type='GRU'):
+    def __init__(self, detection_model, reid_encoder=None, hidden_dim=128, rnn_type="GRU") -> None:
         super().__init__()
         self.detection_model = detection_model
         self.reid_encoder = reid_encoder
-        self.tracker = RNNTracker(input_dim=4, hidden_dim=hidden_dim, output_dim=4, rnn_type=rnn_type)
+        self.tracker = RNNTracker(
+            input_dim=4, hidden_dim=hidden_dim, output_dim=4, rnn_type=rnn_type
+        )
 
     def forward(self, frames):
         all_boxes = []
@@ -20,8 +25,8 @@ class Tracker(torch.nn.Module):
 
             # 2. (Optional) ReID-Feature extrahieren
             if self.reid_encoder is not None and boxes is not None and len(boxes) > 0:
-                crops = self.crop_boxes(frame, boxes)         # → [N, C, H, W]
-                features = self.reid_encoder(crops)            # → [N, D]
+                crops = self.crop_boxes(frame, boxes)  # → [N, C, H, W]
+                features = self.reid_encoder(crops)  # → [N, D]
             else:
                 features = [None for _ in boxes]
 
@@ -32,11 +37,12 @@ class Tracker(torch.nn.Module):
         return self.tracker(box_seq)
 
     def crop_boxes(self, image, boxes, size=(128, 256)):
-        """
-        Crop bounding boxes from an image tensor.
+        """Crop bounding boxes from an image tensor.
+
         Args:
             image: [C, H, W] tensor
             boxes: [N, 4] tensor (x1, y1, x2, y2)
+
         Returns:
             Cropped image patches [N, C, H_crop, W_crop]
         """

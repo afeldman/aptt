@@ -1,3 +1,5 @@
+"""Darknet module."""
+
 from torch import nn
 
 from aptt.model.feature.darknet import CSPDarknetBackbone

@@ -1,3 +1,5 @@
+"""Confidence Matrix module."""
+
 import torch
 
 

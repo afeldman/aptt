@@ -1,14 +1,18 @@
+"""Tracking module."""
+
 import motmetrics as mm
+
 from aptt.lightning_base.module import BaseModule
 from aptt.model.tracking import Tracker
 from aptt.tracker.tracker_manager import TrackerManager
 
+
 class TrackingModule(BaseModule):
     """Multi-Object Tracking Module with PyTorch Lightning.
-    
+
     Supports various tracking filters including GPU-accelerated particle filters.
     Automatically detects and uses available accelerators (CUDA, MPS, TPU).
-    
+
     Args:
         detection_model: Detection model for generating bounding boxes
         tracker_type: Type of tracker filter:
@@ -19,38 +23,37 @@ class TrackingModule(BaseModule):
             - 'particle_tpu': TPU/MPS optimized (1000 particles)
         hidden_dim: Hidden dimension for RNN-based components
         rnn_type: Type of RNN ('GRU' or 'LSTM')
-    
+
     Example:
         >>> # Automatic device selection (will use MPS on Mac, CUDA on Linux/Windows)
-        >>> tracker = TrackingModule(
-        ...     detection_model=yolo_model,
-        ...     tracker_type='particle_gpu'
-        ... )
-        
+        >>> tracker = TrackingModule(detection_model=yolo_model, tracker_type="particle_gpu")
+
         >>> # Explicit device selection
         >>> tracker = TrackingModule(
         ...     detection_model=yolo_model,
-        ...     tracker_type='particle_gpu',
-        ...     device='mps'  # Force MPS on Apple Silicon
+        ...     tracker_type="particle_gpu",
+        ...     device="mps",  # Force MPS on Apple Silicon
         ... )
     """
-    
-    def __init__(self, 
-                 detection_model,
-                 tracker_type='kalman', 
-                 hidden_dim=128, 
-                 rnn_type='GRU',
-                 device=None,  # None = auto-detect
-                 *args, **kwargs):
+
+    def __init__(
+        self,
+        detection_model,
+        tracker_type="kalman",
+        hidden_dim=128,
+        rnn_type="GRU",
+        device=None,  # None = auto-detect
+        *args,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
-        self.trackingmodel = Tracker(detection_model=detection_model, 
-                                     hidden_dim=hidden_dim,
-                                     rnn_type=rnn_type)
+        self.trackingmodel = Tracker(
+            detection_model=detection_model, hidden_dim=hidden_dim, rnn_type=rnn_type
+        )
 
         # TrackerManager will auto-detect device if device=None
         self.tracker = TrackerManager(
-            filter_type=tracker_type, 
-            device=device if device is not None else str(self.device)
+            filter_type=tracker_type, device=device if device is not None else str(self.device)
         )
         self.accumulator = mm.MOTAccumulator(auto_id=True)
 
@@ -59,21 +62,20 @@ class TrackingModule(BaseModule):
         self._pred_by_frame = {}
 
     def validation_step(self, batch, batch_idx):
-        """
-        Batch sollte enthalten:
+        """Batch sollte enthalten:
         - images: [B, C, H, W]
         - targets: Dict mit 'boxes' und 'ids' (pro Frame)
         """
         images, targets = batch
         batch_size = images.shape[0]
 
-        #all_preds = []
+        # all_preds = []
 
         for i in range(batch_size):
-            #img = images[i]
-            gt_boxes = targets[i]['boxes']
-            gt_ids = targets[i]['ids']
-            frame_id = targets[i].get('frame_id', batch_idx * batch_size + i)
+            # img = images[i]
+            gt_boxes = targets[i]["boxes"]
+            gt_ids = targets[i]["ids"]
+            frame_id = targets[i].get("frame_id", batch_idx * batch_size + i)
 
             # MOT: Detektion → (z. B. YOLO o. CenterNet, hier Dummy)
             pred_boxes = gt_boxes  # TODO: echte detections
@@ -99,12 +101,10 @@ class TrackingModule(BaseModule):
         # Trackingmetriken berechnen
         mh = mm.metrics.create()
         summary = mh.compute(
-            self.accumulator,
-            metrics=['mota', 'motp', 'idf1', 'num_switches'],
-            name='MOT'
+            self.accumulator, metrics=["mota", "motp", "idf1", "num_switches"], name="MOT"
         )
 
-        mot_results = summary.loc['MOT'].to_dict()
+        mot_results = summary.loc["MOT"].to_dict()
         for metric, value in mot_results.items():
             self.log(f"val/{metric}", value, prog_bar=True, logger=True)
 

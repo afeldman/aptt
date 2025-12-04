@@ -1,3 +1,5 @@
+"""Hw module."""
+
 import platform
 import sys
 
@@ -7,8 +9,7 @@ import torch
 
 
 class HWInfo:
-
-    def __init__(self):
+    def __init__(self) -> None:
         self._cpu_info = None
         self._gpu_info = None
         self._ram_info = None
@@ -16,25 +17,33 @@ class HWInfo:
         self._python_info = None
 
     def __str__(self):
-        return (f"CPU: {self.get_cpu_info()}\n"
-                f"GPU: {self.get_gpu_info()}\n"
-                f"RAM: {self.get_ram_info()}\n"
-                f"OS: {self.get_os_info()}\n"
-                f"Python: {self.get_python_info()}")
+        return (
+            f"CPU: {self.get_cpu_info()}\n"
+            f"GPU: {self.get_gpu_info()}\n"
+            f"RAM: {self.get_ram_info()}\n"
+            f"OS: {self.get_os_info()}\n"
+            f"Python: {self.get_python_info()}"
+        )
 
     def __repr__(self):
-        return (f"HWInfo(cpu={self.get_cpu_info()}, "
-                f"gpu={self.get_gpu_info()}, "
-                f"ram={self.get_ram_info()}, "
-                f"os={self.get_os_info()}, "
-                f"python={self.get_python_info()})")
+        return (
+            f"HWInfo(cpu={self.get_cpu_info()}, "
+            f"gpu={self.get_gpu_info()}, "
+            f"ram={self.get_ram_info()}, "
+            f"os={self.get_os_info()}, "
+            f"python={self.get_python_info()})"
+        )
 
     def get_cpu_info(self):
         if self._cpu_info is None:
             try:
                 info = cpuinfo.get_cpu_info()
-                self._cpu_info = info.get('brand_raw', 'unknown').replace(
-                    "(R)", "").replace("CPU ", "").replace("@ ", "")
+                self._cpu_info = (
+                    info.get("brand_raw", "unknown")
+                    .replace("(R)", "")
+                    .replace("CPU ", "")
+                    .replace("@ ", "")
+                )
             except Exception:
                 self._cpu_info = "unknown"
         return self._cpu_info

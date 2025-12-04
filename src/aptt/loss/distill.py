@@ -1,9 +1,11 @@
+"""Distill module."""
+
 import torch
 import torch.nn.functional as f
 
 
 class Distill(torch.nn.Module):
-    def __init__(self, t: float = 2.0, reduction: str = "batchmean"):
+    def __init__(self, t: float = 2.0, reduction: str = "batchmean") -> None:
         """KL-Distillation Loss nach Hinton et al.
 
         Args:

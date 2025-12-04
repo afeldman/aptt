@@ -10,19 +10,19 @@ A PyTorch Lightning-based framework for deep learning with focus on:
 __version__ = "0.1.0"
 
 # Core Lightning Modules
-from aptt.modules.yolo import Yolo
-from aptt.modules.centernet import CenterNetModule
-from aptt.modules.tracking import TrackingModule
+from aptt.lightning_base.continual_learning_manager import ContinualLearningManager
 
 # Base Classes
 from aptt.lightning_base.module import BaseModule
 from aptt.lightning_base.trainer import BaseTrainer
-from aptt.lightning_base.continual_learning_manager import ContinualLearningManager
+from aptt.model.backend_adapter import BackboneAdapter
+from aptt.model.detection.centernet import CenterNetModel
 
 # Model Architectures
 from aptt.model.detection.yolo import YOLO
-from aptt.model.detection.centernet import CenterNetModel
-from aptt.model.backend_adapter import BackboneAdapter
+from aptt.modules.centernet import CenterNetModule
+from aptt.modules.tracking import TrackingModule
+from aptt.modules.yolo import Yolo
 
 __all__ = [
     # Version

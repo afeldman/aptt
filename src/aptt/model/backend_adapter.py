@@ -1,11 +1,13 @@
-import math
+"""Backend Adapter module."""
+
 from collections.abc import Sequence
+import math
 
 from torch import Tensor, nn
 
 
 class BackboneAdapter(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._stage_indices: Sequence[int] = []
 

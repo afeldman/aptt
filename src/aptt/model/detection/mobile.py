@@ -1,3 +1,5 @@
+"""Mobile module."""
+
 import torch
 from torch import nn
 
