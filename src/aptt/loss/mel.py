@@ -48,8 +48,12 @@ class MelLoss(torch.nn.Module):
             torch.Tensor: Skalarer Loss-Wert.
         """
         # Mel-Spektren berechnen
-        pvec_true = perceptual_transform(y_true, self.mel_scales, self.n_fft, self.sample_rate, self.eps)
-        pvec_pred = perceptual_transform(y_pred, self.mel_scales, self.n_fft, self.sample_rate, self.eps)
+        pvec_true = perceptual_transform(
+            y_true, self.mel_scales, self.n_fft, self.sample_rate, self.eps
+        )
+        pvec_pred = perceptual_transform(
+            y_pred, self.mel_scales, self.n_fft, self.sample_rate, self.eps
+        )
 
         # Direkt RMSE auf gesamte Batch anwenden (ohne Schleife)
         distances = self.rmse_loss(pvec_pred, pvec_true)

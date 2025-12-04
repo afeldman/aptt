@@ -1,9 +1,18 @@
+"""Bottleneck module."""
+
 import torch
 from torch import nn
 
 
 class Bottleneck(nn.Module):
-    def __init__(self, in_channels: int, intermediate_channels: int, expansion: int, is_bottleneck: bool, stride: int):
+    def __init__(
+        self,
+        in_channels: int,
+        intermediate_channels: int,
+        expansion: int,
+        is_bottleneck: bool,
+        stride: int,
+    ) -> None:
         """Creates a Bottleneck with conv 1x1->3x3->1x1 layers.
 
         Note:

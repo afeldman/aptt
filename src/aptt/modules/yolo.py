@@ -1,10 +1,15 @@
-from typing import Any, Sequence
+"""Yolo module."""
+
+from collections.abc import Sequence
+from typing import Any
+
 import torch
 from torch.nn import Module
 
 from aptt.lightning_base.module import BaseModule
 from aptt.model.backend_adapter import BackboneAdapter
 from aptt.model.detection.yolo import YOLO
+
 
 # End-to-End PyTorch-Lightning Modell
 class Yolo(BaseModule):
@@ -134,7 +139,9 @@ class Yolo(BaseModule):
         self.log("val/loss", loss, prog_bar=True, on_epoch=True, logger=True)
 
         for name, metric in self.active_metrics.items():
-            self.log(f"val/{name}", metric(class_pred, targets["labels"]), prog_bar=True, on_epoch=True)
+            self.log(
+                f"val/{name}", metric(class_pred, targets["labels"]), prog_bar=True, on_epoch=True
+            )
 
         return loss
 

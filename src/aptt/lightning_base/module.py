@@ -1,3 +1,5 @@
+"""Module module."""
+
 r"""(aptt.lightning_base.module) - BaseModule.
 -----------------------------------------------------
 
@@ -62,15 +64,15 @@ optimize_hyperparameters(datamodule, num_samples=10, max_epochs=10)
 
 """
 
-import inspect
 from collections.abc import Sequence
+import inspect
 from typing import TYPE_CHECKING
 
-import pytorch_lightning as pl
-import torch
 from loguru import logger
+import pytorch_lightning as pl
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCheckpointCallback
+import torch
 from torchmetrics import AUROC, Accuracy, F1Score, Precision, Recall
 
 from aptt.config.config_manager import ConfigManager
@@ -162,7 +164,9 @@ class BaseModule(pl.LightningModule):
             "precision": Precision(task="multiclass", num_classes=num_classes, average="macro"),
             "recall": Recall(task="multiclass", num_classes=num_classes, average="macro"),
         }
-        self.active_metrics = {name: metric for name, metric in self.metrics.items() if name in metrics}
+        self.active_metrics = {
+            name: metric for name, metric in self.metrics.items() if name in metrics
+        }
 
         self.teacher_model = teacher_model.eval() if teacher_model else None
 
@@ -266,8 +270,9 @@ class BaseModule(pl.LightningModule):
         """Zeigt eine Model-Übersicht, falls `torchinfo` installiert ist."""
         if HAS_TORCHINFO:
             return summary(model=self, input_size=input_size)
-        else:
-            logger.warning("⚠️ `torchinfo` ist nicht installiert. `summary()` kann nicht ausgeführt werden.")
+        logger.warning(
+            "⚠️ `torchinfo` ist nicht installiert. `summary()` kann nicht ausgeführt werden."
+        )
         return None
 
     def visualize_model(self, input_tensor: torch.Tensor) -> "Digraph | None":
@@ -275,26 +280,33 @@ class BaseModule(pl.LightningModule):
         if HAS_TORCHVIZ:
             y_hat = self(input_tensor)
             return make_dot(y_hat, params=dict(self.named_parameters()))
-        else:
-            logger.debug("⚠️  `torchviz` ist nicht installiert. Graph-Visualisierung nicht verfügbar.")
+        logger.debug("⚠️  `torchviz` ist nicht installiert. Graph-Visualisierung nicht verfügbar.")
         return None
 
     def tune_then_train(self, datamodule, max_epochs=10):
         """Tuned und trainiert direkt danach mit besten Parametern."""
-        best_config = self.optimize_hyperparameters(datamodule, num_samples=10, max_epochs=max_epochs)
+        best_config = self.optimize_hyperparameters(
+            datamodule, num_samples=10, max_epochs=max_epochs
+        )
         model = self.__class__(**best_config)  # <- gleiche Klasse nochmal neu starten
         trainer = BaseTrainer(max_epochs=max_epochs)
         trainer.fit(model, datamodule)
         return model
 
     @staticmethod
-    def ray_tune_train(config, datamodule, max_epochs=10, model_class=None, save_name="best_config"):
+    def ray_tune_train(
+        config, datamodule, max_epochs=10, model_class=None, save_name="best_config"
+    ):
         """Trains the model with Ray Tune based on hyperparameters."""
-        assert isinstance(datamodule, pl.LightningDataModule), "datamodule must be a LightningDataModule."
+        assert isinstance(datamodule, pl.LightningDataModule), (
+            "datamodule must be a LightningDataModule."
+        )
 
         model_class = model_class or BaseModule  # fallback
 
-        model_params = {k: v for k, v in config.items() if k in inspect.signature(model_class).parameters}
+        model_params = {
+            k: v for k, v in config.items() if k in inspect.signature(model_class).parameters
+        }
 
         logger.info(f"Creating model {model_class.__name__} with parameters: {model_params}")
         model = model_class(**model_params)
@@ -314,7 +326,11 @@ class BaseModule(pl.LightningModule):
 
         logger.info(f"Training metrics used for Ray Tune: {metrics}")
 
-        callbacks = [TuneReportCheckpointCallback(metrics=metrics, filename="checkpoint", on="validation_end")]
+        callbacks = [
+            TuneReportCheckpointCallback(
+                metrics=metrics, filename="checkpoint", on="validation_end"
+            )
+        ]
 
         trainer = BaseTrainer(
             max_epochs=max_epochs,

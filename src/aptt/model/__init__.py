@@ -13,11 +13,11 @@ from aptt.model.conv import (
 
 __all__ = [
     "BaseConv2dBlock",
-    "ConvBlock",
-    "DepthwiseSeparableConv",
-    "SEBlock",
-    "Conv1d",
     "CausalConv1d",
-    "ResidualConv1dGLU",
+    "Conv1d",
+    "ConvBlock",
     "ConvTranspose2d",
+    "DepthwiseSeparableConv",
+    "ResidualConv1dGLU",
+    "SEBlock",
 ]

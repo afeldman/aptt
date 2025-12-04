@@ -1,3 +1,5 @@
+"""Dfl module."""
+
 r"""Distribution Focal Loss (DFL) module.
 -------------------------------------
 
@@ -71,7 +73,7 @@ class DFLoss(nn.Module):
         tr = tl + 1  # target right
         wl = tr - target  # weight left
         wr = 1 - wl  # weight right
-        return (F.cross_entropy(pred_dist, tl.view(-1), reduction="none").view(
-            tl.shape) * wl +
-                F.cross_entropy(pred_dist, tr.view(-1), reduction="none").view(
-                    tl.shape) * wr).mean(-1, keepdim=True)
+        return (
+            F.cross_entropy(pred_dist, tl.view(-1), reduction="none").view(tl.shape) * wl
+            + F.cross_entropy(pred_dist, tr.view(-1), reduction="none").view(tl.shape) * wr
+        ).mean(-1, keepdim=True)

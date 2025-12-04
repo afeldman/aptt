@@ -1,3 +1,5 @@
+"""Darknet module."""
+
 import torch
 from torch import nn
 
@@ -17,7 +19,7 @@ class CSPBlock(nn.Module):
         conv3 (ConvBlock): Third convolutional block.
     """
 
-    def __init__(self, in_channels, out_channels, num_blocks):
+    def __init__(self, in_channels, out_channels, num_blocks) -> None:
         """Initialize the CSPBlock.
 
         Args:
@@ -29,7 +31,10 @@ class CSPBlock(nn.Module):
         self.conv1 = ConvBlock(in_channels, out_channels // 2, kernel_size=1)
         self.conv2 = ConvBlock(in_channels, out_channels // 2, kernel_size=1)
         self.blocks = nn.Sequential(
-            *[ConvBlock(out_channels // 2, out_channels // 2, kernel_size=3, padding=1) for _ in range(num_blocks)]
+            *[
+                ConvBlock(out_channels // 2, out_channels // 2, kernel_size=3, padding=1)
+                for _ in range(num_blocks)
+            ]
         )
         self.conv3 = ConvBlock(out_channels, out_channels, kernel_size=1)
 
@@ -65,12 +70,16 @@ class CSPDarknetBackbone(BackboneAdapter):
         if num_blocks_list is None:
             num_blocks_list = [1, 2, 8, 8, 4]
 
-        assert len(channels_list) == len(num_blocks_list) + 1, "channels_list and num_blocks_list must be compatible."
+        assert len(channels_list) == len(num_blocks_list) + 1, (
+            "channels_list and num_blocks_list must be compatible."
+        )
 
         self.layers = nn.ModuleList()
         in_ch = in_channels
         for out_ch, num_blocks in zip(channels_list, num_blocks_list):
-            self.layers.append(ConvBlock(in_ch, out_ch, kernel_size=3, stride=2, padding=1))  # index += 1
+            self.layers.append(
+                ConvBlock(in_ch, out_ch, kernel_size=3, stride=2, padding=1)
+            )  # index += 1
             self.layers.append(CSPBlock(out_ch, out_ch, num_blocks))  # index += 1
             in_ch = out_ch
 

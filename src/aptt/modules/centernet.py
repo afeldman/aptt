@@ -1,8 +1,12 @@
+"""Centernet module."""
+
 import torch
+
 from aptt.lightning_base.module import BaseModule
 from aptt.loss import get_loss
 from aptt.metric.detection import DetectionMetrics
-from aptt.model.detection.centernet import CenterNetModel, CenterNetDecoder
+from aptt.model.detection.centernet import CenterNetDecoder, CenterNetModel
+
 
 class CenterNetModule(BaseModule):
     def __init__(
@@ -13,20 +17,15 @@ class CenterNetModule(BaseModule):
         lr=1e-3,
         decoder_topk=100,
         loss_fn=None,
-    ):
-        
+    ) -> None:
         loss_fn = loss_fn or get_loss("centernet")
 
-        super().__init__(
-            loss_fn=loss_fn
-        )   
-        
+        super().__init__(loss_fn=loss_fn)
+
         self.save_hyperparameters()
 
         self.model = CenterNetModel(
-            backbone=backbone,
-            in_channels_list=in_channels_list,
-            num_classes=num_classes
+            backbone=backbone, in_channels_list=in_channels_list, num_classes=num_classes
         )
         self.decoder = CenterNetDecoder(topk=decoder_topk)
 
@@ -68,7 +67,9 @@ class CenterNetModule(BaseModule):
 
     def configure_optimizers(self):
         optimizer = self.optimizer(self.parameters(), lr=self.hparams.lr)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", patience=3, factor=0.5)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", patience=3, factor=0.5
+        )
         return {
             "optimizer": optimizer,
             "lr_scheduler": {
@@ -76,5 +77,5 @@ class CenterNetModule(BaseModule):
                 "monitor": "val/loss",  # important for ReduceLROnPlateau
                 "interval": "epoch",
                 "frequency": 1,
-            }
+            },
         }

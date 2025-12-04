@@ -71,14 +71,16 @@ def rbf_kernel(x1: torch.Tensor, x2: torch.Tensor, gamma: float = 1.0) -> torch.
     torch.Tensor
         Kernel matrix of shape (n_samples_1, n_samples_2).
     """
-    x1_sq = torch.sum(x1 ** 2, dim=1, keepdim=True)
-    x2_sq = torch.sum(x2 ** 2, dim=1).unsqueeze(0)
+    x1_sq = torch.sum(x1**2, dim=1, keepdim=True)
+    x2_sq = torch.sum(x2**2, dim=1).unsqueeze(0)
     dist_sq = x1_sq + x2_sq - 2 * (x1 @ x2.T)
     dist_sq = torch.clamp(dist_sq, min=0.0)
     return torch.exp(-gamma * dist_sq)
 
 
-def polynomial_kernel(x1: torch.Tensor, x2: torch.Tensor, degree: int = 3, gamma: float = 1.0, coef0: float = 1.0) -> torch.Tensor:
+def polynomial_kernel(
+    x1: torch.Tensor, x2: torch.Tensor, degree: int = 3, gamma: float = 1.0, coef0: float = 1.0
+) -> torch.Tensor:
     """Compute the polynomial kernel.
 
     $$  K(x, x') = (gamma * x^T x' + coef0)^degree
@@ -102,7 +104,9 @@ def polynomial_kernel(x1: torch.Tensor, x2: torch.Tensor, degree: int = 3, gamma
     return (gamma * x1 @ x2.T + coef0) ** degree
 
 
-def sigmoid_kernel(x1: torch.Tensor, x2: torch.Tensor, gamma: float = 1.0, coef0: float = 0.0) -> torch.Tensor:
+def sigmoid_kernel(
+    x1: torch.Tensor, x2: torch.Tensor, gamma: float = 1.0, coef0: float = 0.0
+) -> torch.Tensor:
     """Compute the sigmoid (tanh) kernel.
 
     $$ K(x, x') = tanh(gamma * x^T x' + coef0)
@@ -208,7 +212,7 @@ def gaussian_kernel(x1: torch.Tensor, x2: torch.Tensor, sigma: float = 1.0) -> t
     """
     x1 = x1.unsqueeze(1)
     x2 = x2.unsqueeze(0)
-    return torch.exp(-torch.sum((x1 - x2) ** 2, dim=2) / (2 * sigma ** 2))
+    return torch.exp(-torch.sum((x1 - x2) ** 2, dim=2) / (2 * sigma**2))
 
 
 def cosine_kernel(x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:

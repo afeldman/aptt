@@ -1,3 +1,6 @@
+"""Complex module."""
+
+
 class Complex:
     @staticmethod
     def has_complex() -> bool:

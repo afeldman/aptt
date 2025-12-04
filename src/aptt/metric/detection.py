@@ -1,10 +1,16 @@
+"""Detection module."""
+
 from collections import defaultdict
+
 import torch
 
 from aptt.metric.map import evaluate_map
 
+
 class DetectionMetrics:
-    def __init__(self, iou_thresholds=None, num_classes=1, per_class_ap=False, max_detections=100):
+    def __init__(
+        self, iou_thresholds=None, num_classes=1, per_class_ap=False, max_detections=100
+    ) -> None:
         self.iou_thresholds = iou_thresholds or [0.5 + 0.05 * i for i in range(10)]
         self.num_classes = num_classes
         self.per_class_ap = per_class_ap
@@ -22,8 +28,9 @@ class DetectionMetrics:
         # Limit detections for AR@K
         if self.max_detections:
             pred_boxes = [
-                preds[torch.argsort(preds[:, 4], descending=True)[:self.max_detections]]
-                if preds.shape[0] > self.max_detections else preds
+                preds[torch.argsort(preds[:, 4], descending=True)[: self.max_detections]]
+                if preds.shape[0] > self.max_detections
+                else preds
                 for preds in pred_boxes
             ]
 
@@ -54,7 +61,7 @@ class DetectionMetrics:
             "mAP@[.5:.95]": sum(aps) / len(aps),
             "AP@0.5": aps[0],
             "AP@0.75": aps[5] if len(aps) > 5 else None,
-            "AR@{}": sum(self.recalls) / len(self.recalls) if self.recalls else 0.0
+            "AR@{}": sum(self.recalls) / len(self.recalls) if self.recalls else 0.0,
         }
 
         if self.per_class_ap:

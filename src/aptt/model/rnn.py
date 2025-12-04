@@ -1,6 +1,7 @@
-import torch.nn as nn
+"""Rnn module."""
+
 from loguru import logger
-from torch import Tensor
+from torch import Tensor, nn
 
 from aptt.utils.rnn import RNNType
 
@@ -47,7 +48,7 @@ class BNReluRNN(nn.Module):
         num_layers: int = 1,
         batch_first: bool = True,
         bias: bool = True,
-    ):
+    ) -> None:
         super().__init__()
 
         if rnn_type == RNNType.GRU:

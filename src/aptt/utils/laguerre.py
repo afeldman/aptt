@@ -45,7 +45,7 @@ def laguerre(n: int, x: torch.Tensor) -> torch.Tensor:
 
     if n == 0:
         return torch.ones_like(x)
-    elif n == 1:
+    if n == 1:
         return 1 - x
 
     # Initialisierung von L_0(x) und L_1(x)

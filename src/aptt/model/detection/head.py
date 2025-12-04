@@ -1,10 +1,12 @@
+"""Head module."""
+
 from torch import nn
 
 
 class DetectionHead(nn.Module):
     """Detection-Head für Bounding Boxes, Klassen und Objektness-Scores."""
 
-    def __init__(self, in_channels, num_classes, num_anchors):
+    def __init__(self, in_channels, num_classes, num_anchors) -> None:
         super().__init__()
         self.num_classes = num_classes
         self.num_anchors = num_anchors

@@ -1,9 +1,11 @@
+"""Base module."""
+
 from pathlib import Path
 from typing import Any
 
+from loguru import logger
 import pytorch_lightning as pl
 import torch
-from loguru import logger
 
 from aptt.utils.device import get_best_device
 
@@ -11,7 +13,7 @@ from aptt.utils.device import get_best_device
 class ExportBaseCallback(pl.callbacks.ModelCheckpoint):
     """Base export callback that automatically fetches a batch from the trainer."""
 
-    def __init__(self, output_dir="models", **kwargs):
+    def __init__(self, output_dir="models", **kwargs) -> None:
         """Initialize the ExportBaseCallback.
 
         Args:
@@ -63,11 +65,11 @@ class ExportBaseCallback(pl.callbacks.ModelCheckpoint):
                 # Move to same device as model
                 if trainer.model is not None:
                     device = trainer.model.device
-                    self.example_input = self._move_batch_to_device(
-                        self.example_input, device
-                    )
+                    self.example_input = self._move_batch_to_device(self.example_input, device)
 
-                logger.info("✅ Example batch automatically loaded and moved to the correct device.")
+                logger.info(
+                    "✅ Example batch automatically loaded and moved to the correct device."
+                )
 
             except Exception as e:
                 logger.error(f"❌ Could not load example batch: {e}")

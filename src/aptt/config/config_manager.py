@@ -1,13 +1,15 @@
+"""Config Manager module."""
+
 import json
 from pathlib import Path
 
+from loguru import logger
 import toml
 import yaml
-from loguru import logger
 
 
 class ConfigManager:
-    def __init__(self, config_dir="configs"):
+    def __init__(self, config_dir="configs") -> None:
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(exist_ok=True, parents=True)
 

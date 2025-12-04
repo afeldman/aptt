@@ -1,8 +1,10 @@
-import torch.nn as nn
+"""Beamforming module."""
+
+from torch import nn
 
 
 class BeamformingNet(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.cnn = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=3, stride=1, padding=1),

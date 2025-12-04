@@ -1,8 +1,10 @@
+from unittest import mock
+
 import pytest
+import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-import pytorch_lightning as pl
-from unittest import mock
+
 from aptt.callbacks.tensor_rt import TensorRTExportCallback
 
 

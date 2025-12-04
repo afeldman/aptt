@@ -20,8 +20,8 @@ License:
 """
 
 import torch
+from torch import nn
 import torch.linalg as la
-import torch.nn as nn
 
 from aptt.utils.complex import Complex
 
@@ -42,7 +42,7 @@ class DFT(nn.Module):
         >>> x_reconstructed = dft.rewind(X)  # IDFT ausführen
     """
 
-    def __init__(self, n_fft: int, dtype=torch.float32):
+    def __init__(self, n_fft: int, dtype=torch.float32) -> None:
         super().__init__()
 
         # Sicherstellen, dass n_fft eine ganze Zahl ist.
@@ -52,10 +52,14 @@ class DFT(nn.Module):
 
         # **Erstellen der DFT-Matrix**
         indices: torch.Tensor = torch.arange(n_fft, dtype=dtype)
-        omega: torch.Tensor = -2j * torch.pi * indices[:, None] * indices / n_fft  # Formel der DFT-Matrix
+        omega: torch.Tensor = (
+            -2j * torch.pi * indices[:, None] * indices / n_fft
+        )  # Formel der DFT-Matrix
 
         if Complex.has_complex():
-            dft_matrix: torch.Tensor = torch.exp(omega).to(torch.complex128)  # Falls complexPyTorch verfügbar ist
+            dft_matrix: torch.Tensor = torch.exp(omega).to(
+                torch.complex128
+            )  # Falls complexPyTorch verfügbar ist
         else:
             dft_matrix = torch.exp(omega)  # Falls nicht, bleibt es float
 
@@ -71,11 +75,15 @@ class DFT(nn.Module):
         Returns:
             torch.Tensor: Frequenzdarstellung des Signals.
         """
-        assert signal.shape[-1] == self.n_fft, f"Expected last dimension {self.n_fft}, got {signal.shape[-1]}"
+        assert signal.shape[-1] == self.n_fft, (
+            f"Expected last dimension {self.n_fft}, got {signal.shape[-1]}"
+        )
         assert isinstance(self.dft_matrix, torch.Tensor), "DFT matrix must be a torch.Tensor"
 
         if Complex.has_complex():
-            assert signal.dtype == torch.complex128, "Signal must be complex-valued (torch.complex128)"
+            assert signal.dtype == torch.complex128, (
+                "Signal must be complex-valued (torch.complex128)"
+            )
 
         return signal @ self.dft_matrix.to(signal.device)  # GPU-Kompatibilität
 
@@ -99,5 +107,6 @@ class DFT(nn.Module):
         return signal @ idft_matrix.to(signal.device)  # GPU-Kompatibilität
 
     inverse = rewind  # Alias für inverse DFT
+
 
 DFTLayer = DFT

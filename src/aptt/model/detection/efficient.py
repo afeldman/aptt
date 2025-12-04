@@ -1,3 +1,5 @@
+"""Efficient module."""
+
 from torch import nn
 
 from aptt.model.feature.efficientnet import EfficientNetBackbone
@@ -27,7 +29,7 @@ class EfficientNet(EfficientNetBackbone):
         dropout_rate: float = 0.2,
         num_classes: int = 1000,
         version: str = "b0",
-    ):
+    ) -> None:
         """Initialize the EfficientNet model.
 
         Args:

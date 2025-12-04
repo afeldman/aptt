@@ -40,7 +40,7 @@ class PolynomialNet(nn.Module):
         (torch.Size([3, 4]), torch.Size([3, 3]))
     """
 
-    def __init__(self, laguerre_order: int, hermite_order: int):
+    def __init__(self, laguerre_order: int, hermite_order: int) -> None:
         super().__init__()
 
         if not isinstance(laguerre_order, int) or laguerre_order < 0:
@@ -98,7 +98,9 @@ class PolynomialCartesian2Polar(nn.Module):
 
     def __init__(self, order: int, laguerre: bool = True, clamp: float = 1e-8) -> None:
         super().__init__()
-        self.polynomial_layer = LaguerreLayer(max_order=order) if laguerre else HermiteLayer(max_order=order)
+        self.polynomial_layer = (
+            LaguerreLayer(max_order=order) if laguerre else HermiteLayer(max_order=order)
+        )
         self.max_order = order
         self.clamp_value = clamp
 
@@ -161,9 +163,11 @@ class PolynomialPolar2Cartesian(nn.Module):
         torch.Size([2, 3, 4])  # (batch_size, 3 kartesische Koordinaten, max_order+1 Polynome)
     """
 
-    def __init__(self, order: int, laguerre: bool = True):
+    def __init__(self, order: int, laguerre: bool = True) -> None:
         super().__init__()
-        self.polynomial_layer = LaguerreLayer(max_order=order) if laguerre else HermiteLayer(max_order=order)
+        self.polynomial_layer = (
+            LaguerreLayer(max_order=order) if laguerre else HermiteLayer(max_order=order)
+        )
         self.max_order = order
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -195,4 +199,6 @@ class PolynomialPolar2Cartesian(nn.Module):
         z_polynomial = self.polynomial_layer(z_coords)  # Shape: (batch_size, max_order+1)
 
         # Stapeln entlang der zweiten Achse (3 Richtungen: x, y, z)
-        return torch.stack((x_polynomial, y_polynomial, z_polynomial), dim=1)  # (batch_size, 3, max_order+1)
+        return torch.stack(
+            (x_polynomial, y_polynomial, z_polynomial), dim=1
+        )  # (batch_size, 3, max_order+1)

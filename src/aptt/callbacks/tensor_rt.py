@@ -17,12 +17,12 @@ Note:
     This callback will raise an ImportError on macOS.
 """
 
-import sys
 from pathlib import Path
+import sys
 
+from loguru import logger
 import pytorch_lightning as pl
 import torch
-from loguru import logger
 
 from aptt.callbacks.base import ExportBaseCallback
 from aptt.callbacks.torchscript import TorchScriptExportCallback
@@ -31,6 +31,7 @@ from aptt.callbacks.torchscript import TorchScriptExportCallback
 if sys.platform in ("linux", "win32"):
     try:
         import torch_tensorrt  # type: ignore
+
         TENSORRT_AVAILABLE = True
     except ImportError:
         TENSORRT_AVAILABLE = False
@@ -43,13 +44,15 @@ else:
 
 class TensorRTExportCallback(ExportBaseCallback):
     """Exports the best model to TensorRT (.trt) using TorchScript.
-    
+
     Note:
         Only available on Linux and Windows. On macOS, this callback will
         raise an error during initialization.
     """
 
-    def __init__(self, output_dir="models", precision="fp16", workspace_size=1 << 20, **kwargs):
+    def __init__(
+        self, output_dir="models", precision="fp16", workspace_size=1 << 20, **kwargs
+    ) -> None:
         """Initialize the TensorRT export callback.
 
         Args:
@@ -57,7 +60,7 @@ class TensorRTExportCallback(ExportBaseCallback):
             precision (str): TensorRT precision mode ('fp16', 'fp32', 'int8').
             workspace_size (int): Workspace size in bytes for TensorRT.
             **kwargs: Additional arguments passed to the base ModelCheckpoint.
-            
+
         Raises:
             RuntimeError: If TensorRT is not available on this platform.
         """
@@ -67,7 +70,7 @@ class TensorRTExportCallback(ExportBaseCallback):
                 "Only supported on Linux and Windows. "
                 "Install with: pip install 'aptt[tensorrt]' (Linux/Windows only)"
             )
-        
+
         super().__init__(**kwargs)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -99,7 +102,9 @@ class TensorRTExportCallback(ExportBaseCallback):
 
         logger.info(f"🔹 Loading best model: {best_checkpoint_path}")
 
-        pl_module.load_state_dict(torch.load(best_checkpoint_path, map_location="cpu")["state_dict"])
+        pl_module.load_state_dict(
+            torch.load(best_checkpoint_path, map_location="cpu")["state_dict"]
+        )
         pl_module.eval()
 
         example_input = self.get_example_input(trainer)

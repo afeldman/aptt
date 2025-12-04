@@ -1,3 +1,5 @@
+"""Residual module."""
+
 import torch
 from torch import nn
 
@@ -14,7 +16,7 @@ class InverseResidualBlock(nn.Module):
         stride: int = 1,
         squeeze_exitation: bool = False,
         activation=None,
-    ):
+    ) -> None:
         """Constructs a inverse residual block with depthwise seperable convolution.
 
         Args:

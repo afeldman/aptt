@@ -21,7 +21,7 @@ class Signal2NoiseRatio(torch.nn.Module):
         SDR-Wert (Tensor)
     """
 
-    def __init__(self, eps: float = 1e-8):
+    def __init__(self, eps: float = 1e-8) -> None:
         super().__init__()
         self.eps = eps
 
@@ -44,7 +44,7 @@ class ScaleInvariantSignal2NoiseRatio(torch.nn.Module):
         SI-SNR-Wert (Tensor)
     """
 
-    def __init__(self, eps: float = 1e-8):
+    def __init__(self, eps: float = 1e-8) -> None:
         super().__init__()
         self.eps = eps
 
@@ -74,17 +74,21 @@ class ScaleInvariantSignal2DistortionRatio(torch.nn.Module):
         SI-SDR-Wert (Tensor)
     """
 
-    def __init__(self, eps: float = 1e-8):
+    def __init__(self, eps: float = 1e-8) -> None:
         self.eps = eps
 
     def forward(self, y_true: Tensor, y_pred: Tensor) -> Tensor:
         true_energy = torch.sum(y_true**2, dim=-1, keepdim=True)
-        optimal_scaling = torch.sum(y_true * y_pred, dim=-1, keepdim=True) / (true_energy + self.eps)
+        optimal_scaling = torch.sum(y_true * y_pred, dim=-1, keepdim=True) / (
+            true_energy + self.eps
+        )
 
         projection = optimal_scaling * y_true
         noise = y_pred - projection
 
-        ratio = torch.sum(projection**2, dim=-1, keepdim=True) / (torch.sum(noise**2, dim=-1, keepdim=True) + self.eps)
+        ratio = torch.sum(projection**2, dim=-1, keepdim=True) / (
+            torch.sum(noise**2, dim=-1, keepdim=True) + self.eps
+        )
         si_sdr_value = 10 * torch.log10(ratio + self.eps)
 
         return torch.mean(si_sdr_value)

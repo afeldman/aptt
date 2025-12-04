@@ -1,10 +1,15 @@
+"""Centernet module."""
+
 from torch.nn import Module, ModuleList
 
 from aptt.heads.box import RotationFreeBBoxHead
-from aptt.heads.heatmap import (HeatmapHead, OffsetHead)
+from aptt.heads.heatmap import HeatmapHead, OffsetHead
+
 
 class CenterNetHead(Module):
-    def __init__(self, in_channels: int, num_classes:int=1, use_bbox_regression:bool=False):
+    def __init__(
+        self, in_channels: int, num_classes: int = 1, use_bbox_regression: bool = False
+    ) -> None:
         super().__init__()
 
         # Heatmaps
@@ -20,7 +25,7 @@ class CenterNetHead(Module):
         self.use_bbox_regression = use_bbox_regression
         if self.use_bbox_regression:
             self.bbox_reg = RotationFreeBBoxHead(in_channels)
-    
+
     def forward(self, x):
         out = {
             "tl_heat": self.tl_heat(x),
@@ -34,12 +39,11 @@ class CenterNetHead(Module):
             out["bbox"] = self.bbox_reg(x)  # (B, 4, H, W)
         return out
 
+
 class MultiScaleCenterNetHead(Module):
-    def __init__(self, in_channels_list, num_classes=1):
+    def __init__(self, in_channels_list, num_classes=1) -> None:
         super().__init__()
-        self.heads = ModuleList([
-            CenterNetHead(ch, num_classes) for ch in in_channels_list
-        ])
-    
+        self.heads = ModuleList([CenterNetHead(ch, num_classes) for ch in in_channels_list])
+
     def forward(self, features):  # list of FPN outputs
         return [head(f) for head, f in zip(self.heads, features)]

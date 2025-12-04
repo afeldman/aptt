@@ -1,23 +1,25 @@
+"""Conv module."""
+
 import math
 
 import torch
-import torch.nn as nn
+from torch import nn
 from torch.nn.functional import linear
 from torch.nn.utils.parametrizations import weight_norm
 
 
 class BaseConv2dBlock(nn.Module):
     """Abstrakte Basisklasse für Conv2d-basierte Blöcke.
-    
+
     Vereinheitlicht das Conv-BatchNorm-Activation Pattern, das in vielen
     Architekturen verwendet wird. Unterstützt automatische Aktivierungsfunktions-Instanziierung.
-    
+
     Attributes:
         conv (nn.Conv2d): Convolutional Layer.
         bn (nn.BatchNorm2d | None): Optional Batch-Normalisierungsschicht.
         activation (nn.Module | None): Optional Aktivierungsfunktion.
     """
-    
+
     def __init__(
         self,
         in_channels: int,
@@ -29,9 +31,9 @@ class BaseConv2dBlock(nn.Module):
         bias: bool = False,
         use_bn: bool = True,
         activation: type[nn.Module] | nn.Module | None = nn.LeakyReLU,
-    ):
+    ) -> None:
         """Initialisiert den BaseConv2dBlock.
-        
+
         Args:
             in_channels: Anzahl der Eingabekanäle.
             out_channels: Anzahl der Ausgabekanäle.
@@ -44,9 +46,11 @@ class BaseConv2dBlock(nn.Module):
             activation: Aktivierungsfunktion (Klasse oder Instanz).
         """
         super().__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=groups, bias=bias)
+        self.conv = nn.Conv2d(
+            in_channels, out_channels, kernel_size, stride, padding, groups=groups, bias=bias
+        )
         self.bn = nn.BatchNorm2d(out_channels) if use_bn else None
-        
+
         # Intelligente Aktivierungsfunktions-Instanziierung
         if activation is None:
             self.activation = None
@@ -59,13 +63,13 @@ class BaseConv2dBlock(nn.Module):
         else:
             # Bereits instanziiert
             self.activation = activation
-    
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward-Pass durch den Block.
-        
+
         Args:
             x: Eingabetensor.
-            
+
         Returns:
             Ausgabetensor nach Conv -> BN -> Activation.
         """
@@ -79,7 +83,7 @@ class BaseConv2dBlock(nn.Module):
 
 class ConvBlock(BaseConv2dBlock):
     """Ein grundlegender Convolutional Block (Conv2d + BatchNorm + Aktivierung).
-    
+
     Erbt von BaseConv2dBlock und bietet eine einfache Conv-BN-Activation Sequenz.
     Rückwärtskompatibel mit der vorherigen Implementierung.
 
@@ -90,8 +94,16 @@ class ConvBlock(BaseConv2dBlock):
     """
 
     def __init__(
-        self, in_channels, out_channels, kernel_size, stride=1, padding=0, groups=1, bias=False, activation=nn.LeakyReLU
-    ):
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=1,
+        padding=0,
+        groups=1,
+        bias=False,
+        activation=nn.LeakyReLU,
+    ) -> None:
         """Initialisiert den ConvBlock.
 
         Args:
@@ -119,7 +131,7 @@ class ConvBlock(BaseConv2dBlock):
 
 class DepthwiseSeparableConv(nn.Module):
     """Depthwise Separable Convolution Block.
-    
+
     Verwendet BaseConv2dBlock für beide Phasen: Depthwise und Pointwise Convolution.
     Effizientere Alternative zu Standard-Convolutions durch Aufteilung in zwei Schritte.
 
@@ -128,7 +140,13 @@ class DepthwiseSeparableConv(nn.Module):
         pointwise (BaseConv2dBlock): Pointwise Convolutional Block.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, stride: int = 1, activation: type[nn.Module] = nn.ReLU):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        stride: int = 1,
+        activation: type[nn.Module] = nn.ReLU,
+    ) -> None:
         """Initialisiert die DepthwiseSeparableConv.
 
         Args:
@@ -150,7 +168,7 @@ class DepthwiseSeparableConv(nn.Module):
             use_bn=True,
             activation=activation,
         )
-        
+
         # Pointwise: 1x1 Convolution zur Kanalkombination
         self.pointwise = BaseConv2dBlock(
             in_channels=in_channels,
@@ -187,7 +205,7 @@ class SEBlock(nn.Module):
         activation (nn.Module): Aktivierungsfunktion.
     """
 
-    def __init__(self, in_channels, reduction=4, activation=nn.SiLU):
+    def __init__(self, in_channels, reduction=4, activation=nn.SiLU) -> None:
         """Initialisiert den SEBlock.
 
         Args:
@@ -223,7 +241,7 @@ class Conv1d(nn.Conv1d):
         _linearized_weight (torch.Tensor): Linearized weight tensor.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize the Conv1d layer.
 
         Args:
@@ -279,7 +297,9 @@ class Conv1d(nn.Conv1d):
         return output.view(bsz, 1, -1)
 
     @staticmethod
-    def factory(in_channels, out_channels, kernel_size, dropout=0, std_mul=4.0, **kwargs) -> nn.Module:
+    def factory(
+        in_channels, out_channels, kernel_size, dropout=0, std_mul=4.0, **kwargs
+    ) -> nn.Module:
         m = Conv1d(in_channels, out_channels, kernel_size, **kwargs)
         std = math.sqrt((std_mul * (1.0 - dropout)) / (m.kernel_size[0] * in_channels))
         m.weight.data.normal_(mean=0, std=std)
@@ -294,10 +314,15 @@ class Conv1d(nn.Conv1d):
         if weight_normalization:
             assert bias
             return Conv1d.factory(
-                in_channels, out_channels, kernel_size=1, padding=0, dilation=1, bias=bias, std_mul=1.0
+                in_channels,
+                out_channels,
+                kernel_size=1,
+                padding=0,
+                dilation=1,
+                bias=bias,
+                std_mul=1.0,
             )
-        else:
-            return Conv1d(in_channels, out_channels, kernel_size=1, padding=0, dilation=1, bias=bias)
+        return Conv1d(in_channels, out_channels, kernel_size=1, padding=0, dilation=1, bias=bias)
 
     def conv1x1_forward(self, x, is_incremental) -> torch.Tensor:
         """Conv1x1 forward."""
@@ -339,10 +364,12 @@ class Conv1d(nn.Conv1d):
 
 
 class CausalConv1d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, dilation):
+    def __init__(self, in_channels, out_channels, kernel_size, dilation) -> None:
         super().__init__()
         self.padding = (kernel_size - 1) * dilation
-        self.conv = nn.Conv1d(in_channels, out_channels, kernel_size, dilation=dilation, padding=self.padding)
+        self.conv = nn.Conv1d(
+            in_channels, out_channels, kernel_size, dilation=dilation, padding=self.padding
+        )
 
     def forward(self, x):
         x = self.conv(x)
@@ -386,7 +413,7 @@ class ResidualConv1dGLU(nn.Module):
         weight_normalization=True,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__()
         self.dropout = dropout
         if skip_out_channels is None:
@@ -454,10 +481,16 @@ class ResidualConv1dGLU(nn.Module):
         # conv output is split into two groups
         gate_out_channels = gate_channels // 2
         self.conv1x1_out = Conv1d.conv1x1(
-            gate_out_channels, residual_channels, bias=bias, weight_normalization=weight_normalization
+            gate_out_channels,
+            residual_channels,
+            bias=bias,
+            weight_normalization=weight_normalization,
         )
         self.conv1x1_skip = Conv1d.conv1x1(
-            gate_out_channels, skip_out_channels, bias=bias, weight_normalization=weight_normalization
+            gate_out_channels,
+            skip_out_channels,
+            bias=bias,
+            weight_normalization=weight_normalization,
         )
 
     def forward(self, x, c=None, g=None):
@@ -529,5 +562,4 @@ def ConvTranspose2d(in_channels, out_channels, kernel_size, weight_normalization
     m.bias.data.zero_()
     if weight_normalization:
         return weight_norm(m)
-    else:
-        return m
+    return m

@@ -68,7 +68,7 @@ Example:
 from collections.abc import Sequence
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from aptt.model.detection.head import DetectionHead
 from aptt.model.feature.darknet import CSPDarknetBackbone
@@ -94,7 +94,7 @@ class DetectionModel(nn.Module):
         fpn_out_channels: int = 256,
         num_classes: int = 1,
         num_anchors: int = 3,
-    ):
+    ) -> None:
         """Initialize the DetectionModel.
 
         Args:

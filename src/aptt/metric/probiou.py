@@ -1,3 +1,5 @@
+"""Probiou module."""
+
 import torch
 
 from aptt.metric.confidence_matrix import get_covariance_matrix
@@ -27,9 +29,12 @@ def probiou(obb1: torch.Tensor, obb2: torch.Tensor, c_iou: bool = False, eps: fl
     a2, b2, c2 = get_covariance_matrix(obb2)
 
     t1 = (
-        ((a1 + a2) * (y1 - y2).pow(2) + (b1 + b2) * (x1 - x2).pow(2)) / ((a1 + a2) * (b1 + b2) - (c1 + c2).pow(2) + eps)
+        ((a1 + a2) * (y1 - y2).pow(2) + (b1 + b2) * (x1 - x2).pow(2))
+        / ((a1 + a2) * (b1 + b2) - (c1 + c2).pow(2) + eps)
     ) * 0.25
-    t2 = (((c1 + c2) * (x2 - x1) * (y1 - y2)) / ((a1 + a2) * (b1 + b2) - (c1 + c2).pow(2) + eps)) * 0.5
+    t2 = (
+        ((c1 + c2) * (x2 - x1) * (y1 - y2)) / ((a1 + a2) * (b1 + b2) - (c1 + c2).pow(2) + eps)
+    ) * 0.5
     t3 = (
         ((a1 + a2) * (b1 + b2) - (c1 + c2).pow(2))
         / (4 * ((a1 * b1 - c1.pow(2)).clamp_(0) * (a2 * b2 - c2.pow(2)).clamp_(0)).sqrt() + eps)

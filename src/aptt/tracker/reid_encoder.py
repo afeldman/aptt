@@ -1,13 +1,18 @@
+"""Reid Encoder module."""
+
 import torch
 from torch import nn
 
+
 class ReIDEncoder(nn.Module):
-    def __init__(self, base_model: nn.Module, 
-                 output_dim: int = 128, 
-                 use_bn: bool = True, 
-                 dropout: float = 0.0):
-        """
-        ReID Encoder-Modul.
+    def __init__(
+        self,
+        base_model: nn.Module,
+        output_dim: int = 128,
+        use_bn: bool = True,
+        dropout: float = 0.0,
+    ) -> None:
+        """ReID Encoder-Modul.
 
         Args:
             base_model (nn.Module): Pretrained CNN-Backbone (z. B. ResNet50, EfficientNet, etc.).
@@ -31,10 +36,10 @@ class ReIDEncoder(nn.Module):
             layers.append(nn.BatchNorm1d(output_dim))
         if dropout > 0:
             layers.append(nn.Dropout(dropout))
-        
+
         self.embedding = nn.Sequential(*layers)
 
     def forward(self, x):  # x = [B, C, H, W]
         feat = self.encoder(x).view(x.size(0), -1)  # [B, C]
-        emb = self.embedding(feat)                  # [B, D]
+        emb = self.embedding(feat)  # [B, D]
         return nn.functional.normalize(emb, dim=1)  # L2-normalisiert

@@ -1,3 +1,5 @@
+"""Lwf module."""
+
 import torch
 import torch.nn.functional as f
 
@@ -7,8 +9,12 @@ from aptt.loss.distill import Distill
 # learning without forgetting
 class LwF(torch.nn.Module):
     def __init__(
-        self, t=2, alpha=0.5, loss: torch.nn.Module = Distill, new_class_loss: torch.nn.Module = f.cross_entropy
-    ):
+        self,
+        t=2,
+        alpha=0.5,
+        loss: torch.nn.Module = Distill,
+        new_class_loss: torch.nn.Module = f.cross_entropy,
+    ) -> None:
         super().__init__()
         self.alpha = alpha
         self.loss = loss(t)  # <- jetzt instanziieren

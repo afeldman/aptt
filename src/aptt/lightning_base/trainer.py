@@ -1,6 +1,7 @@
+"""Trainer module."""
 
-import pytorch_lightning as pl
 from loguru import logger
+import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, RichProgressBar
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import MLFlowLogger, TensorBoardLogger
@@ -48,7 +49,7 @@ class BaseTrainer(pl.Trainer):
         early_stopping: EarlyStopping | None = None,
         model_checkpoint: ModelCheckpoint | None = None,
         **kwargs,
-    ):
+    ) -> None:
         # Callbacks initialisieren
         callbacks = kwargs.pop("callbacks", [])
         callbacks.append(RichProgressBar())
@@ -99,7 +100,9 @@ class BaseTrainer(pl.Trainer):
             logger.debug(f"use mlflow experiment: {mlflow_experiment}")
             self.mlflow = True
 
-        super().__init__(logger=loggers, callbacks=callbacks, accelerator="gpu", devices="auto", **kwargs)
+        super().__init__(
+            logger=loggers, callbacks=callbacks, accelerator="gpu", devices="auto", **kwargs
+        )
 
         # Falls gewünscht, automatische Batch-Größe optimieren
         self.auto_batch_size = auto_batch_size

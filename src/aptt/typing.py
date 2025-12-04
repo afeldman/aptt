@@ -3,8 +3,8 @@
 from typing import Union
 
 import numpy as np
-import torch
 from numpy.typing import NDArray
+import torch
 
 #: A unified type for either a NumPy array (float32) or a PyTorch tensor.
 #:

@@ -1,6 +1,8 @@
-import torch
+"""Embedding Logger module."""
+
 from pytorch_lightning import Callback
 from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
+import torch
 
 from aptt.viz.embedding import log_embedding_plot_to_mlflow
 
@@ -16,7 +18,8 @@ class EmbeddingLoggerCallback(Callback):
         >>> callback = EmbeddingLoggerCallback(num_batches=3, log_to_mlflow=True)
         >>> trainer = Trainer(callbacks=[callback])
     """
-    def __init__(self, num_batches: int = 1, log_to_mlflow: bool = True):
+
+    def __init__(self, num_batches: int = 1, log_to_mlflow: bool = True) -> None:
         """Initializes the embedding logging callback.
 
         Args:
@@ -28,7 +31,9 @@ class EmbeddingLoggerCallback(Callback):
         self.labels = []
         self.log_to_mlflow = log_to_mlflow
 
-    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx=0):
+    def on_validation_batch_end(
+        self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx=0
+    ):
         """Collects embeddings and labels from the current batch during validation.
 
         Args:
@@ -82,12 +87,14 @@ class EmbeddingLoggerCallback(Callback):
                 mat=embeddings,
                 metadata=labels.tolist(),
                 global_step=trainer.global_step,
-                tag="val_embeddings"
+                tag="val_embeddings",
             )
 
         # MLflow Logging
         if self.log_to_mlflow and getattr(pl_module, "use_mlflow", False):
-            log_embedding_plot_to_mlflow(embeddings=embeddings, labels=labels, step=trainer.global_step)
+            log_embedding_plot_to_mlflow(
+                embeddings=embeddings, labels=labels, step=trainer.global_step
+            )
 
         # Puffer leeren
         self.embeddings.clear()

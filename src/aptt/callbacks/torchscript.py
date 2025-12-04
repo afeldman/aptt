@@ -14,9 +14,9 @@ trainer.fit(model)
 
 from pathlib import Path
 
+from loguru import logger
 import pytorch_lightning as pl
 import torch
-from loguru import logger
 
 from aptt.callbacks.base import ExportBaseCallback
 
@@ -24,7 +24,7 @@ from aptt.callbacks.base import ExportBaseCallback
 class TorchScriptExportCallback(ExportBaseCallback):
     """Exportiert das Modell nach TorchScript (.pt)."""
 
-    def __init__(self, output_dir="models", optimize=True, **kwargs):
+    def __init__(self, output_dir="models", optimize=True, **kwargs) -> None:
         """:param output_dir: Verzeichnis für exportierte Modelle.
         :param optimize: Falls True, wird TorchScript optimiert.
         :param kwargs: Zusätzliche Parameter für ModelCheckpoint.
@@ -73,12 +73,16 @@ class TorchScriptExportCallback(ExportBaseCallback):
         logger.info(f"🔹 Exportiere nach TorchScript: {ts_path}")
 
         try:
-            TorchScriptExportCallback.build_torchscript(pl_module, ts_path, example_input, self.optimize)
+            TorchScriptExportCallback.build_torchscript(
+                pl_module, ts_path, example_input, self.optimize
+            )
         except Exception as e:
             logger.error(f"❌ Fehler beim TorchScript-Export: {e}")
 
     @staticmethod
-    def build_torchscript(module, model_path: Path, example_input: torch.Tensor, optimize: bool = True):
+    def build_torchscript(
+        module, model_path: Path, example_input: torch.Tensor, optimize: bool = True
+    ):
         """Erstellt ein TorchScript-Modell aus einem PyTorch-Modell.
 
         :param module: PyTorch-Modul.

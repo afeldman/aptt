@@ -1,9 +1,11 @@
+"""Wavenet module."""
+
 import math
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
+import torch.nn.functional as F
 
 from aptt.model.conv import Conv1d, ConvTranspose2d, ResidualConv1dGLU
 from aptt.utils.rnn import RNNType
@@ -27,9 +29,8 @@ def _expand_global_features(b: int, t: int, g: torch.Tensor, bct: bool = True) -
     if bct:
         g_bct = g.expand(b, -1, t)
         return g_bct.contiguous()
-    else:
-        g_btc = g.expand(b, -1, t).transpose(1, 2)
-        return g_btc.contiguous()
+    g_btc = g.expand(b, -1, t).transpose(1, 2)
+    return g_btc.contiguous()
 
 
 def to_one_hot(tensor: torch.Tensor, n, fill_with: float = 1.0) -> torch.Tensor:
@@ -67,7 +68,9 @@ def sample_from_discretized_mix_logistic(y, log_scale_min=-7.0):
     one_hot = to_one_hot(argmax, nr_mix)
     # select logistic parameters
     means = torch.sum(y[:, :, nr_mix : 2 * nr_mix] * one_hot, dim=-1)
-    log_scales = torch.clamp(torch.sum(y[:, :, 2 * nr_mix : 3 * nr_mix] * one_hot, dim=-1), min=log_scale_min)
+    log_scales = torch.clamp(
+        torch.sum(y[:, :, 2 * nr_mix : 3 * nr_mix] * one_hot, dim=-1), min=log_scale_min
+    )
     # sample from logistic & clip to interval
     # we don't actually round to the nearest 8bit value when sampling
     u = means.data.new(means.size()).uniform_(1e-5, 1.0 - 1e-5)
@@ -119,7 +122,7 @@ class WaveNet(nn.Module):
         scalar_input=False,
         use_speaker_embedding=True,
         legacy=True,
-    ):
+    ) -> None:
         super().__init__()
         assert layers % stacks == 0
         self.scalar_input = scalar_input
@@ -152,15 +155,21 @@ class WaveNet(nn.Module):
         self.last_conv_layers = nn.ModuleList(
             [
                 nn.ReLU(inplace=True),
-                Conv1d.conv1x1(skip_out_channels, skip_out_channels, weight_normalization=weight_normalization),
+                Conv1d.conv1x1(
+                    skip_out_channels, skip_out_channels, weight_normalization=weight_normalization
+                ),
                 nn.ReLU(inplace=True),
-                Conv1d.conv1x1(skip_out_channels, out_channels, weight_normalization=weight_normalization),
+                Conv1d.conv1x1(
+                    skip_out_channels, out_channels, weight_normalization=weight_normalization
+                ),
             ]
         )
 
         if gin_channels > 0 and use_speaker_embedding:
             assert n_speakers is not None
-            self.embed_speakers = nn.Embedding(num_embeddings=n_speakers, embedding_dim=gin_channels, padding_idx=None)
+            self.embed_speakers = nn.Embedding(
+                num_embeddings=n_speakers, embedding_dim=gin_channels, padding_idx=None
+            )
             self.embed_speakers.weight.data.normal_(0, std=0.1)
         else:
             self.embed_speakers = None
@@ -195,7 +204,11 @@ class WaveNet(nn.Module):
         return self.cin_channels > 0
 
     def forward(
-        self, x: torch.Tensor, c: torch.Tensor | None = None, g: torch.Tensor | None = None, softmax: bool = False
+        self,
+        x: torch.Tensor,
+        c: torch.Tensor | None = None,
+        g: torch.Tensor | None = None,
+        softmax: bool = False,
     ) -> torch.Tensor:
         """Forward step.
 
@@ -301,9 +314,8 @@ class WaveNet(nn.Module):
             if self.scalar_input:
                 if test_inputs.size(1) == 1:
                     test_inputs = test_inputs.transpose(1, 2).contiguous()
-            else:
-                if test_inputs.size(1) == self.out_channels:
-                    test_inputs = test_inputs.transpose(1, 2).contiguous()
+            elif test_inputs.size(1) == self.out_channels:
+                test_inputs = test_inputs.transpose(1, 2).contiguous()
 
             B = test_inputs.size(0)
             if T is None:
@@ -344,18 +356,16 @@ class WaveNet(nn.Module):
             # https://github.com/pytorch/pytorch/issues/584#issuecomment-275169567
             if next(self.parameters()).is_cuda:
                 initial_input = initial_input.cuda()
-        else:
-            if initial_input.size(1) == self.out_channels:
-                initial_input = initial_input.transpose(1, 2).contiguous()
+        elif initial_input.size(1) == self.out_channels:
+            initial_input = initial_input.transpose(1, 2).contiguous()
 
         current_input = initial_input
 
         for t in tqdm(range(T)):
             if test_inputs is not None and t < test_inputs.size(1):
                 current_input = test_inputs[:, t, :].unsqueeze(1)
-            else:
-                if t > 0:
-                    current_input = outputs[-1]
+            elif t > 0:
+                current_input = outputs[-1]
 
             # Conditioning features for single time step
             ct = None if c is None else c[:, t, :].unsqueeze(1)
@@ -379,11 +389,15 @@ class WaveNet(nn.Module):
 
             # Generate next input by sampling
             if self.scalar_input:
-                x = sample_from_discretized_mix_logistic(x.view(B, -1, 1), log_scale_min=log_scale_min)
+                x = sample_from_discretized_mix_logistic(
+                    x.view(B, -1, 1), log_scale_min=log_scale_min
+                )
             else:
                 x = F.softmax(x.view(B, -1), dim=1) if softmax else x.view(B, -1)
                 if quantize:
-                    sample = np.random.choice(np.arange(self.out_channels), p=x.view(-1).data.cpu().numpy())
+                    sample = np.random.choice(
+                        np.arange(self.out_channels), p=x.view(-1).data.cpu().numpy()
+                    )
                     x.zero_()
                     x[:, sample] = 1.0
             outputs += [x.data]
@@ -469,7 +483,7 @@ class WaveNetRNN(WaveNet):
         scalar_input=False,
         use_speaker_embedding=True,
         legacy=True,
-    ):
+    ) -> None:
         """Initialize the WaveNetRNN model."""
         super().__init__(
             out_channels=out_channels,
@@ -512,7 +526,11 @@ class WaveNetRNN(WaveNet):
         self.output_layer = nn.Linear(rnn_output_size, out_channels)
 
     def forward(
-        self, x: torch.Tensor, c: torch.Tensor | None = None, g: torch.Tensor | None = None, softmax: bool = False
+        self,
+        x: torch.Tensor,
+        c: torch.Tensor | None = None,
+        g: torch.Tensor | None = None,
+        softmax: bool = False,
     ) -> torch.Tensor:
         """Forward pass through the WaveNetRNN model.
 

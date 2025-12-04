@@ -1,15 +1,17 @@
+"""Continual Learning Manager module."""
+
 from copy import deepcopy
 from pathlib import Path
 
-import torch
 from loguru import logger
+import torch
 
 from aptt.config.config_manager import ConfigManager
 from aptt.lightning_base.trainer import BaseTrainer
 
 
 class ContinualLearningManager:
-    def __init__(self, save_dir="configs", model_save_dir="teachers"):
+    def __init__(self, save_dir="configs", model_save_dir="teachers") -> None:
         self.config_manager = ConfigManager(save_dir)
         self.model_save_dir = Path(model_save_dir)
         self.model_save_dir.mkdir(parents=True, exist_ok=True)
@@ -18,7 +20,9 @@ class ContinualLearningManager:
         """Speichert das Teacher-Modell als TorchScript."""
         save_path = self.model_save_dir / f"teacher_stage_{stage_idx + 1}_{num_classes}_classes.pt"
         model.eval()
-        example_input = torch.randn(1, 3, 224, 224, device=model.device) if not example_input else example_input
+        example_input = (
+            torch.randn(1, 3, 224, 224, device=model.device) if not example_input else example_input
+        )
         traced_model = torch.jit.trace(model, example_input)
         traced_model.save(str(save_path))
         logger.info(f"🔹 Teacher-Modell gespeichert: {save_path}")

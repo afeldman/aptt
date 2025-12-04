@@ -1,6 +1,7 @@
 """Support Vector Machine (SVM).
-Classifier utilizing PyTorch and 
-support vector regression (SVR) principles."""
+Classifier utilizing PyTorch and
+support vector regression (SVR) principles.
+"""
 
 from collections.abc import Callable
 from typing import Any
@@ -10,12 +11,13 @@ import torch
 from aptt.svm.kernels import linear_kernel
 from aptt.utils.device import get_best_device
 
+
 class SVM:
     """Support Vector Machine (SVM) Classifier.
-    
-    utilizing PyTorch and support vector regression 
+
+    utilizing PyTorch and support vector regression
     (SVR) principles. This implementation uses the dual
-    form of the SVM optimization problem and allows 
+    form of the SVM optimization problem and allows
     for the use of different kernel functions.
 
     Example:
@@ -26,12 +28,13 @@ class SVM:
         >>> model.fit(X_train, y_train)
         >>> predictions = model.predict(X_test)
     """
-    def __init__(self, 
-                 kernel:Callable[
-                     [torch.Tensor, torch.Tensor], 
-                     torch.Tensor]=linear_kernel, 
-                 c:float=1.0, 
-                 **kernel_params: Any):
+
+    def __init__(
+        self,
+        kernel: Callable[[torch.Tensor, torch.Tensor], torch.Tensor] = linear_kernel,
+        c: float = 1.0,
+        **kernel_params: Any,
+    ) -> None:
         """Initialize the SVM classifier.
 
         Args:
@@ -93,8 +96,9 @@ class SVM:
             optimizer.zero_grad()
 
             # Dual-Objective (zu maximieren)
-            loss = 0.5 * torch.sum((alpha.view(-1, 1) * alpha.view(1, -1)) * (y.view(-1, 1) * y.view(1, -1)) * K) \
-                   - torch.sum(alpha)
+            loss = 0.5 * torch.sum(
+                (alpha.view(-1, 1) * alpha.view(1, -1)) * (y.view(-1, 1) * y.view(1, -1)) * K
+            ) - torch.sum(alpha)
 
             (-loss).backward()  # Wir minimieren den loss
             optimizer.step()
@@ -125,6 +129,8 @@ class SVM:
         """
         assert self.alpha is not None, "Model must be fitted before prediction"
         X = X.to(self.device)
-        K = self.kernel(X, self.support_vectors, **self.kernel_params).to(self.device) # [n_test x n_support]
+        K = self.kernel(X, self.support_vectors, **self.kernel_params).to(
+            self.device
+        )  # [n_test x n_support]
         decision = torch.sum(self.alpha * self.support_labels * K, dim=1) + self.b
         return torch.sign(decision)

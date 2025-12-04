@@ -23,6 +23,7 @@ __call__: Compute the classification loss between predictions and true labels.
 References:
 https://pytorch.org/docs/stable/generated/torch.nn.functional.cross_entropy.html
 """
+
 import torch
 from torch.nn import functional as F
 

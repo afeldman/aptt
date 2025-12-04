@@ -114,31 +114,31 @@ def mel_filter_bank(
     filter_bank = torch.zeros(n_filters, n_fft // 2 + 1)
 
     for i in range(1, n_filters + 1):
-        start, peak, end = int( \
-            bin_points[i - 1].item()), \
-            int(bin_points[i].item()
-            ), \
-            int(bin_points[i + 1].item())
+        start, peak, end = (
+            int(bin_points[i - 1].item()),
+            int(bin_points[i].item()),
+            int(bin_points[i + 1].item()),
+        )
 
         if peak > start:
             filter_bank[i - 1, start:peak] = (
                 torch.arange(start, peak, dtype=torch.float32) - start
-                ) / (peak - start)
+            ) / (peak - start)
 
         if end > peak:
-            filter_bank[i - 1, peak:end] = (
-                end - torch.arange(peak, end, dtype=torch.float32)
-                ) / (end - peak)
+            filter_bank[i - 1, peak:end] = (end - torch.arange(peak, end, dtype=torch.float32)) / (
+                end - peak
+            )
 
     return filter_bank
 
 
 def perceptual_transform(
     x: torch.Tensor,
-    mel_scales:tuple[int, int, int]=(16, 32, 64),
-    n_fft:int=512,
-    sample_rate:int=44_100,
-    eps:float=1e-7
+    mel_scales: tuple[int, int, int] = (16, 32, 64),
+    n_fft: int = 512,
+    sample_rate: int = 44_100,
+    eps: float = 1e-7,
 ) -> torch.Tensor:
     """Apply perceptual transformation to input data.
 

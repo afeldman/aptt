@@ -1,5 +1,7 @@
-import math
+"""Efficientnet module."""
+
 from collections.abc import Sequence
+import math
 
 import torch
 from torch import nn
@@ -20,7 +22,9 @@ class MBConvBlock(nn.Module):
         block (nn.Sequential): The sequential block containing the layers.
     """
 
-    def __init__(self, in_channels, out_channels, expand_ratio, kernel_size, stride, se_ratio):
+    def __init__(
+        self, in_channels, out_channels, expand_ratio, kernel_size, stride, se_ratio
+    ) -> None:
         """Initialize the MBConvBlock.
 
         Args:
@@ -37,7 +41,7 @@ class MBConvBlock(nn.Module):
         self.use_residual = self.stride == 1 and in_channels == out_channels
 
         layers = []
-        
+
         # Expansion phase (nur wenn expand_ratio != 1)
         if expand_ratio != 1:
             layers.append(
@@ -99,8 +103,7 @@ class MBConvBlock(nn.Module):
         """
         if self.use_residual:
             return x + self.block(x)
-        else:
-            return self.block(x)
+        return self.block(x)
 
 
 # EfficientNet als Backbone (Feature Extractor)
@@ -166,14 +169,21 @@ class EfficientNetBackbone(BackboneAdapter):
 
         # Blocks
         self.blocks = nn.Sequential()
-        for idx, (expand_ratio, channels, repeats, kernel_size, stride, se_ratio) in enumerate(self.block_args):
+        for idx, (expand_ratio, channels, repeats, kernel_size, stride, se_ratio) in enumerate(
+            self.block_args
+        ):
             out_channels = self.round_filters(channels, width_coefficient)
             repeats = self.round_repeats(repeats, depth_coefficient)
             for i in range(repeats):
                 self.blocks.add_module(
                     f"mbconv{idx + 1}_block{i + 1}",
                     MBConvBlock(
-                        in_channels, out_channels, expand_ratio, kernel_size, stride if i == 0 else 1, se_ratio
+                        in_channels,
+                        out_channels,
+                        expand_ratio,
+                        kernel_size,
+                        stride if i == 0 else 1,
+                        se_ratio,
                     ),
                 )
                 in_channels = out_channels
@@ -199,7 +209,9 @@ class EfficientNetBackbone(BackboneAdapter):
 
         self.out_channels = out_channels
 
-    def forward(self, x:torch.Tensor, return_stages: bool = False, return_pooled: bool = True) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, return_stages: bool = False, return_pooled: bool = True
+    ) -> torch.Tensor:
         """Forward pass through the EfficientNet model.
 
         Args:
@@ -257,7 +269,7 @@ class EfficientNetBackbone(BackboneAdapter):
             "b5": (1.6, 2.2),
             "b6": (1.8, 2.6),
             "b7": (2.0, 3.1),
-       }
+        }
 
         if version not in model_scales:
             raise ValueError(f"Unknown EfficientNet version '{version}'")
