@@ -58,7 +58,7 @@ class HermiteLayer(nn.Module):
 
         Examples:
             >>> import torch
-            >>> from apu.ml.layers.hermite import HermiteLayer
+            >>> from aptt.layers.hermite import HermiteLayer
             >>> hermite_layer = HermiteLayer(max_order=3)
             >>> x = torch.tensor([0.0, 1.0, 2.0])
             >>> hermite_layer(x)

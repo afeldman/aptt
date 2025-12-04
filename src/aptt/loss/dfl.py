@@ -9,7 +9,7 @@ i} + CE(p_{i}, t_{i} + 1) * (1 - w_{i})) / N
 
 Example:
 >>> import torch
->>> from apu.ml.loss import DFLoss
+>>> from aptt.loss import DFLoss
 >>> criterion = DFLoss()
 >>> preds = torch.randn(2, 16)
 >>> target = torch.randint(0, 16, (2,))

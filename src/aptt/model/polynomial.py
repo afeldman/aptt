@@ -32,7 +32,7 @@ class PolynomialNet(nn.Module):
 
     Examples:
         >>> import torch
-        >>> from apu.ml.layers.polynomial_net import PolynomialNet
+        >>> from aptt.model.polynomial import PolynomialNet
         >>> poly_net = PolynomialNet(laguerre_order=3, hermite_order=2)
         >>> x = torch.tensor([0.0, 1.0, 2.0])
         >>> laguerre_features, hermite_features = poly_net(x)

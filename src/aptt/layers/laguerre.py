@@ -61,7 +61,7 @@ class LaguerreLayer(nn.Module):
 
         Examples:
             >>> import torch
-            >>> from apu.ml.layers.laguerre import LaguerreLayer
+            >>> from aptt.layers.laguerre import LaguerreLayer
             >>> laguerre_layer = LaguerreLayer(max_order=3)
             >>> x = torch.tensor([0.0, 1.0, 2.0])
             >>> laguerre_layer(x)

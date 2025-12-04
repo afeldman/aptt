@@ -1,4 +1,4 @@
-r"""(apu.ml.lightning_base.model) - BaseModule.
+r"""(aptt.lightning_base.module) - BaseModule.
 -----------------------------------------------------
 
 A PyTorch Lightning-based model for training and hyperparameter optimization using Ray Tune.
