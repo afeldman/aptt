@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 from aptt.model.backend_adapter import BackboneAdapter
-from aptt.model.conv import SEBlock
+from aptt.model.conv import BaseConv2dBlock, SEBlock
 
 
 # MBConv Block
@@ -13,7 +13,7 @@ class MBConvBlock(nn.Module):
     """Mobile Inverted Residual Bottleneck Block.
 
     This block is used in EfficientNet and consists of an expansion phase, depthwise convolution,
-    squeeze and excitation, and output phase.
+    squeeze and excitation, and output phase. Nutzt BaseConv2dBlock für vereinheitlichte Conv-Operationen.
 
     Attributes:
         use_residual (bool): Whether to use residual connections.
@@ -37,34 +37,54 @@ class MBConvBlock(nn.Module):
         self.use_residual = self.stride == 1 and in_channels == out_channels
 
         layers = []
+        
+        # Expansion phase (nur wenn expand_ratio != 1)
         if expand_ratio != 1:
-            # Expansion phase
-            layers.append(nn.Conv2d(in_channels, hidden_dim, kernel_size=1, bias=False))
-            layers.append(nn.BatchNorm2d(hidden_dim))
-            layers.append(nn.SiLU())
+            layers.append(
+                BaseConv2dBlock(
+                    in_channels=in_channels,
+                    out_channels=hidden_dim,
+                    kernel_size=1,
+                    stride=1,
+                    padding=0,
+                    bias=False,
+                    use_bn=True,
+                    activation=nn.SiLU,
+                )
+            )
 
         # Depthwise convolution phase
         layers.append(
-            nn.Conv2d(
-                hidden_dim,
-                hidden_dim,
+            BaseConv2dBlock(
+                in_channels=hidden_dim,
+                out_channels=hidden_dim,
                 kernel_size=kernel_size,
                 stride=stride,
                 padding=kernel_size // 2,
-                groups=hidden_dim,
+                groups=hidden_dim,  # Depthwise
                 bias=False,
+                use_bn=True,
+                activation=nn.SiLU,
             )
         )
-        layers.append(nn.BatchNorm2d(hidden_dim))
-        layers.append(nn.SiLU())
 
         # Squeeze and Excitation phase
         if se_ratio is not None:
             layers.append(SEBlock(hidden_dim, reduction=int(1 / se_ratio)))
 
-        # Output phase
-        layers.append(nn.Conv2d(hidden_dim, out_channels, kernel_size=1, bias=False))
-        layers.append(nn.BatchNorm2d(out_channels))
+        # Output phase (Pointwise convolution ohne Aktivierung)
+        layers.append(
+            BaseConv2dBlock(
+                in_channels=hidden_dim,
+                out_channels=out_channels,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                bias=False,
+                use_bn=True,
+                activation=None,  # Keine Aktivierung am Ende
+            )
+        )
 
         self.block = nn.Sequential(*layers)
 
@@ -131,9 +151,16 @@ class EfficientNetBackbone(BackboneAdapter):
         # Stem
         out_channels = self.round_filters(32, width_coefficient)
         self.stem = nn.Sequential(
-            nn.Conv2d(input_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.SiLU(),
+            BaseConv2dBlock(
+                in_channels=input_channels,
+                out_channels=out_channels,
+                kernel_size=3,
+                stride=2,
+                padding=1,
+                bias=False,
+                use_bn=True,
+                activation=nn.SiLU,
+            )
         )
         in_channels = out_channels
 
@@ -154,7 +181,16 @@ class EfficientNetBackbone(BackboneAdapter):
         # Head
         out_channels = self.round_filters(1280, width_coefficient)
         self.head = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False), nn.BatchNorm2d(out_channels), nn.SiLU()
+            BaseConv2dBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                bias=False,
+                use_bn=True,
+                activation=nn.SiLU,
+            )
         )
 
         # Final linear layer

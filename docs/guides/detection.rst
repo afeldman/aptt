@@ -13,7 +13,7 @@ Modell erstellen
 
 .. code-block:: python
 
-   from aptt.modul.yolo import Yolo
+   from aptt.modules.yolo import Yolo
    from aptt.model.feature.efficientnet import EfficientNetBackbone
    
    # Backbone erstellen
@@ -76,7 +76,7 @@ Modell erstellen
 
 .. code-block:: python
 
-   from aptt.modul.centernet import CenterNetModule
+   from aptt.modules.centernet import CenterNetModule
    from aptt.model.feature.resnet import ResNetBackbone
    
    # Backbone

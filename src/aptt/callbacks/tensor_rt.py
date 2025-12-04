@@ -1,7 +1,7 @@
 """TensorRT export callback for PyTorch Lightning.
 
 This module contains a callback that exports the best model to TensorRT
-once it has been saved.
+once it has been saved. Only available on Linux and Windows.
 
 Example:
     ```python
@@ -11,21 +11,43 @@ Example:
     trainer = Trainer(callbacks=[TensorRTExportCallback()])
     trainer.fit(model)
     ```
+
+Note:
+    TensorRT is only supported on Linux and Windows platforms.
+    This callback will raise an ImportError on macOS.
 """
 
+import sys
 from pathlib import Path
 
 import pytorch_lightning as pl
 import torch
-import torch_tensorrt  # type: ignore
 from loguru import logger
 
 from aptt.callbacks.base import ExportBaseCallback
 from aptt.callbacks.torchscript import TorchScriptExportCallback
 
+# TensorRT is only available on Linux and Windows
+if sys.platform in ("linux", "win32"):
+    try:
+        import torch_tensorrt  # type: ignore
+        TENSORRT_AVAILABLE = True
+    except ImportError:
+        TENSORRT_AVAILABLE = False
+        logger.warning("torch_tensorrt not available. Install with: pip install torch-tensorrt")
+else:
+    TENSORRT_AVAILABLE = False
+    torch_tensorrt = None  # type: ignore
+    logger.info(f"TensorRT is not supported on {sys.platform}. Only available on Linux/Windows.")
+
 
 class TensorRTExportCallback(ExportBaseCallback):
-    """Exports the best model to TensorRT (.trt) using TorchScript."""
+    """Exports the best model to TensorRT (.trt) using TorchScript.
+    
+    Note:
+        Only available on Linux and Windows. On macOS, this callback will
+        raise an error during initialization.
+    """
 
     def __init__(self, output_dir="models", precision="fp16", workspace_size=1 << 20, **kwargs):
         """Initialize the TensorRT export callback.
@@ -35,7 +57,17 @@ class TensorRTExportCallback(ExportBaseCallback):
             precision (str): TensorRT precision mode ('fp16', 'fp32', 'int8').
             workspace_size (int): Workspace size in bytes for TensorRT.
             **kwargs: Additional arguments passed to the base ModelCheckpoint.
+            
+        Raises:
+            RuntimeError: If TensorRT is not available on this platform.
         """
+        if not TENSORRT_AVAILABLE:
+            raise RuntimeError(
+                f"TensorRT is not available on {sys.platform}. "
+                "Only supported on Linux and Windows. "
+                "Install with: pip install 'aptt[tensorrt]' (Linux/Windows only)"
+            )
+        
         super().__init__(**kwargs)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)

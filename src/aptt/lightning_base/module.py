@@ -64,6 +64,7 @@ optimize_hyperparameters(datamodule, num_samples=10, max_epochs=10)
 
 import inspect
 from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 import pytorch_lightning as pl
 import torch
@@ -75,6 +76,9 @@ from torchmetrics import AUROC, Accuracy, F1Score, Precision, Recall
 from aptt.config.config_manager import ConfigManager
 from aptt.lightning_base.trainer import BaseTrainer
 from aptt.loss import get_loss
+
+if TYPE_CHECKING:
+    from torchviz import Digraph
 
 try:
     from torchinfo import ModelStatistics, summary
@@ -90,6 +94,8 @@ try:
     HAS_TORCHVIZ = True
 except ImportError:
     HAS_TORCHVIZ = False
+    Digraph = None  # type: ignore
+    make_dot = None  # type: ignore
     print("⚠️  `torchviz` not installed. Graph visualization will not be available.")
 
 
@@ -264,7 +270,7 @@ class BaseModule(pl.LightningModule):
             logger.warning("⚠️ `torchinfo` ist nicht installiert. `summary()` kann nicht ausgeführt werden.")
         return None
 
-    def visualize_model(self, input_tensor: torch.Tensor) -> Digraph | None:
+    def visualize_model(self, input_tensor: torch.Tensor) -> "Digraph | None":
         """Zeigt ein Computation Graph mit `torchviz`, falls verfügbar."""
         if HAS_TORCHVIZ:
             y_hat = self(input_tensor)
