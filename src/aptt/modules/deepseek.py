@@ -14,6 +14,7 @@ from torch import nn
 
 from aptt.heads.language_modeling import CombinedLMHead
 from aptt.layers.attention.mla import MultiHeadLatentAttention
+from aptt.layers.moe import EfficientDeepSeekMoE
 from aptt.lightning_base.module import BaseModule
 from aptt.loss.language_modeling import (
     LanguageModelingLoss,
@@ -68,6 +69,9 @@ class DeepSeekTransformerBlock(nn.Module):
         dropout: float = 0.0,
         layer_norm_eps: float = 1e-6,
         use_moe: bool = False,
+        n_shared_experts: int = 1,
+        n_routed_experts: int = 256,
+        n_expert_per_token: int = 8,
     ) -> None:
         """Initialize DeepSeek transformer block."""
         super().__init__()
@@ -91,18 +95,26 @@ class DeepSeekTransformerBlock(nn.Module):
         # Pre-FFN layer norm
         self.ln_2 = nn.LayerNorm(d_model, eps=layer_norm_eps)
 
-        # FFN (oder MoE in Zukunft)
+        # FFN oder MoE
         if use_moe:
-            # TODO: Phase 2 - Implement DeepSeekMoE
-            raise NotImplementedError("MoE Layer wird in Phase 2 implementiert")
-        # Standard FFN: SwiGLU Activation
-        self.ffn = nn.Sequential(
-            nn.Linear(d_model, d_ffn),
-            nn.SiLU(),
-            nn.Dropout(dropout),
-            nn.Linear(d_ffn, d_model),
-            nn.Dropout(dropout),
-        )
+            # DeepSeek MoE Layer
+            self.ffn = EfficientDeepSeekMoE(
+                d_model=d_model,
+                n_shared_experts=n_shared_experts,
+                n_routed_experts=n_routed_experts,
+                n_expert_per_token=n_expert_per_token,
+                d_ffn=d_ffn,
+                dropout=dropout,
+            )
+        else:
+            # Standard FFN: SwiGLU Activation
+            self.ffn = nn.Sequential(
+                nn.Linear(d_model, d_ffn),
+                nn.SiLU(),
+                nn.Dropout(dropout),
+                nn.Linear(d_ffn, d_model),
+                nn.Dropout(dropout),
+            )
 
     def forward(
         self,
@@ -129,9 +141,15 @@ class DeepSeekTransformerBlock(nn.Module):
         x, _ = self.attention(x, attention_mask=attention_mask)  # MLA returns (output, cache)
         x = residual + x
 
-        # Pre-norm + FFN + Residual
+        # Pre-norm + FFN/MoE + Residual
         residual = x
         x = self.ln_2(x)
+
+        if self.use_moe:
+            # MoE returns (output, stats)
+            x, _ = self.ffn(x)
+            return residual + x
+        # Standard FFN
         x = self.ffn(x)
         return residual + x
 
@@ -185,6 +203,10 @@ class DeepSeekV3(nn.Module):
         use_mtp: bool = True,
         mtp_depth: int = 1,
         tie_weights: bool = True,
+        use_moe: bool = False,
+        n_shared_experts: int = 1,
+        n_routed_experts: int = 256,
+        n_expert_per_token: int = 8,
     ) -> None:
         """Initialize DeepSeek-V3 model."""
         super().__init__()
@@ -212,7 +234,10 @@ class DeepSeekV3(nn.Module):
                     d_ffn=d_ffn,
                     dropout=dropout,
                     layer_norm_eps=layer_norm_eps,
-                    use_moe=False,  # TODO: Phase 2
+                    use_moe=use_moe,
+                    n_shared_experts=n_shared_experts,
+                    n_routed_experts=n_routed_experts,
+                    n_expert_per_token=n_expert_per_token,
                 )
                 for _ in range(n_layers)
             ]
@@ -389,19 +414,19 @@ class DeepSeekModule(BaseModule):
         n_heads: int = 32,
         d_head: int = 64,
         max_seq_len: int = 2048,
-        learning_rate: float = 1e-4,
+        _learning_rate: float = 1e-4,
         use_mtp: bool = True,
         mtp_depth: int = 1,
         mtp_lambda: float = 0.3,
         label_smoothing: float = 0.1,
-        weight_decay: float = 0.01,
-        warmup_steps: int = 2000,
-        max_steps: int = 100000,
+        _weight_decay: float = 0.01,
+        _warmup_steps: int = 2000,
+        _max_steps: int = 100000,
         **kwargs: Any,
     ) -> None:
         """Initialize DeepSeek Lightning Module."""
         # Dummy loss to satisfy BaseModule
-        dummy_loss = lambda x, y: torch.tensor(0.0)  # noqa: E731
+        dummy_loss = lambda x, y: torch.tensor(0.0)  # noqa: E731, ARG005
 
         super().__init__(
             loss_fn=dummy_loss,  # Dummy, we override with custom loss
@@ -443,11 +468,11 @@ class DeepSeekModule(BaseModule):
         self.train_accuracy = TokenAccuracyMetric()
         self.val_accuracy = TokenAccuracyMetric()
 
-    def forward(self, input_ids: Tensor, **kwargs: Any) -> Any:
+    def forward(self, input_ids: Tensor, **_kwargs: Any) -> Any:
         """Forward pass."""
         return self.model(input_ids, return_mtp=self.training and self.hparams.use_mtp)
 
-    def training_step(self, batch: dict[str, Tensor], batch_idx: int) -> Tensor:
+    def training_step(self, batch: dict[str, Tensor], _batch_idx: int) -> Tensor:
         """Training step.
 
         Args:
@@ -484,7 +509,7 @@ class DeepSeekModule(BaseModule):
 
         return loss
 
-    def validation_step(self, batch: dict[str, Tensor], batch_idx: int) -> Tensor:
+    def validation_step(self, batch: dict[str, Tensor], _batch_idx: int) -> Tensor:
         """Validation step.
 
         Args:
