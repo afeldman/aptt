@@ -9,7 +9,7 @@ Training Setup
 .. code-block:: python
 
    import torch
-   from aptt.modul.centernet import CenterNetModule
+   from aptt.modules.centernet import CenterNetModule
    from aptt.model.feature.resnet import ResNetBackbone
    from aptt.lightning_base.trainer import BaseTrainer
    from aptt.lightning_base.dataset.image_loader import ImageDataModule

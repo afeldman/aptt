@@ -8,7 +8,7 @@ Basic Tracking
 
 .. code-block:: python
 
-   from aptt.modul.tracking import TrackingModule
+   from aptt.modules.tracking import TrackingModule
    from aptt.tracker.tracker import KalmanFilter, LSTMTracker
    from aptt.lightning_base.trainer import BaseTrainer
    

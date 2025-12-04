@@ -6,8 +6,82 @@ from torch.nn.functional import linear
 from torch.nn.utils.parametrizations import weight_norm
 
 
-class ConvBlock(nn.Module):
+class BaseConv2dBlock(nn.Module):
+    """Abstrakte Basisklasse für Conv2d-basierte Blöcke.
+    
+    Vereinheitlicht das Conv-BatchNorm-Activation Pattern, das in vielen
+    Architekturen verwendet wird. Unterstützt automatische Aktivierungsfunktions-Instanziierung.
+    
+    Attributes:
+        conv (nn.Conv2d): Convolutional Layer.
+        bn (nn.BatchNorm2d | None): Optional Batch-Normalisierungsschicht.
+        activation (nn.Module | None): Optional Aktivierungsfunktion.
+    """
+    
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        stride: int = 1,
+        padding: int = 0,
+        groups: int = 1,
+        bias: bool = False,
+        use_bn: bool = True,
+        activation: type[nn.Module] | nn.Module | None = nn.LeakyReLU,
+    ):
+        """Initialisiert den BaseConv2dBlock.
+        
+        Args:
+            in_channels: Anzahl der Eingabekanäle.
+            out_channels: Anzahl der Ausgabekanäle.
+            kernel_size: Größe des Convolutional Kernels.
+            stride: Schrittweite der Convolution.
+            padding: Padding der Convolution.
+            groups: Anzahl der Gruppen für die Convolution.
+            bias: Ob ein Bias in der Convolution verwendet wird.
+            use_bn: Ob Batch Normalization verwendet wird.
+            activation: Aktivierungsfunktion (Klasse oder Instanz).
+        """
+        super().__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=groups, bias=bias)
+        self.bn = nn.BatchNorm2d(out_channels) if use_bn else None
+        
+        # Intelligente Aktivierungsfunktions-Instanziierung
+        if activation is None:
+            self.activation = None
+        elif isinstance(activation, type):
+            # Klasse übergeben -> instanziiere mit inplace wenn möglich
+            if "inplace" in activation.__init__.__code__.co_varnames:
+                self.activation = activation(inplace=True)
+            else:
+                self.activation = activation()
+        else:
+            # Bereits instanziiert
+            self.activation = activation
+    
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward-Pass durch den Block.
+        
+        Args:
+            x: Eingabetensor.
+            
+        Returns:
+            Ausgabetensor nach Conv -> BN -> Activation.
+        """
+        x = self.conv(x)
+        if self.bn is not None:
+            x = self.bn(x)
+        if self.activation is not None:
+            x = self.activation(x)
+        return x
+
+
+class ConvBlock(BaseConv2dBlock):
     """Ein grundlegender Convolutional Block (Conv2d + BatchNorm + Aktivierung).
+    
+    Erbt von BaseConv2dBlock und bietet eine einfache Conv-BN-Activation Sequenz.
+    Rückwärtskompatibel mit der vorherigen Implementierung.
 
     Attribute:
         conv (nn.Conv2d): Convolutional Layer.
@@ -30,73 +104,77 @@ class ConvBlock(nn.Module):
             bias (bool): Ob ein Bias in der Convolution verwendet wird. Standard ist False.
             activation (nn.Module): Aktivierungsfunktion. Standard ist LeakyReLU.
         """
-        super().__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=groups, bias=bias)
-        self.bn = nn.BatchNorm2d(out_channels)
-
-        if isinstance(activation, type):
-            if "inplace" in activation.__init__.__code__.co_varnames:
-                self.activation = activation(inplace=True)
-            else:
-                self.activation = activation()
-        else:
-            self.activation = activation
-
-    def forward(self, x):
-        """Forward-Pass durch den ConvBlock.
-
-        Args:
-            x (torch.Tensor): Eingabetensor.
-
-        Returns:
-            torch.Tensor: Ausgabetensor.
-        """
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activation(x)
-        return x
+        super().__init__(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            groups=groups,
+            bias=bias,
+            use_bn=True,
+            activation=activation,
+        )
 
 
 class DepthwiseSeparableConv(nn.Module):
     """Depthwise Separable Convolution Block.
+    
+    Verwendet BaseConv2dBlock für beide Phasen: Depthwise und Pointwise Convolution.
+    Effizientere Alternative zu Standard-Convolutions durch Aufteilung in zwei Schritte.
 
     Attribute:
-        depthwise (nn.Conv2d): Depthwise Convolutional Layer.
-        bn1 (nn.BatchNorm2d): Batch-Normalisierungsschicht für Depthwise Convolution.
-        pointwise (nn.Conv2d): Pointwise Convolutional Layer.
-        bn2 (nn.BatchNorm2d): Batch-Normalisierungsschicht für Pointwise Convolution.
-        activation (nn.Module): Aktivierungsfunktion.
+        depthwise (BaseConv2dBlock): Depthwise Convolutional Block.
+        pointwise (BaseConv2dBlock): Pointwise Convolutional Block.
     """
 
-    def __init__(self, in_channels, out_channels, stride=1, activation=nn.ReLU):
+    def __init__(self, in_channels: int, out_channels: int, stride: int = 1, activation: type[nn.Module] = nn.ReLU):
         """Initialisiert die DepthwiseSeparableConv.
 
         Args:
-            in_channels (int): Anzahl der Eingabekanäle.
-            out_channels (int): Anzahl der Ausgabekanäle.
-            stride (int): Schrittweite der Convolution. Standard ist 1.
-            activation (nn.Module): Aktivierungsfunktion. Standard ist ReLU.
+            in_channels: Anzahl der Eingabekanäle.
+            out_channels: Anzahl der Ausgabekanäle.
+            stride: Schrittweite der Convolution.
+            activation: Aktivierungsfunktion.
         """
         super().__init__()
-        self.depthwise = nn.Conv2d(
-            in_channels, in_channels, kernel_size=3, stride=stride, padding=1, groups=in_channels, bias=False
+        # Depthwise: Jeder Kanal wird separat gefaltet (groups=in_channels)
+        self.depthwise = BaseConv2dBlock(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            kernel_size=3,
+            stride=stride,
+            padding=1,
+            groups=in_channels,
+            bias=False,
+            use_bn=True,
+            activation=activation,
         )
-        self.bn1 = nn.BatchNorm2d(in_channels)
-        self.pointwise = nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False)
-        self.bn2 = nn.BatchNorm2d(out_channels)
-        self.activation = activation(inplace=True) if activation == nn.ReLU else activation()
+        
+        # Pointwise: 1x1 Convolution zur Kanalkombination
+        self.pointwise = BaseConv2dBlock(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            groups=1,
+            bias=False,
+            use_bn=True,
+            activation=activation,
+        )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward-Pass durch die DepthwiseSeparableConv.
 
         Args:
-            x (torch.Tensor): Eingabetensor.
+            x: Eingabetensor.
 
         Returns:
-            torch.Tensor: Ausgabetensor.
+            Ausgabetensor nach Depthwise -> Pointwise Convolution.
         """
-        x = self.activation(self.bn1(self.depthwise(x)))
-        x = self.activation(self.bn2(self.pointwise(x)))
+        x = self.depthwise(x)
+        x = self.pointwise(x)
         return x
 
 
