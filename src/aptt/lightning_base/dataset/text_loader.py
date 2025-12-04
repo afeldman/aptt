@@ -99,9 +99,15 @@ class TextDataset(Dataset):
 
         # Tokenize
         if hasattr(self.tokenizer, "encode"):
-            token_ids = self.tokenizer.encode(text).ids
+            encoded = self.tokenizer.encode(text)
+            # Check if result has .ids attribute (HuggingFace tokenizers)
+            if hasattr(encoded, "ids"):
+                token_ids = encoded.ids
+            else:
+                # Direct list of IDs
+                token_ids = encoded
         else:
-            # Fallback für einfache Tokenizer
+            # Fallback: assume tokenizer is callable
             token_ids = self.tokenizer(text)
 
         # Split into chunks with sliding window
@@ -116,7 +122,11 @@ class TextDataset(Dataset):
                     text = data.get("text", "")
 
                     if hasattr(self.tokenizer, "encode"):
-                        token_ids = self.tokenizer.encode(text).ids
+                        encoded = self.tokenizer.encode(text)
+                        if hasattr(encoded, "ids"):
+                            token_ids = encoded.ids
+                        else:
+                            token_ids = encoded
                     else:
                         token_ids = self.tokenizer(text)
 

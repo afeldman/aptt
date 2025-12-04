@@ -1,7 +1,7 @@
 [project]
 name = "aptt"
-version = "0.1.0"
-description = ""
+version = "0.2.0"
+description = "Comprehensive deep learning framework with state-of-the-art implementations: GPT, DeepSeek-V3 with MLA/MoE, YOLO, CenterNet, and specialized audio/vision models built on PyTorch Lightning"
 authors = [{ name = "anton feldmann", email = "anton.feldmann@gmail.com" }]
 license = { text = "MIT" }
 readme = "README.md"
