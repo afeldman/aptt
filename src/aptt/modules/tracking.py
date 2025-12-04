@@ -4,18 +4,54 @@ from aptt.model.tracking import Tracker
 from aptt.tracker.tracker_manager import TrackerManager
 
 class TrackingModule(BaseModule):
+    """Multi-Object Tracking Module with PyTorch Lightning.
+    
+    Supports various tracking filters including GPU-accelerated particle filters.
+    Automatically detects and uses available accelerators (CUDA, MPS, TPU).
+    
+    Args:
+        detection_model: Detection model for generating bounding boxes
+        tracker_type: Type of tracker filter:
+            - 'kalman': Fast Kalman filter (CPU/GPU)
+            - 'lstm': LSTM-based tracker
+            - 'particle': Basic particle filter (CPU, 100 particles)
+            - 'particle_gpu': GPU particle filter (CUDA/MPS, 500 particles)
+            - 'particle_tpu': TPU/MPS optimized (1000 particles)
+        hidden_dim: Hidden dimension for RNN-based components
+        rnn_type: Type of RNN ('GRU' or 'LSTM')
+    
+    Example:
+        >>> # Automatic device selection (will use MPS on Mac, CUDA on Linux/Windows)
+        >>> tracker = TrackingModule(
+        ...     detection_model=yolo_model,
+        ...     tracker_type='particle_gpu'
+        ... )
+        
+        >>> # Explicit device selection
+        >>> tracker = TrackingModule(
+        ...     detection_model=yolo_model,
+        ...     tracker_type='particle_gpu',
+        ...     device='mps'  # Force MPS on Apple Silicon
+        ... )
+    """
+    
     def __init__(self, 
                  detection_model,
                  tracker_type='kalman', 
                  hidden_dim=128, 
-                 rnn_type='GRU',  
+                 rnn_type='GRU',
+                 device=None,  # None = auto-detect
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.trackingmodel = Tracker(detection_model=detection_model, 
                                      hidden_dim=hidden_dim,
                                      rnn_type=rnn_type)
 
-        self.tracker = TrackerManager(filter_type=tracker_type, device=self.device)
+        # TrackerManager will auto-detect device if device=None
+        self.tracker = TrackerManager(
+            filter_type=tracker_type, 
+            device=device if device is not None else str(self.device)
+        )
         self.accumulator = mm.MOTAccumulator(auto_id=True)
 
         # Frame-weises Zwischenspeichern der Ergebnisse

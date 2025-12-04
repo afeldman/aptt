@@ -3,15 +3,33 @@ import torch
 from torch import nn
 
 from aptt.tracker.tracker import Track
+from aptt.utils.device import get_best_device
+
 
 class TrackerManager:
-    def __init__(self, iou_threshold=0.3, max_age=30, filter_type='kalman', device='cpu'):
+    """Manager for multiple object tracks with various filter types.
+    
+    Args:
+        iou_threshold: Minimum IoU for matching detections to tracks
+        max_age: Maximum frames a track can exist without updates
+        filter_type: Type of filter ('kalman', 'particle', 'particle_gpu', 'particle_tpu')
+        device: Device for computation ('cuda', 'mps', 'cpu', or None for auto-detect)
+    """
+    
+    def __init__(self, iou_threshold=0.3, max_age=30, filter_type='kalman', device=None):
         self.tracks = []
         self.next_id = 0
         self.iou_threshold = iou_threshold
         self.max_age = max_age
         self.filter_type = filter_type
-        self.device = device
+        
+        # Auto-detect best device if not specified
+        if device is None:
+            self.device = str(get_best_device())
+        else:
+            self.device = device
+        
+        print(f"TrackerManager using device: {self.device}")
         
 
     def update(self,
