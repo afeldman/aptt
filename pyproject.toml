@@ -1,0 +1,110 @@
+[project]
+name = "aptt"
+version = "0.1.0"
+description = ""
+authors = [{ name = "anton feldmann", email = "anton.feldmann@gmail.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "complexpytorch>=0.4",
+    "loguru>=0.7.3",
+    "matplotlib>=3.10.3",
+    "numpy>=2.3.0",
+    "opencv-python-headless>=4.11.0.86",
+    "psutil>=7.0.0",
+    "py-cpuinfo>=9.0.0",
+    "pytorch-lightning>=2.5.1.post0",
+    "ray[tune]>=2.47.1",
+    "toml>=0.10.2",
+    "torch-tensorrt>=2.6.1",
+    "torchaudio>=2.6.0",
+    "torchinfo>=1.8.0",
+    "torchsummary>=1.5.1",
+    "torchviz>=0.0.3",
+    "zarr>=3.0.8",
+    "mlflow>=2.22.0",
+    "plotly>=6.1.2",
+    "motmetrics>=1.4.0",
+]
+
+[project.optional-dependencies]
+cpu = ["torch>=2.6.0,<3.0.0", "torchvision>=0.21.0,<0.22.0"]
+cu124 = ["torch>=2.6.0,<3.0.0", "torchvision>=0.21.0,<0.22.0"]
+dev = [
+    "ruff>=0.11.11",
+    "mypy>=1.15.0",
+    "sphinx>=8.2.3",
+    "pytest>=8.3.5",
+    "types-toml>=0.10.8.20240310",
+    "black>=25.1.0"
+]
+doc = [
+    "sphinx>=8.2.3",
+    "sphinx-autodoc-typehints>=3.2.0",
+    "furo>=2024.8.6",
+    "autodoc-pydantic>=2.2.0",
+    "pygraphviz>=1.14",
+    "recommonmark>=0.7.1",
+    "myst-parser>=4.0.1"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aptt"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+strict = true
+explicit_package_bases = true
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+exclude = ["tests/"]
+line-length = 100
+target-version = "py311"
+fix = true
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C90", "I", "N", "UP", "D"]
+ignore = ["D100", "D104"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.uv]
+conflicts = [[{ extra = "cpu" }, { extra = "cu124" }]]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu124", extra = "cu124", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { index = "pytorch-cpu", extra = "cpu" },
+]
+torchvision = [
+    { index = "pytorch-cu124", extra = "cu124", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { index = "pytorch-cpu", extra = "cpu" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+filterwarnings = ["ignore::UserWarning", "ignore::DeprecationWarning"]
