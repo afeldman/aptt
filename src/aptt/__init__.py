@@ -7,7 +7,7 @@ A PyTorch Lightning-based framework for deep learning with focus on:
 - Audio/Signal Processing
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 # Core Lightning Modules
 from aptt.lightning_base.continual_learning_manager import ContinualLearningManager
