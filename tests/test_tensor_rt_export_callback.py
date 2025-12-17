@@ -1,11 +1,18 @@
 from unittest import mock
+import sys
 
 import pytest
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from aptt.callbacks.tensor_rt import TensorRTExportCallback
+from aptt.callbacks.tensor_rt import TENSORRT_AVAILABLE, TensorRTExportCallback
+
+# Skip this test module when TensorRT isn't available on the current platform
+pytestmark = pytest.mark.skipif(
+    not TENSORRT_AVAILABLE,
+    reason="TensorRT nicht verfügbar (nur Linux/Windows); Test wird übersprungen.",
+)
 
 
 class DummyDataModule(pl.LightningDataModule):
