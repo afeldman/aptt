@@ -1,6 +1,8 @@
 class_*.json
 .trunk/*
 
+.DS_Store
+
 .vscode/
 
 .jj/
