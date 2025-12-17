@@ -5,6 +5,6 @@ from aptt.lightning_base.dataset.text_loader import TextDataLoader, TextDataset
 
 __all__ = [
     "BaseDataLoader",
-    "TextDataset",
     "TextDataLoader",
+    "TextDataset",
 ]

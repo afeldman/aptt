@@ -7,10 +7,10 @@ from aptt.modules.tracking import TrackingModule
 from aptt.modules.yolo import Yolo
 
 __all__ = [
+    "GPT",
     "CenterNetModule",
     "DeepSeekModule",
     "DeepSeekV3",
-    "GPT",
     "GPTModule",
     "TrackingModule",
     "Yolo",

@@ -187,7 +187,7 @@ aptt/
 │   └── text_dataset.md            # Dataset documentation
 ├── pyproject.toml                 # Project configuration
 ├── README.md                      # This file
-└── LICENSE                        # MIT License
+#
 ```
 
 ## 🎓 Key Concepts
@@ -357,9 +357,6 @@ Please ensure:
 - Tests pass (\`pytest\`)
 - Documentation is updated
 
-## 📝 License
-
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 

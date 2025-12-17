@@ -3,7 +3,6 @@ name = "aptt"
 version = "1.0.2"
 description = "Comprehensive deep learning framework with state-of-the-art implementations: GPT, DeepSeek-V3 with MLA/MoE, YOLO, CenterNet, and specialized audio/vision models built on PyTorch Lightning"
 authors = [{ name = "anton feldmann", email = "anton.feldmann@gmail.com" }]
-license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -56,6 +55,7 @@ requires = ["hatchling>=1.18.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
+only-packages = true
 packages = ["appt"]
 
 [tool.hatch.build.targets.sdist]
@@ -68,6 +68,10 @@ include = [
     "pyproject.toml",
     "LICENSE",
 ]
+
+
+[tool.hatch.build.targets.wheel.force-include]
+# This section is intentionally empty to prevent hatchling from adding LICENSE-File
 
 [tool.mypy]
 python_version = "3.11"
