@@ -55,8 +55,10 @@ doc = [
 requires = ["hatchling>=1.18.0"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+packages = ["src/aptt"]
+
 [tool.hatch.build.targets.wheel]
-only-packages = true
 packages = ["aptt"]
 
 [tool.hatch.build.targets.sdist]
