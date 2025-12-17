@@ -56,22 +56,17 @@ requires = ["hatchling>=1.18.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/appt"]
-include = [
-    "/src/appt",
-    "/README.md",
-    "/LICENSE",
-]
+packages = ["appt"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "/src/appt",
-    "/tests",
-    "/docs",
-    "/examples",
-    "/README.md",
-    "/pyproject.toml",
-    "/LICENSE",
+    "src/appt",
+    "tests",
+    "docs",
+    "examples",
+    "README.md",
+    "pyproject.toml",
+    "LICENSE",
 ]
 
 [tool.mypy]
