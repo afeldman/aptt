@@ -248,7 +248,7 @@ All examples automatically detect and use the best available device.
 
 ## 🐛 Troubleshooting
 
-**Import Error: "No module named 'aptt'"**
+**Import Error: "No module named 'deepsuite'"**
 
 ```bash
 # Install in editable mode
@@ -305,7 +305,7 @@ Features:
 """
 
 import argparse
-from aptt.utils.device import get_best_device
+from deepsuite.utils.device import get_best_device
 
 def main():
     parser = argparse.ArgumentParser(description='...')

@@ -17,10 +17,10 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 
-from aptt.heads.classification import ClassificationHead
-from aptt.lightning_base.module import BaseLightningModule
-from aptt.lightning_base.trainer import BaseTrainer
-from aptt.model.detection.resnet import ResNetBackbone
+from deepsuite.heads.classification import ClassificationHead
+from deepsuite.lightning_base.module import BaseLightningModule
+from deepsuite.lightning_base.trainer import BaseTrainer
+from deepsuite.model.detection.resnet import ResNetBackbone
 
 
 class ClassificationModel(torch.nn.Module):

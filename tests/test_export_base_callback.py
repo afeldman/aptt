@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from aptt.callbacks.base import ExportBaseCallback
+from deepsuite.callbacks.base import ExportBaseCallback
 
 
 class DummyDataModule(pl.LightningDataModule):

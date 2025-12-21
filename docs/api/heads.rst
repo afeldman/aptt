@@ -4,7 +4,7 @@ Detection Heads
 BBox Head
 ---------
 
-.. automodule:: aptt.heads.box
+.. automodule:: deepsuite.heads.box
    :members:
    :undoc-members:
    :show-inheritance:
@@ -12,7 +12,7 @@ BBox Head
 CenterNet Head
 --------------
 
-.. automodule:: aptt.heads.centernet
+.. automodule:: deepsuite.heads.centernet
    :members:
    :undoc-members:
    :show-inheritance:
@@ -20,7 +20,7 @@ CenterNet Head
 Classification Head
 -------------------
 
-.. automodule:: aptt.heads.classification
+.. automodule:: deepsuite.heads.classification
    :members:
    :undoc-members:
    :show-inheritance:
@@ -28,7 +28,7 @@ Classification Head
 Heatmap Head
 ------------
 
-.. automodule:: aptt.heads.heatmap
+.. automodule:: deepsuite.heads.heatmap
    :members:
    :undoc-members:
    :show-inheritance:

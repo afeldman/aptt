@@ -19,10 +19,10 @@ import cv2
 import numpy as np
 import torch
 
-from aptt.model.detection.centernet import CenterNetModel
-from aptt.model.detection.yolo import YOLOv5
-from aptt.utils.bbox import nms
-from aptt.utils.device import get_best_device
+from deepsuite.model.detection.centernet import CenterNetModel
+from deepsuite.model.detection.yolo import YOLOv5
+from deepsuite.utils.bbox import nms
+from deepsuite.utils.device import get_best_device
 
 
 class DetectionInference:

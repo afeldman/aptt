@@ -12,7 +12,7 @@ from __future__ import annotations
 import torch
 from torch import nn
 
-from aptt.layers.attention import MultiHeadLatentAttention
+from deepsuite.layers.attention import MultiHeadLatentAttention
 
 
 class ExampleTransformerLayer(nn.Module):

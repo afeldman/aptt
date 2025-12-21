@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'aptt'
+project = 'deepsuite'
 author = 'Anton Feldmann <anton.feldmann@gmail.com>'
 copyright = f"2025, {author}"
 

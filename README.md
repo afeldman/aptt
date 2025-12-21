@@ -1,8 +1,12 @@
-# APTT – Antons PyTorch Tools
+<p align="center">
+    <img src="docs/logo.png" alt="DeepSuite" width="140" />
+</p>
 
-**APTT** (Antons PyTorch Tools) is a comprehensive deep learning framework built on [PyTorch Lightning](https://www.pytorchlightning.ai/)
-that provides production-ready implementations of state-of-the-art architectures including transformer language models (GPT, DeepSeek-V3),
-object detection (YOLO, CenterNet), and specialized neural networks for vision and audio tasks.
+# DeepSuite
+
+DeepSuite is a comprehensive deep learning framework based on [PyTorch Lightning](https://www.pytorchlightning.ai/).
+It provides production-ready implementations of modern architectures: language models (GPT, DeepSeek‑V3 with MLA/MoE),
+object detection (YOLO, CenterNet), and specialized audio/vision models. Docstrings and examples follow Google‑Style.
 
 ## 🚀 Features
 
@@ -39,33 +43,33 @@ object detection (YOLO, CenterNet), and specialized neural networks for vision a
 ## 🛠️ Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/afeldman/aptt.git
-cd aptt
+# Clone repository
+git clone https://github.com/afeldman/deepsuite.git
+cd deepsuite
 
-# Create virtual environment (recommended)
+# Virtual environment (recommended)
 python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Install for CPU
+# Installation (CPU)
 uv sync --extra cpu --extra dev
 
-# Install for CUDA 12.4
+# Installation (CUDA 12.4)
 uv sync --extra cu124 --extra dev
 
-# For documentation building
-apt-get install libgraphviz-dev  # Linux
+# Documentation build dependencies
 brew install graphviz             # macOS
+sudo apt-get install libgraphviz-dev  # Linux
 ```
 
 ## 🎯 Quick Start
 
-### Language Model Training (DeepSeek-V3)
+### Language Model Training (DeepSeek‑V3)
 
 ```python
 import pytorch_lightning as pl
-from aptt.modules.deepseek import DeepSeekModule
-from aptt.lightning_base.dataset import TextDataLoader
+from deepsuite.model.llm.deepseek import DeepSeekV3Module
+from deepsuite.lightning_base.dataset.text_loader import TextDataLoader
 
 # Prepare dataset
 datamodule = TextDataLoader(
@@ -78,18 +82,18 @@ datamodule = TextDataLoader(
 )
 
 # Create model
-model = DeepSeekModule(
+model = DeepSeekV3Module(
     vocab_size=50000,
     d_model=2048,
     n_layers=24,
     n_heads=16,
-    use_moe=True,           # Enable Mixture-of-Experts
-    use_mtp=True,           # Enable Multi-Token Prediction
+    use_moe=True,           # Mixture-of-Experts
+    use_mtp=True,           # Multi-Token Prediction
     n_routed_experts=256,
     n_expert_per_token=8,
 )
 
-# Train
+# Training
 trainer = pl.Trainer(max_steps=100000, accelerator="gpu")
 trainer.fit(model, datamodule)
 ```
@@ -97,16 +101,35 @@ trainer.fit(model, datamodule)
 ### Object Detection (YOLO)
 
 ```python
-from aptt.modul.yolo import YOLOModule
+import pytorch_lightning as pl
+from deepsuite.model.feature.yolo import YOLOLightningModule
 
-model = YOLOModule(
+model = YOLOLightningModule(
     num_classes=80,
-    model_size="yolov5s",
-    pretrained=True,
+    backbone="cspdarknet",
+    use_rotated_loss=False,
 )
 
 trainer = pl.Trainer(max_epochs=100, accelerator="gpu")
 trainer.fit(model, datamodule)
+```
+
+### Feature Matching (LoFTR)
+
+```python
+from deepsuite.model.loftr.loftr import LoFTR
+
+loftr = LoFTR(d_model=256, nhead=8)
+matches = loftr(img1, img2)
+```
+
+### Spatial Transformer Networks (STN)
+
+```python
+from deepsuite.model.stn import AffineSTN
+
+stn = AffineSTN(in_channels=3)
+warped = stn(images)
 ```
 
 ## 📚 Documentation
@@ -156,8 +179,8 @@ make html
 ## 🏗️ Project Structure
 
 ```bash
-aptt/
-├── src/aptt/                      # Core source code
+deepsuite/
+├── src/deepsuite/                      # Core source code
 │   ├── callbacks/                 # Training callbacks (TensorRT, t-SNE, etc.)
 │   ├── heads/                     # Output heads (classification, detection, LM)
 │   ├── layers/                    # Neural network layers
@@ -197,13 +220,13 @@ aptt/
 DeepSeek-V3's efficient attention mechanism with low-rank KV-compression:
 
 ```python
-from aptt.layers.attention.mla import MultiHeadLatentAttention
+from deepsuite.layers.attention.mla import MultiHeadLatentAttention
 
 attention = MultiHeadLatentAttention(
-d=2048, # Model dimension
-n_h=16, # Number of heads
-d_h_c=256, # Compressed KV dimension
-d_h_r=64, # Per-head RoPE dimension
+    d=2048,  # Model dimension
+    n_h=16,  # Number of heads
+    d_h_c=256,  # Compressed KV dimension
+    d_h_r=64,  # Per-head RoPE dimension
 )
 ```
 
@@ -212,13 +235,13 @@ d_h_r=64, # Per-head RoPE dimension
 Sparse expert activation with auxiliary-loss-free load balancing:
 
 ```python
-from aptt.layers.moe import DeepSeekMoE
+from deepsuite.layers.moe import DeepSeekMoE
 
 moe = DeepSeekMoE(
-d_model=2048,
-n_shared_experts=1, # Always active
-n_routed_experts=256, # Selectively activated
-n_expert_per_token=8, # Top-K experts per token
+    d_model=2048,
+    n_shared_experts=1,  # Always active
+    n_routed_experts=256,  # Selectively activated
+    n_expert_per_token=8,  # Top-K experts per token
 )
 ```
 
@@ -227,22 +250,19 @@ n_expert_per_token=8, # Top-K experts per token
 Predict multiple future tokens simultaneously:
 
 ```python
-
-# Dataset with MTP targets
-
+# Dataset mit MTP-Zielen
 dataset = TextDataset(
-data_path="train.txt",
-tokenizer=tokenizer,
-return_mtp=True,
-mtp_depth=3, # Predict 1, 2, 3 tokens ahead
+    data_path="train.txt",
+    tokenizer=tokenizer,
+    return_mtp=True,
+    mtp_depth=3,  # Predict 1, 2, 3 tokens ahead
 )
 
 # Model with MTP loss
-
-model = DeepSeekModule(
-vocab_size=50000,
-use_mtp=True,
-mtp_lambda=0.3, # MTP loss weight
+model = DeepSeekV3Module(
+    vocab_size=50000,
+    use_mtp=True,
+    mtp_lambda=0.3,  # MTP loss weight
 )
 ```
 
@@ -268,65 +288,69 @@ mtp_lambda=0.3, # MTP loss weight
 ## 🧪 Testing
 
 ```bash
-
-# Run all tests
-
+# All tests
 pytest
 
-# Run specific test
-
+# Single test
 pytest tests/test_tensor_rt_export_callback.py
 
 # With coverage
-
-pytest --cov=aptt
+pytest --cov=deepsuite
 ```
 
 ## 🛠️ Development
 
-### Code Quality
+### Code Quality (Google‑Style, Ruff, MyPy)
+
+Docstrings follow Google-Style and are verified via Ruff (pydocstyle=google).
 
 ```bash
-
 # Format code
+ruff format .
 
+# Linting (Auto-Fix)
+ruff check . --fix
+
+# Type checking
+mypy src/deepsuite
+```
+
+Optional: Set up pre-commit hooks.
+
+```bash
+# Format code
 ruff format .
 
 # Lint
-
 ruff check .
 
 # Type checking
-
-mypy src/aptt
+mypy src/deepsuite
 ```
 
-### Pre-commit Hooks
+### Pre‑commit Hooks
 
 ```bash
 # Install pre-commit
-
 pip install pre-commit
 
 # Setup hooks
-
 pre-commit install
 
 # Run manually
-
 pre-commit run --all-files
 ```
 
 ## 📖 Citation
 
-If you use APTT in your research, please cite:
+If you use DeepSuite in your research, please cite:
 
 ```bibtex
-@software{aptt2025,
-title = {APTT: Antons PyTorch Tools},
+@software{deepsuite2025,
+title = {DeepSuite},
 author = {Anton Feldmann},
 year = {2025},
-url = {https://github.com/afeldman/aptt}
+url = {https://github.com/afeldman/deepsuite}
 }
 ```
 
@@ -354,9 +378,8 @@ Contributions are welcome! Please:
 Please ensure:
 
 - Code follows the style guide (Ruff + MyPy)
-- Tests pass (\`pytest\`)
+- Tests pass (pytest)
 - Documentation is updated
-
 
 ## 🙏 Acknowledgments
 
@@ -369,8 +392,8 @@ Please ensure:
 
 Anton Feldmann - anton.feldmann@gmail.com
 
-Project Link: [https://github.com/afeldman/aptt](https://github.com/afeldman/aptt)
+Project Link: [https://github.com/afeldman/deepsuite](https://github.com/afeldman/deepsuite)
 
 ---
 
-**Version:** 0.2.0 | **Python:** >=3.11 | **PyTorch:** >=2.6.0 | **Lightning:** >=2.5.1
+**Version:** 1.0.3 | **Python:** >=3.11 | **PyTorch:** >=2.6.0 | **Lightning:** >=2.5.1 | **License:** Apache 2.0

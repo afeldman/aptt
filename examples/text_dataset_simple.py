@@ -9,7 +9,7 @@ import tempfile
 
 import torch
 
-from aptt.lightning_base.dataset.text_loader import TextDataLoader, TextDataset
+from deepsuite.lightning_base.dataset.text_loader import TextDataLoader, TextDataset
 
 
 class SimpleCharTokenizer:
@@ -63,9 +63,7 @@ def example_1_basic_usage() -> None:
     print("\n=== Example 1: Basic Usage ===")
 
     # Create temp text file
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
         f.write("hello world. this is a test. language models are great!")
         temp_path = f.name
 
@@ -101,9 +99,7 @@ def example_2_mtp_dataset() -> None:
     """Example 2: Multi-Token Prediction."""
     print("\n=== Example 2: Multi-Token Prediction ===")
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
         f.write("the quick brown fox jumps over the lazy dog. " * 5)
         temp_path = f.name
 
@@ -130,7 +126,7 @@ def example_2_mtp_dataset() -> None:
     print("\nMTP lookahead:")
     for i in range(3):
         decoded = tokenizer.decode(sample["mtp_labels"][i][:10].tolist())
-        print(f"  Depth {i+1}: '{decoded}'")
+        print(f"  Depth {i + 1}: '{decoded}'")
 
     # Cleanup
     Path(temp_path).unlink()
@@ -249,17 +245,18 @@ def example_6_training_ready() -> None:
     """Example 6: Training-ready dataset for DeepSeek/GPT."""
     print("\n=== Example 6: Training-Ready Dataset ===")
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
         # Längerer Text für realistisches Training
-        text = """
+        text = (
+            """
 the transformer architecture revolutionized nlp.
 it uses self attention mechanisms for sequence processing.
 gpt models are autoregressive language models.
 deepseek uses multi head latent attention and mixture of experts.
 these models can generate coherent text and solve tasks.
-""" * 20
+"""
+            * 20
+        )
         f.write(text)
         temp_path = f.name
 

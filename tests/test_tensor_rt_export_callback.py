@@ -1,12 +1,11 @@
 from unittest import mock
-import sys
 
 import pytest
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from aptt.callbacks.tensor_rt import TENSORRT_AVAILABLE, TensorRTExportCallback
+from deepsuite.callbacks.tensor_rt import TENSORRT_AVAILABLE, TensorRTExportCallback
 
 # Skip this test module when TensorRT isn't available on the current platform
 pytestmark = pytest.mark.skipif(
@@ -50,10 +49,10 @@ def dummy_trainer(tmp_path):
     return trainer, model, callback, checkpoint_path
 
 
-@mock.patch("aptt.callbacks.tensor_rt.TorchScriptExportCallback.build_torchscript")
-@mock.patch("aptt.callbacks.tensor_rt.torch_tensorrt.ts.compile")
-@mock.patch("aptt.callbacks.tensor_rt.torch.jit.save")
-@mock.patch("aptt.callbacks.tensor_rt.torch.jit.load")
+@mock.patch("deepsuite.callbacks.tensor_rt.TorchScriptExportCallback.build_torchscript")
+@mock.patch("deepsuite.callbacks.tensor_rt.torch_tensorrt.ts.compile")
+@mock.patch("deepsuite.callbacks.tensor_rt.torch.jit.save")
+@mock.patch("deepsuite.callbacks.tensor_rt.torch.jit.load")
 def test_tensor_rt_export(
     mock_jit_load,
     mock_jit_save,

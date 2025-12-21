@@ -4,12 +4,12 @@ Utilities
 Bounding Box Utilities
 ----------------------
 
-.. automodule:: aptt.utils.bbox
+.. automodule:: deepsuite.utils.bbox
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: aptt.utils.xy
+.. automodule:: deepsuite.utils.xy
    :members:
    :undoc-members:
    :show-inheritance:
@@ -17,7 +17,7 @@ Bounding Box Utilities
 Anchor Utilities
 ~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.utils.anchor
+.. automodule:: deepsuite.utils.anchor
    :members:
    :undoc-members:
    :show-inheritance:
@@ -25,7 +25,7 @@ Anchor Utilities
 Task-Aligned Assigner
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.utils.taskAlignedAssigner
+.. automodule:: deepsuite.utils.taskAlignedAssigner
    :members:
    :undoc-members:
    :show-inheritance:
@@ -33,12 +33,12 @@ Task-Aligned Assigner
 Device Management
 -----------------
 
-.. automodule:: aptt.utils.device
+.. automodule:: deepsuite.utils.device
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: aptt.utils.autocast
+.. automodule:: deepsuite.utils.autocast
    :members:
    :undoc-members:
    :show-inheritance:
@@ -46,7 +46,7 @@ Device Management
 Signal Processing
 -----------------
 
-.. automodule:: aptt.utils.tsignal
+.. automodule:: deepsuite.utils.tsignal
    :members:
    :undoc-members:
    :show-inheritance:
@@ -54,7 +54,7 @@ Signal Processing
 Complex Utilities
 ~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.utils.complex
+.. automodule:: deepsuite.utils.complex
    :members:
    :undoc-members:
    :show-inheritance:
@@ -65,7 +65,7 @@ Mathematical Functions
 Hermite Polynomials
 ~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.utils.hermite
+.. automodule:: deepsuite.utils.hermite
    :members:
    :undoc-members:
    :show-inheritance:
@@ -73,7 +73,7 @@ Hermite Polynomials
 Laguerre Polynomials
 ~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.utils.laguerre
+.. automodule:: deepsuite.utils.laguerre
    :members:
    :undoc-members:
    :show-inheritance:
@@ -81,7 +81,7 @@ Laguerre Polynomials
 Image Utilities
 ---------------
 
-.. automodule:: aptt.utils.image
+.. automodule:: deepsuite.utils.image
    :members:
    :undoc-members:
    :show-inheritance:
@@ -92,7 +92,7 @@ Model Utilities
 Teacher Model Management
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.utils.teacher
+.. automodule:: deepsuite.utils.teacher
    :members:
    :undoc-members:
    :show-inheritance:
@@ -100,7 +100,7 @@ Teacher Model Management
 Head Expansion
 ~~~~~~~~~~~~~~
 
-.. automodule:: aptt.utils.head_expansion
+.. automodule:: deepsuite.utils.head_expansion
    :members:
    :undoc-members:
    :show-inheritance:
@@ -108,7 +108,7 @@ Head Expansion
 Search Space
 ~~~~~~~~~~~~
 
-.. automodule:: aptt.utils.search_space
+.. automodule:: deepsuite.utils.search_space
    :members:
    :undoc-members:
    :show-inheritance:
@@ -116,7 +116,7 @@ Search Space
 Tensor Utilities
 ----------------
 
-.. automodule:: aptt.utils.tensor
+.. automodule:: deepsuite.utils.tensor
    :members:
    :undoc-members:
    :show-inheritance:
@@ -124,7 +124,7 @@ Tensor Utilities
 RNN Utilities
 -------------
 
-.. automodule:: aptt.utils.rnn
+.. automodule:: deepsuite.utils.rnn
    :members:
    :undoc-members:
    :show-inheritance:

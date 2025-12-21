@@ -1,72 +1,72 @@
 name: Build and Publish to PyPI
 
 on:
-    push:
-        tags:
-            - "v*"
-    workflow_dispatch:
-        inputs:
-            repository:
-                description: "Publish target: pypi or testpypi"
-                required: false
-                default: "pypi"
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Publish target: pypi or testpypi"
+        required: false
+        default: "pypi"
 
 jobs:
-    build:
-        name: Build sdist and wheel
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  build:
+    name: Build sdist and wheel DeepSuite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Set up Python 3.11
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.11"
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-            - name: Ensure build tooling
-              run: |
-                  python -m pip install --upgrade pip
-                  python -m pip install build
+      - name: Ensure build tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
 
-            - name: Check tag matches project version
-              if: startsWith(github.ref, 'refs/tags/v')
-              run: bash .github/scripts/check-version.sh
+      - name: Check tag matches project version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: bash .github/scripts/check-version.sh
 
-            - name: Build
-              run: |
-                  python -m build
+      - name: Build
+        run: |
+          python -m build
 
-            - name: Upload artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: dist
-                  path: dist/*
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
 
-    publish:
-        name: Publish to PyPI/TestPyPI
-        needs: build
-        runs-on: ubuntu-latest
-        # Publish on tag push or when manually requested via workflow_dispatch
-        if: |
-            startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  publish:
+    name: Publish to PyPI/TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # Publish on tag push or when manually requested via workflow_dispatch
+    if: |
+      startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Download build artifacts
-              uses: actions/download-artifact@v4
-              with:
-                  name: dist
-                  path: dist
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
 
-            - name: Publish with twine
-              run: |
-                  REPO="pypi"
-                  if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.repository }}" = "testpypi" ]; then
-                    REPO="testpypi"
-                  fi
-                  bash .github/scripts/publish-with-twine.sh "$REPO"
-              env:
-                  PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-                  TEST_PYPI_API_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      - name: Publish with twine
+        run: |
+          REPO="pypi"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.repository }}" = "testpypi" ]; then
+            REPO="testpypi"
+          fi
+          bash .github/scripts/publish-with-twine.sh "$REPO"
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          TEST_PYPI_API_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}

@@ -4,7 +4,7 @@ Callbacks
 Base Callback
 -------------
 
-.. automodule:: aptt.callbacks.base
+.. automodule:: deepsuite.callbacks.base
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ TorchScript Export
 TensorRT Export
 ~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.callbacks.tensor_rt
+.. automodule:: deepsuite.callbacks.tensor_rt
    :members:
    :undoc-members:
    :show-inheritance:
@@ -34,7 +34,7 @@ Visualization Callbacks
 Embedding Logger
 ~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.callbacks.embedding_logger
+.. automodule:: deepsuite.callbacks.embedding_logger
    :members:
    :undoc-members:
    :show-inheritance:
@@ -42,7 +42,7 @@ Embedding Logger
 t-SNE/Laplace Callback
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.callbacks.tsne_laplace_callback
+.. automodule:: deepsuite.callbacks.tsne_laplace_callback
    :members:
    :undoc-members:
    :show-inheritance:

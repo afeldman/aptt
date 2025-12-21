@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import torch
 
-from aptt.heads.language_modeling import CombinedLMHead, LanguageModelingHead
-from aptt.loss.language_modeling import (
+from deepsuite.heads.language_modeling import CombinedLMHead, LanguageModelingHead
+from deepsuite.loss.language_modeling import (
     LanguageModelingLoss,
     MultiTokenPredictionLoss,
     PerplexityMetric,

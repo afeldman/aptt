@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import torch
 
-from aptt.modules.deepseek import DeepSeekModule, DeepSeekV3
-from aptt.modules.gpt import GPT, GPTModule
+from deepsuite.modules.deepseek import DeepSeekModule, DeepSeekV3
+from deepsuite.modules.gpt import GPT, GPTModule
 
 
 def example_deepseek_v3_basic() -> None:

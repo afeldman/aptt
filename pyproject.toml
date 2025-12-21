@@ -1,10 +1,10 @@
 [project]
-name = "aptt"
-version = "1.0.3"
+name = "deepsuite"
+version = "1.0.0"
 description = "Comprehensive deep learning framework with state-of-the-art implementations: GPT, DeepSeek-V3 with MLA/MoE, YOLO, CenterNet, and specialized audio/vision models built on PyTorch Lightning"
 authors = [{ name = "anton feldmann", email = "anton.feldmann@gmail.com" }]
 readme = "README.md"
-license-files = { paths = ["LICENSE.txt"] }
+license-files = { paths = ["LICENSE"] }
 requires-python = ">=3.11"
 dependencies = [
     "complexpytorch>=0.4",
@@ -56,14 +56,14 @@ requires = ["hatchling>=1.18.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-packages = ["src/aptt"]
+packages = ["src/deepsuite"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["aptt"]
+packages = ["deepsuite"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "src/aptt",
+    "src/deepsuite",
     "tests",
     "docs",
     "examples",
@@ -226,7 +226,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
     "F401",    # Allow unused imports in __init__
     "D104",    # Missing docstring in public package
 ]
-"aptt/layers/attention/__init__.py" = ["F401"]
+"deepsuite/layers/attention/__init__.py" = ["F401"]
 "examples/**/*.py" = [
     "T20",     # Allow print statements in examples
     "INP001",  # Allow implicit namespace packages
@@ -240,7 +240,7 @@ max-doc-length = 100
 max-line-length = 100
 
 [tool.ruff.lint.isort]
-known-first-party = ["aptt"]
+known-first-party = ["deepsuite"]
 force-sort-within-sections = true
 split-on-trailing-comma = false
 

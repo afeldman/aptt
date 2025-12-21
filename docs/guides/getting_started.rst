@@ -19,8 +19,8 @@ Installation mit uv
 .. code-block:: bash
 
    # Repository klonen
-   git clone https://github.com/afeldman/aptt.git
-   cd aptt
+   git clone https://github.com/afeldman/deepsuite.git
+   cd deepsuite
    
    # Mit CPU-Support installieren
    uv install --extra cpu
@@ -61,7 +61,7 @@ Beispiel:
 
 .. code-block:: python
 
-   from aptt.lightning_base.module import BaseModule
+   from deepsuite.lightning_base.module import BaseModule
    import torch.nn as nn
    
    class MyModel(BaseModule):
@@ -94,7 +94,7 @@ Beispiel:
 
 .. code-block:: python
 
-   from aptt.lightning_base.trainer import BaseTrainer
+   from deepsuite.lightning_base.trainer import BaseTrainer
    
    trainer = BaseTrainer(
        log_dir="logs",
@@ -112,7 +112,7 @@ APTT bietet einen ``ConfigManager`` für einfache Konfigurationsverwaltung:
 
 .. code-block:: python
 
-   from aptt.config.config_manager import ConfigManager
+   from deepsuite.config.config_manager import ConfigManager
    
    config_manager = ConfigManager(config_dir="configs")
    

@@ -20,10 +20,10 @@ import numpy as np
 from scipy.io import wavfile
 import torch
 
-from aptt.model.beamforming.beamforming import DelayAndSumBeamformer, MUSICBeamformer
-from aptt.model.doa import DOAEstimator
-from aptt.utils.array_calibration import circular_array_geometry, linear_array_geometry
-from aptt.utils.device import get_best_device
+from deepsuite.model.beamforming.beamforming import DelayAndSumBeamformer, MUSICBeamformer
+from deepsuite.model.doa import DOAEstimator
+from deepsuite.utils.array_calibration import circular_array_geometry, linear_array_geometry
+from deepsuite.utils.device import get_best_device
 
 
 class AudioBeamformingPipeline:

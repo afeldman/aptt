@@ -14,7 +14,7 @@ from tokenizers.pre_tokenizers import Whitespace
 from tokenizers.trainers import BpeTrainer
 import torch
 
-from aptt.lightning_base.dataset.text_loader import TextDataLoader, TextDataset
+from deepsuite.lightning_base.dataset.text_loader import TextDataLoader, TextDataset
 
 
 def create_simple_tokenizer(vocab_size: int = 1000) -> Tokenizer:
@@ -53,9 +53,7 @@ def example_1_text_file() -> None:
     print("\n=== Example 1: Raw Text File ===")
 
     # Create temp text file
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
         f.write(
             """The transformer architecture has revolutionized natural language processing.
 It uses self-attention mechanisms to process sequences in parallel.
@@ -159,9 +157,7 @@ def example_4_mtp_targets() -> None:
     """Example 4: Dataset with Multi-Token Prediction targets."""
     print("\n=== Example 4: Multi-Token Prediction ===")
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
         f.write("This is a long text for multi-token prediction. " * 20)
         temp_path = f.name
 
@@ -187,7 +183,7 @@ def example_4_mtp_targets() -> None:
 
     print("\nMTP targets:")
     for i in range(3):
-        print(f"  Lookahead {i+1}: {sample['mtp_labels'][i][:5].tolist()}")
+        print(f"  Lookahead {i + 1}: {sample['mtp_labels'][i][:5].tolist()}")
 
     # Cleanup
     Path(temp_path).unlink()
@@ -202,12 +198,8 @@ def example_5_dataloader() -> None:
         train_path = Path(tmpdir) / "train.txt"
         val_path = Path(tmpdir) / "val.txt"
 
-        train_path.write_text(
-            "Training data for language models. " * 100, encoding="utf-8"
-        )
-        val_path.write_text(
-            "Validation data for evaluation. " * 50, encoding="utf-8"
-        )
+        train_path.write_text("Training data for language models. " * 100, encoding="utf-8")
+        val_path.write_text("Validation data for evaluation. " * 50, encoding="utf-8")
 
         tokenizer = create_simple_tokenizer()
 
@@ -225,9 +217,7 @@ def example_5_dataloader() -> None:
         # Setup
         datamodule.setup("fit")
 
-        print(
-            f"Train dataset: {len(datamodule.train_dataset)} samples"
-        )
+        print(f"Train dataset: {len(datamodule.train_dataset)} samples")
         print(f"Val dataset: {len(datamodule.val_dataset)} samples")
 
         # Get dataloaders
@@ -272,9 +262,7 @@ def example_7_with_deepseek() -> None:
     """Example 7: Using dataset with DeepSeek model."""
     print("\n=== Example 7: Training with DeepSeek ===")
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
         f.write("Training data for DeepSeek model. " * 100)
         temp_path = f.name
 
@@ -315,9 +303,7 @@ def example_8_with_gpt() -> None:
     """Example 8: Using dataset with GPT model."""
     print("\n=== Example 8: Training with GPT ===")
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
         f.write("Training data for GPT model. " * 100)
         temp_path = f.name
 

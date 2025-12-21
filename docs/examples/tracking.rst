@@ -8,9 +8,9 @@ Basic Tracking
 
 .. code-block:: python
 
-   from aptt.modules.tracking import TrackingModule
-   from aptt.tracker.tracker import KalmanFilter, LSTMTracker
-   from aptt.lightning_base.trainer import BaseTrainer
+   from deepsuite.modules.tracking import TrackingModule
+   from deepsuite.tracker.tracker import KalmanFilter, LSTMTracker
+   from deepsuite.lightning_base.trainer import BaseTrainer
    
    # Tracking Modell erstellen
    model = TrackingModule(
@@ -33,7 +33,7 @@ Kalman Filter Tracking
 
 .. code-block:: python
 
-   from aptt.tracker.tracker import KalmanFilter
+   from deepsuite.tracker.tracker import KalmanFilter
    import numpy as np
    
    # Kalman Filter initialisieren
@@ -86,7 +86,7 @@ LSTM Tracker
 
 .. code-block:: python
 
-   from aptt.tracker.tracker import LSTMTracker
+   from deepsuite.tracker.tracker import LSTMTracker
    import torch
    
    # LSTM Tracker
@@ -115,8 +115,8 @@ DeepSORT-style Tracking
 
 .. code-block:: python
 
-   from aptt.tracker.reid_encoder import ReIDEncoder
-   from aptt.tracker.tracker import Track
+   from deepsuite.tracker.reid_encoder import ReIDEncoder
+   from deepsuite.tracker.tracker import Track
    import torch
    
    class DeepSORT:
@@ -233,7 +233,7 @@ Video Tracking
 .. code-block:: python
 
    import cv2
-   from aptt.tracker.inference import run_tracking
+   from deepsuite.tracker.inference import run_tracking
    
    # Video laden
    cap = cv2.VideoCapture("input_video.mp4")

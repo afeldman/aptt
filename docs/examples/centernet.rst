@@ -9,10 +9,10 @@ Training Setup
 .. code-block:: python
 
    import torch
-   from aptt.modules.centernet import CenterNetModule
-   from aptt.model.feature.resnet import ResNetBackbone
-   from aptt.lightning_base.trainer import BaseTrainer
-   from aptt.lightning_base.dataset.image_loader import ImageDataModule
+   from deepsuite.modules.centernet import CenterNetModule
+   from deepsuite.model.feature.resnet import ResNetBackbone
+   from deepsuite.lightning_base.trainer import BaseTrainer
+   from deepsuite.lightning_base.dataset.image_loader import ImageDataModule
    
    # 1. ResNet Backbone erstellen
    backbone = ResNetBackbone(
@@ -237,7 +237,7 @@ Custom CenterNet Head
 
 .. code-block:: python
 
-   from aptt.heads.centernet import CenterNetHead
+   from deepsuite.heads.centernet import CenterNetHead
    import torch.nn as nn
    
    class CustomCenterNetHead(nn.Module):
@@ -281,7 +281,7 @@ Evaluation
 
 .. code-block:: python
 
-   from aptt.metric.detection import DetectionMetrics
+   from deepsuite.metric.detection import DetectionMetrics
    from torch.utils.data import DataLoader
    
    def evaluate_centernet(model, dataloader, num_classes=80):

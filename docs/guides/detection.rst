@@ -13,8 +13,8 @@ Modell erstellen
 
 .. code-block:: python
 
-   from aptt.modules.yolo import Yolo
-   from aptt.model.feature.efficientnet import EfficientNetBackbone
+   from deepsuite.modules.yolo import Yolo
+   from deepsuite.model.feature.efficientnet import EfficientNetBackbone
    
    # Backbone erstellen
    backbone = EfficientNetBackbone(
@@ -37,7 +37,7 @@ Mit ResNet Backbone
 
 .. code-block:: python
 
-   from aptt.model.feature.resnet import ResNetBackbone
+   from deepsuite.model.feature.resnet import ResNetBackbone
    
    backbone = ResNetBackbone(
        resnet_variant=[[64, 128, 256, 512], [3, 4, 6, 3], 4, True],
@@ -55,7 +55,7 @@ Training
 
 .. code-block:: python
 
-   from aptt.lightning_base.trainer import BaseTrainer
+   from deepsuite.lightning_base.trainer import BaseTrainer
    from pytorch_lightning import LightningDataModule
    
    trainer = BaseTrainer(
@@ -76,8 +76,8 @@ Modell erstellen
 
 .. code-block:: python
 
-   from aptt.modules.centernet import CenterNetModule
-   from aptt.model.feature.resnet import ResNetBackbone
+   from deepsuite.modules.centernet import CenterNetModule
+   from deepsuite.model.feature.resnet import ResNetBackbone
    
    # Backbone
    backbone = ResNetBackbone(
@@ -115,7 +115,7 @@ Bounding Box Loss
 
 .. code-block:: python
 
-   from aptt.loss.bbox import BboxLoss
+   from deepsuite.loss.bbox import BboxLoss
    
    # Standard IoU
    loss = BboxLoss(iou_type="iou")
@@ -136,7 +136,7 @@ Für rotierte Bounding Boxes:
 
 .. code-block:: python
 
-   from aptt.loss.bbox import RotatedBboxLoss
+   from deepsuite.loss.bbox import RotatedBboxLoss
    
    loss = RotatedBboxLoss()
    
@@ -150,7 +150,7 @@ CenterNet Loss
 
 .. code-block:: python
 
-   from aptt.loss.centernet import CenterNetLoss
+   from deepsuite.loss.centernet import CenterNetLoss
    
    loss = CenterNetLoss(
        heatmap_loss_weight=1.0,
@@ -166,7 +166,7 @@ mAP (Mean Average Precision)
 
 .. code-block:: python
 
-   from aptt.metric.map import evaluate_map
+   from deepsuite.metric.map import evaluate_map
    
    map_score = evaluate_map(
        pred_boxes=predictions,
@@ -179,7 +179,7 @@ IoU Metrics
 
 .. code-block:: python
 
-   from aptt.metric.bbox_iou import bbox_iou
+   from deepsuite.metric.bbox_iou import bbox_iou
    
    # Standard IoU
    iou = bbox_iou(boxes1, boxes2, xywh=True, iou_type="iou")
@@ -188,7 +188,7 @@ IoU Metrics
    giou = bbox_iou(boxes1, boxes2, xywh=True, iou_type="giou")
    
    # Rotated IoU
-   from aptt.metric.bbox_iou import rotated_bbox_iou
+   from deepsuite.metric.bbox_iou import rotated_bbox_iou
    rot_iou = rotated_bbox_iou(rotated_boxes1, rotated_boxes2)
 
 Detection Metrics Module
@@ -196,7 +196,7 @@ Detection Metrics Module
 
 .. code-block:: python
 
-   from aptt.metric.detection import DetectionMetrics
+   from deepsuite.metric.detection import DetectionMetrics
    
    metrics = DetectionMetrics(num_classes=80)
    
@@ -263,7 +263,7 @@ Nachbearbeitung
 
 .. code-block:: python
 
-   from aptt.utils.bbox import xywh2xyxy, xyxy2xywh
+   from deepsuite.utils.bbox import xywh2xyxy, xyxy2xywh
    
    # Convert zwischen Formaten
    xyxy_boxes = xywh2xyxy(xywh_boxes)
@@ -281,7 +281,7 @@ Custom Detection Head
 
 .. code-block:: python
 
-   from aptt.heads.box import BBoxHead
+   from deepsuite.heads.box import BBoxHead
    import torch.nn as nn
    
    class CustomDetectionHead(nn.Module):

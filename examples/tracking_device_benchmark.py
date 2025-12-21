@@ -15,8 +15,8 @@ import time
 
 import torch
 
-from aptt.tracker.tracker import KalmanFilter, ParticleFilter, ParticleFilterGPU
-from aptt.utils.device import get_best_device
+from deepsuite.tracker.tracker import KalmanFilter, ParticleFilter, ParticleFilterGPU
+from deepsuite.utils.device import get_best_device
 
 
 def generate_synthetic_trajectory(num_frames: int = 100) -> list[list[float]]:

@@ -11,7 +11,7 @@ Modell definieren
 
 .. code-block:: python
 
-   from aptt.lightning_base.module import BaseModule
+   from deepsuite.lightning_base.module import BaseModule
    import torch.nn as nn
    
    class SimpleClassifier(BaseModule):
@@ -37,7 +37,7 @@ DataModule erstellen
 
 .. code-block:: python
 
-   from aptt.lightning_base.dataset.image_loader import ImageDataModule
+   from deepsuite.lightning_base.dataset.image_loader import ImageDataModule
    
    datamodule = ImageDataModule(
        train_dir="data/train",
@@ -52,7 +52,7 @@ Training starten
 
 .. code-block:: python
 
-   from aptt.lightning_base.trainer import BaseTrainer
+   from deepsuite.lightning_base.trainer import BaseTrainer
    
    model = SimpleClassifier()
    
@@ -94,7 +94,7 @@ APTT bietet eine Vielzahl von Loss-Funktionen:
 
 .. code-block:: python
 
-   from aptt.loss import get_loss
+   from deepsuite.loss import get_loss
    
    # Focal Loss für unbalancierte Datasets
    focal_loss = get_loss("focal", alpha=0.25, gamma=2.0)
@@ -150,8 +150,8 @@ Model Export Callbacks
 
 .. code-block:: python
 
-   from aptt.callbacks.torchscript import TorchScriptExportCallback
-   from aptt.callbacks.tensor_rt import TensorRTExportCallback
+   from deepsuite.callbacks.torchscript import TorchScriptExportCallback
+   from deepsuite.callbacks.tensor_rt import TensorRTExportCallback
    
    trainer = BaseTrainer(
        export_formats=["torchscript", "tensor_rt"],
@@ -163,8 +163,8 @@ Visualization Callbacks
 
 .. code-block:: python
 
-   from aptt.callbacks.embedding_logger import EmbeddingLoggerCallback
-   from aptt.callbacks.tsne_laplace_callback import TSNELaplaceCallback
+   from deepsuite.callbacks.embedding_logger import EmbeddingLoggerCallback
+   from deepsuite.callbacks.tsne_laplace_callback import TSNELaplaceCallback
    
    callbacks = [
        EmbeddingLoggerCallback(),

@@ -19,8 +19,8 @@ LwF nutzt das alte Modell als "Teacher" für neue Aufgaben:
 
 .. code-block:: python
 
-   from aptt.loss.lwf import LwF
-   from aptt.utils.teacher import copy_teacher, freeze_teacher
+   from deepsuite.loss.lwf import LwF
+   from deepsuite.utils.teacher import copy_teacher, freeze_teacher
    
    # Ursprüngliches Modell als Teacher kopieren
    teacher_model = copy_teacher(student_model)
@@ -54,7 +54,7 @@ Allgemeine Distillation:
 
 .. code-block:: python
 
-   from aptt.loss.distill import Distill
+   from deepsuite.loss.distill import Distill
    
    distill_loss = Distill(temperature=3.0, alpha=0.7)
    
@@ -72,7 +72,7 @@ Der ContinualLearningManager verwaltet mehrere Tasks:
 
 .. code-block:: python
 
-   from aptt.lightning_base.continual_learning_manager import ContinualLearningManager
+   from deepsuite.lightning_base.continual_learning_manager import ContinualLearningManager
    
    cl_manager = ContinualLearningManager(
        base_model=model,
@@ -104,7 +104,7 @@ Für neue Klassen den Classifier erweitern:
 
 .. code-block:: python
 
-   from aptt.utils.head_expansion import expand_classifier
+   from deepsuite.utils.head_expansion import expand_classifier
    
    # Ursprüngliches Modell hat 10 Klassen
    model = MyClassifier(num_classes=10)
@@ -254,10 +254,10 @@ Beispiel: Class-Incremental Learning
 
 .. code-block:: python
 
-   from aptt.lightning_base.module import BaseModule
-   from aptt.loss.lwf import LwF
-   from aptt.utils.teacher import copy_teacher, freeze_teacher
-   from aptt.utils.head_expansion import expand_classifier
+   from deepsuite.lightning_base.module import BaseModule
+   from deepsuite.loss.lwf import LwF
+   from deepsuite.utils.teacher import copy_teacher, freeze_teacher
+   from deepsuite.utils.head_expansion import expand_classifier
    
    # Phase 1: Initiales Training (Klassen 0-9)
    model = MyClassifier(num_classes=10)

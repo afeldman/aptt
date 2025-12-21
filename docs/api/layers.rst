@@ -7,7 +7,7 @@ Basic Layers
 Bottleneck
 ~~~~~~~~~~
 
-.. automodule:: aptt.layers.bottleneck
+.. automodule:: deepsuite.layers.bottleneck
    :members:
    :undoc-members:
    :show-inheritance:
@@ -18,7 +18,7 @@ Specialized Layers
 Complex Layers
 ~~~~~~~~~~~~~~
 
-.. automodule:: aptt.layers.complex
+.. automodule:: deepsuite.layers.complex
    :members:
    :undoc-members:
    :show-inheritance:
@@ -26,7 +26,7 @@ Complex Layers
 DFT (Discrete Fourier Transform)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.layers.dft
+.. automodule:: deepsuite.layers.dft
    :members:
    :undoc-members:
    :show-inheritance:
@@ -34,7 +34,7 @@ DFT (Discrete Fourier Transform)
 Hermite Layers
 ~~~~~~~~~~~~~~
 
-.. automodule:: aptt.layers.hermite
+.. automodule:: deepsuite.layers.hermite
    :members:
    :undoc-members:
    :show-inheritance:
@@ -42,7 +42,7 @@ Hermite Layers
 Laguerre Layers
 ~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.layers.laguerre
+.. automodule:: deepsuite.layers.laguerre
    :members:
    :undoc-members:
    :show-inheritance:

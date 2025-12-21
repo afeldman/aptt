@@ -10,10 +10,10 @@ Komplettes Training
 
    import torch
    from pathlib import Path
-   from aptt.modules.yolo import Yolo
-   from aptt.model.feature.efficientnet import EfficientNetBackbone
-   from aptt.lightning_base.trainer import BaseTrainer
-   from aptt.lightning_base.dataset.image_loader import ImageDataModule
+   from deepsuite.modules.yolo import Yolo
+   from deepsuite.model.feature.efficientnet import EfficientNetBackbone
+   from deepsuite.lightning_base.trainer import BaseTrainer
+   from deepsuite.lightning_base.dataset.image_loader import ImageDataModule
    
    # 1. Backbone erstellen
    backbone = EfficientNetBackbone(

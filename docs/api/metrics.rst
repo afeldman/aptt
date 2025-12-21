@@ -7,7 +7,7 @@ Detection Metrics
 Detection Metrics
 ~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.metric.detection
+.. automodule:: deepsuite.metric.detection
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ Detection Metrics
 Bounding Box IoU
 ~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.metric.bbox_iou
+.. automodule:: deepsuite.metric.bbox_iou
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ Bounding Box IoU
 ProbIoU
 ~~~~~~~
 
-.. automodule:: aptt.metric.probiou
+.. automodule:: deepsuite.metric.probiou
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ ProbIoU
 Mean Average Precision (mAP)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.metric.map
+.. automodule:: deepsuite.metric.map
    :members:
    :undoc-members:
    :show-inheritance:
@@ -39,7 +39,7 @@ Mean Average Precision (mAP)
 Covariance Matrix
 ~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.metric.confidence_matrix
+.. automodule:: deepsuite.metric.confidence_matrix
    :members:
    :undoc-members:
    :show-inheritance:
@@ -50,7 +50,7 @@ General Metrics
 Norm-based Metrics
 ~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.metric.norm
+.. automodule:: deepsuite.metric.norm
    :members:
    :undoc-members:
    :show-inheritance:

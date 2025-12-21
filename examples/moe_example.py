@@ -11,8 +11,13 @@ This example demonstrates:
 
 import torch
 
-from aptt.layers.moe import AuxiliaryLossFreeRouter, DeepSeekMoE, EfficientDeepSeekMoE, FFNExpert
-from aptt.modules.deepseek import DeepSeekV3
+from deepsuite.layers.moe import (
+    AuxiliaryLossFreeRouter,
+    DeepSeekMoE,
+    EfficientDeepSeekMoE,
+    FFNExpert,
+)
+from deepsuite.modules.deepseek import DeepSeekV3
 
 
 def example_1_ffn_expert() -> None:
@@ -60,8 +65,7 @@ def example_2_router() -> None:
     # Load balancing stats
     print("\nLoad Balancing Statistics:")
     print(f"Load balance factor: {stats['load_balance_factor']:.4f}")
-    print(f"Min/Max expert load: {stats['min_load']:.0f} / "
-          f"{stats['max_load']:.0f}")
+    print(f"Min/Max expert load: {stats['min_load']:.0f} / {stats['max_load']:.0f}")
 
     # Show load distribution
     expert_load = stats["expert_counts"]
@@ -180,8 +184,7 @@ def example_5_load_balancing_analysis() -> None:
         if i == 0 or i == n_batches - 1:
             print(f"\nBatch {i + 1}:")
             print(f"  Load balance factor: {stats['load_balance_factor']:.4f}")
-            print(f"  Min/Max: {stats['min_load']:.0f} / "
-                  f"{stats['max_load']:.0f}")
+            print(f"  Min/Max: {stats['min_load']:.0f} / {stats['max_load']:.0f}")
 
     # Aggregate stats
     all_loads = torch.stack(all_loads)

@@ -4,7 +4,7 @@ Loss-Funktionen
 Übersicht
 ---------
 
-.. automodule:: aptt.loss
+.. automodule:: deepsuite.loss
    :members: get_loss
    :undoc-members:
 
@@ -14,7 +14,7 @@ Detection Losses
 Bounding Box Loss
 ~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.bbox
+.. automodule:: deepsuite.loss.bbox
    :members:
    :undoc-members:
    :show-inheritance:
@@ -22,7 +22,7 @@ Bounding Box Loss
 CenterNet Loss
 ~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.centernet
+.. automodule:: deepsuite.loss.centernet
    :members:
    :undoc-members:
    :show-inheritance:
@@ -30,7 +30,7 @@ CenterNet Loss
 Detection Loss
 ~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.detection
+.. automodule:: deepsuite.loss.detection
    :members:
    :undoc-members:
    :show-inheritance:
@@ -38,7 +38,7 @@ Detection Loss
 DFL (Distribution Focal Loss)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.dfl
+.. automodule:: deepsuite.loss.dfl
    :members:
    :undoc-members:
    :show-inheritance:
@@ -49,7 +49,7 @@ Classification Losses
 Focal Loss
 ~~~~~~~~~~
 
-.. automodule:: aptt.loss.focal
+.. automodule:: deepsuite.loss.focal
    :members:
    :undoc-members:
    :show-inheritance:
@@ -57,7 +57,7 @@ Focal Loss
 Classification Loss
 ~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.classification
+.. automodule:: deepsuite.loss.classification
    :members:
    :undoc-members:
    :show-inheritance:
@@ -65,7 +65,7 @@ Classification Loss
 Varifocal Loss
 ~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.varifocal
+.. automodule:: deepsuite.loss.varifocal
    :members:
    :undoc-members:
    :show-inheritance:
@@ -76,7 +76,7 @@ Specialized Losses
 Keypoint Loss
 ~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.keypoint
+.. automodule:: deepsuite.loss.keypoint
    :members:
    :undoc-members:
    :show-inheritance:
@@ -84,7 +84,7 @@ Keypoint Loss
 Heatmap Loss
 ~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.heat
+.. automodule:: deepsuite.loss.heat
    :members:
    :undoc-members:
    :show-inheritance:
@@ -92,7 +92,7 @@ Heatmap Loss
 Segmentation Loss
 ~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.segmentation
+.. automodule:: deepsuite.loss.segmentation
    :members:
    :undoc-members:
    :show-inheritance:
@@ -103,7 +103,7 @@ Knowledge Distillation
 Distillation Loss
 ~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.distill
+.. automodule:: deepsuite.loss.distill
    :members:
    :undoc-members:
    :show-inheritance:
@@ -111,7 +111,7 @@ Distillation Loss
 Learning without Forgetting (LwF)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.lwf
+.. automodule:: deepsuite.loss.lwf
    :members:
    :undoc-members:
    :show-inheritance:
@@ -122,7 +122,7 @@ Audio Losses
 Mel Loss
 ~~~~~~~~
 
-.. automodule:: aptt.loss.mel
+.. automodule:: deepsuite.loss.mel
    :members:
    :undoc-members:
    :show-inheritance:
@@ -130,7 +130,7 @@ Mel Loss
 RMSE
 ~~~~
 
-.. automodule:: aptt.loss.rmse
+.. automodule:: deepsuite.loss.rmse
    :members:
    :undoc-members:
    :show-inheritance:
@@ -138,7 +138,7 @@ RMSE
 SNR (Signal-to-Noise Ratio)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: aptt.loss.snr
+.. automodule:: deepsuite.loss.snr
    :members:
    :undoc-members:
    :show-inheritance:
