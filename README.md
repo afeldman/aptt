@@ -100,7 +100,7 @@ trainer.fit(model, datamodule)
 
 ### Object Detection (YOLO)
 
-```python
+````python
 import pytorch_lightning as pl
 from deepsuite.model.feature.yolo import YOLOLightningModule
 
@@ -112,7 +112,31 @@ model = YOLOLightningModule(
 
 trainer = pl.Trainer(max_epochs=100, accelerator="gpu")
 trainer.fit(model, datamodule)
-```
+
+### Pluggable Heads & Global Registry
+
+DeepSuite provides a global head registry and trainer helpers to compose multi-head models across projects.
+
+```python
+from deepsuite.registry import HeadRegistry
+from deepsuite.lightning_base.trainer import train_heads_with_registry
+
+# Register your head class in your project
+@HeadRegistry.register("my_head")
+class MyHead:
+    ...
+
+# Build and train via registry
+trainer = train_heads_with_registry(
+    head_cfgs=[{"name": "my_head", "args": {"param": 123}}],
+    module_builder=MyMultiHeadLightningModule,  # accepts heads, share_backbone
+    datamodule=my_data_module,
+    trainer_cfg={"max_epochs": 10, "accelerator": "gpu"},
+    share_backbone=True,
+)
+````
+
+````
 
 ### Feature Matching (LoFTR)
 
@@ -121,7 +145,7 @@ from deepsuite.model.loftr.loftr import LoFTR
 
 loftr = LoFTR(d_model=256, nhead=8)
 matches = loftr(img1, img2)
-```
+````
 
 ### Spatial Transformer Networks (STN)
 
@@ -396,4 +420,4 @@ Project Link: [https://github.com/afeldman/deepsuite](https://github.com/afeldma
 
 ---
 
-**Version:** 1.0.3 | **Python:** >=3.11 | **PyTorch:** >=2.6.0 | **Lightning:** >=2.5.1 | **License:** Apache 2.0
+**Version:** 1.0.1 | **Python:** >=3.11 | **PyTorch:** >=2.6.0 | **Lightning:** >=2.5.1 | **License:** Apache 2.0

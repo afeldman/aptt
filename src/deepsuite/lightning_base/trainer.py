@@ -1,4 +1,4 @@
-"""Trainer module."""
+"""Trainer module and registry-coupled helpers."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from deepsuite.callbacks.onnx import ONNXExportCallback
 from deepsuite.callbacks.tensor_rt import TensorRTExportCallback
 from deepsuite.callbacks.tflite import TFLiteExportCallback
 from deepsuite.callbacks.torchscript import TorchScriptExportCallback
+from deepsuite.registry import HeadRegistry
 
 if TYPE_CHECKING:
     from pytorch_lightning.loggers.logger import Logger
@@ -176,3 +177,48 @@ class BaseTrainer(pl.Trainer):
 
         super().fit(model, *args, **kwargs)
         logger.info("🔹 Training abgeschlossen.\n" + "=" * 50)
+
+
+def build_trainer_from_config(trainer_cfg: dict | None = None) -> BaseTrainer:
+    """Build a BaseTrainer from a config dict.
+
+    Args:
+        trainer_cfg: Keyword-args for BaseTrainer.
+
+    Returns:
+        BaseTrainer: Initialized trainer.
+    """
+    trainer_cfg = trainer_cfg or {}
+    return BaseTrainer(**trainer_cfg)
+
+
+def train_heads_with_registry(
+    head_cfgs: list[dict],
+    module_builder,
+    datamodule: pl.LightningDataModule,
+    trainer_cfg: dict | None = None,
+    share_backbone: bool | None = None,
+):
+    """Instantiate heads via HeadRegistry and run training with BaseTrainer.
+
+    Args:
+        head_cfgs: List of head config dicts: {"name": str, "args": dict}
+        module_builder: Callable accepting (heads, share_backbone) -> LightningModule
+        datamodule: LightningDataModule to provide data loaders
+        trainer_cfg: Dict for BaseTrainer construction
+        share_backbone: Optional flag passed to module_builder
+
+    Returns:
+        BaseTrainer: The trainer after running fit.
+    """
+    heads = []
+    for cfg in head_cfgs:
+        name = cfg.get("name")
+        args = cfg.get("args", {})
+        head_cls = HeadRegistry.get(name)
+        heads.append(head_cls(**args))
+
+    module = module_builder(heads=heads, share_backbone=bool(share_backbone))
+    trainer = build_trainer_from_config(trainer_cfg)
+    trainer.fit(module, datamodule=datamodule)
+    return trainer
