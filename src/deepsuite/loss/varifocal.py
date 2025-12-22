@@ -13,38 +13,35 @@ References:
     https://arxiv.org/abs/2008.13367
 
 Example:
-    ```python
-    import torch
-    from deepsuite.loss.varifocal import VarifocalLoss
+    .. code-block:: python
 
-    criterion = VarifocalLoss()
+        import torch
+        from deepsuite.loss.varifocal import VarifocalLoss
 
-    # Predicted scores (logits) for the class
-    pred_score = torch.randn(16, 80, requires_grad=True)  # 16 anchors, 80 classes
+        criterion = VarifocalLoss()
 
-    # Target scores (continuous values between 0 and 1)
-    gt_score = torch.rand(16, 80)
+        # Predicted scores (logits) for the class
+        pred_score = torch.randn(16, 80, requires_grad=True)  # 16 anchors, 80 classes
 
-    # Class labels (binary: 0 or 1)
-    label = (gt_score > 0.5).float()
+        # Target scores (continuous values between 0 and 1)
+        gt_score = torch.rand(16, 80)
 
-    loss = criterion(pred_score, gt_score, label)
-    print(f"Varifocal Loss: {loss.item()}")
-    ```
+        # Class labels (binary: 0 or 1)
+        label = (gt_score > 0.5).float()
+
+        loss = criterion(pred_score, gt_score, label)
+        print(f"Varifocal Loss: {loss.item()}")
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import cast
 
 import torch
 from torch import nn
 import torch.nn.functional as F
 
 from deepsuite.utils.autocast import autocast
-
-if TYPE_CHECKING:
-    from torch import Tensor
 
 
 class VarifocalLoss(nn.Module):
@@ -58,17 +55,17 @@ class VarifocalLoss(nn.Module):
     but also a continuous quality score of the target dataset.
 
     Example:
-        ```python
-        vfl = VarifocalLoss()
+        .. code-block:: python
 
-        # Batch of 32 samples with 80 classes
-        pred_score = torch.randn(32, 80, requires_grad=True)
-        gt_score = torch.rand(32, 80)  # Target quality scores
-        label = (gt_score > 0.5).float()  # Binary labels
+            vfl = VarifocalLoss()
 
-        loss = vfl(pred_score, gt_score, label)
-        print(f"Loss: {loss.item()}")
-        ```
+            # Batch of 32 samples with 80 classes
+            pred_score = torch.randn(32, 80, requires_grad=True)
+            gt_score = torch.rand(32, 80)  # Target quality scores
+            label = (gt_score > 0.5).float()  # Binary labels
+
+            loss = vfl(pred_score, gt_score, label)
+            print(f("Loss: {loss.item()}"))
     """
 
     def __init__(self) -> None:
@@ -115,15 +112,15 @@ class VarifocalLoss(nn.Module):
             torch.Tensor: Scalar loss (averaged over all samples and classes).
 
         Example:
-            ```python
-            pred = torch.randn(8, 10)  # 8 samples, 10 classes
-            gt = torch.rand(8, 10) * 0.5 + 0.25  # Scores between 0.25 and 0.75
-            labels = torch.randint(0, 2, (8, 10)).float()
+            .. code-block:: python
 
-            vfl = VarifocalLoss()
-            loss = vfl(pred, gt, labels, alpha=0.75, gamma=2.0)
-            print(f"Loss: {loss.item()}")
-            ```
+                pred = torch.randn(8, 10)  # 8 samples, 10 classes
+                gt = torch.rand(8, 10) * 0.5 + 0.25  # Scores between 0.25 and 0.75
+                labels = torch.randint(0, 2, (8, 10)).float()
+
+                vfl = VarifocalLoss()
+                loss = vfl(pred, gt, labels, alpha=0.75, gamma=2.0)
+                print(f"Loss: {loss.item()}")
         """
         # Compute focus weight based on prediction confidence and quality score
         # - Negative samples (label=0): Weight increases with sigmoid(pred)^gamma
@@ -143,4 +140,4 @@ class VarifocalLoss(nn.Module):
                 .mean(1)
                 .sum()
             )
-        return loss
+        return cast("torch.Tensor", loss)

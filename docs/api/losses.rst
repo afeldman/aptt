@@ -96,6 +96,7 @@ Segmentation Loss
    :members:
    :undoc-members:
    :show-inheritance:
+   :noindex:
 
 Knowledge Distillation
 -----------------------

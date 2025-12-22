@@ -81,7 +81,7 @@ class TorchScriptExportCallback(ExportBaseCallback):
 
         try:
             self._export_torchscript(pl_module, example_input, ts_path, self.optimize)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error(f"❌ Fehler beim TorchScript-Export: {e}")
 
     @staticmethod
@@ -110,6 +110,6 @@ class TorchScriptExportCallback(ExportBaseCallback):
             traced_model.save(str(model_path))
             logger.info(f"✅ TorchScript-Modell gespeichert: {model_path}")
 
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error(f"❌ Fehler beim TorchScript-Export: {e}")
             raise

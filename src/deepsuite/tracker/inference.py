@@ -1,11 +1,15 @@
-"""Inference module."""
+"""Inference utilities for running tracking over a dataloader."""
+
+from collections.abc import Callable, Iterable, Iterator
+from typing import Any
 
 import torch
+from torch import Tensor, nn
 
 from deepsuite.tracker.tracker_manager import TrackerManager
 
 
-def crop_boxes_from_image(image, boxes, size=128):
+def crop_boxes_from_image(image: Tensor, boxes: Tensor, size: int = 128) -> Tensor:
     crops = []
     for box in boxes:
         x1, y1, x2, y2 = box.int()
@@ -17,7 +21,12 @@ def crop_boxes_from_image(image, boxes, size=128):
     return torch.stack(crops)
 
 
-def run_tracking(detector, dataloader, reid_encoder=None, device="cpu"):
+def run_tracking(
+    detector: Callable[[Tensor], Iterable[Tensor]] | nn.Module,
+    dataloader: Iterable[dict[str, Any]],
+    reid_encoder: nn.Module | None = None,
+    device: str = "cpu",
+) -> Iterator[tuple[Any, list[list[tuple[int, Tensor]]]]]:
     tracker = TrackerManager(filter_type="kalman", device=device)
 
     for batch in dataloader:

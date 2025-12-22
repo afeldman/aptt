@@ -30,6 +30,8 @@ References:
 
 """
 
+from typing import cast
+
 import torch
 from torch.nn import functional as F
 
@@ -39,24 +41,29 @@ from deepsuite.utils.image import crop_mask
 from deepsuite.utils.xy import xyxy2xywh
 
 
-class SegmentationLoss(DetectionLoss):
-    """Criterion class for computing training losses."""
+class SegmentationLoss(DetectionLoss):  # type: ignore[misc]
+    """Criterion class for computing segmentation training losses."""
 
-    def __init__(self, model) -> None:  # model must be de-paralleled
+    def __init__(self, model: torch.nn.Module) -> None:  # model must be de-paralleled
         """Initializes the v8SegmentationLoss class, taking a de-paralleled model as argument."""
         super().__init__(model)
-        self.overlap = model.args.overlap_mask
+        self.overlap: bool = bool(getattr(model.args, "overlap_mask", False))
 
-    def __call__(self, preds, batch):
+    def __call__(
+        self,
+        preds: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | tuple[torch.Tensor, ...],
+        batch: dict[str, torch.Tensor],
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Calculate and return the loss for the YOLO model."""
         loss = torch.zeros(4, device=self.device)  # box, cls, dfl
         feats, pred_masks, proto = preds if len(preds) == 3 else preds[1]
-        batch_size, _, mask_h, mask_w = (
-            proto.shape
-        )  # batch size, number of masks, mask height, mask width
-        pred_distri, pred_scores = torch.cat(
-            [xi.view(feats[0].shape[0], self.no, -1) for xi in feats], 2
-        ).split((self.reg_max * 4, self.nc), 1)
+        batch_size, _, mask_h, mask_w = proto.shape  # B, N, H, W
+        pred_distri, pred_scores = cast(
+            "tuple[torch.Tensor, torch.Tensor]",
+            torch.cat([xi.view(feats[0].shape[0], self.no, -1) for xi in feats], 2).split(  # type: ignore[no-untyped-call]
+                (self.reg_max * 4, self.nc), 1
+            ),
+        )
 
         # B, grids, ..
         pred_scores = pred_scores.permute(0, 2, 1).contiguous()
@@ -65,9 +72,9 @@ class SegmentationLoss(DetectionLoss):
 
         dtype = pred_scores.dtype
         imgsz = (
-            torch.tensor(feats[0].shape[2:], device=self.device, dtype=dtype) * self.stride[0]
+            torch.tensor(feats[0].shape[2:], device=self.device, dtype=dtype) * self.strides[0]
         )  # image size (h,w)
-        anchor_points, stride_tensor = make_anchors(feats, self.stride, 0.5)
+        anchor_points, stride_tensor = make_anchors(feats, self.strides, 0.5)
 
         # Targets
         try:
@@ -168,7 +175,8 @@ class SegmentationLoss(DetectionLoss):
             "in,nhw->ihw", pred, proto
         )  # (n, 32) @ (32, 80, 80) -> (n, 80, 80)
         loss = F.binary_cross_entropy_with_logits(pred_mask, gt_mask, reduction="none")
-        return (crop_mask(loss, xyxy).mean(dim=(1, 2)) / area).sum()
+        from typing import cast
+        return cast("torch.Tensor", (crop_mask(loss, xyxy).mean(dim=(1, 2)) / area).sum())
 
     def calculate_segmentation_loss(
         self,
@@ -200,11 +208,14 @@ class SegmentationLoss(DetectionLoss):
 
         Notes:
             The batch loss can be computed for improved speed at higher memory usage.
-            For example, pred_mask can be computed as follows:
+            For example, ``pred_mask`` can be computed as follows:
+
+            .. code-block:: python
+
                 pred_mask = torch.einsum('in,nhw->ihw', pred, proto)  # (i, 32) @ (32, 160, 160) -> (i, 160, 160)
         """
         _, _, mask_h, mask_w = proto.shape
-        loss = 0
+        loss: torch.Tensor = torch.tensor(0.0, device=proto.device)
 
         # Normalize to 0-1
         target_bboxes_normalized = target_bboxes / imgsz[[1, 0, 1, 0]]
@@ -229,7 +240,7 @@ class SegmentationLoss(DetectionLoss):
                 else:
                     gt_mask = masks[batch_idx.view(-1) == i][mask_idx]
 
-                loss += self.single_mask_loss(
+                loss = loss + self.single_mask_loss(
                     gt_mask,
                     pred_masks_i[fg_mask_i],
                     proto_i,
@@ -239,6 +250,6 @@ class SegmentationLoss(DetectionLoss):
 
             # WARNING: lines below prevents Multi-GPU DDP 'unused gradient' PyTorch errors, do not remove
             else:
-                loss += (proto * 0).sum() + (pred_masks * 0).sum()  # inf sums may lead to nan loss
+                loss = loss + (proto * 0).sum() + (pred_masks * 0).sum()  # keep graph
 
         return loss / fg_mask.sum()

@@ -29,6 +29,8 @@ References:
 """
 
 
+from typing import cast
+
 from loguru import logger
 import torch
 from torch import Tensor, nn
@@ -155,12 +157,12 @@ class BinaryFocalLoss(FocalLoss):
 
         # Apply reduction
         if self.reduction == "mean":
-            return loss.mean()
+            return cast("Tensor", loss.mean())
 
         if self.reduction == "sum":
-            return loss.sum()
+            return cast("Tensor", loss.sum())
 
-        return loss
+        return cast("Tensor", loss)
 
 
 class MulticlassFocalLoss(FocalLoss):
@@ -182,7 +184,7 @@ class MulticlassFocalLoss(FocalLoss):
         gamma: float = 1.5,
         reduction: str = "mean",
         ignore_index: int = -100,
-        epsilon=1e-8,
+        epsilon: float = 1e-8,
         debug: bool = False,
     ) -> None:
         """Initialize the FocalLoss class.
@@ -262,4 +264,4 @@ class MulticlassFocalLoss(FocalLoss):
                 f"pt mean: {pt.mean().item():.4f}, focal term mean: {focal_term.mean().item():.4f}"
             )
 
-        return loss
+        return cast("torch.Tensor", loss)

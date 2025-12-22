@@ -28,8 +28,6 @@ Example:
 
 from __future__ import annotations
 
-from typing import Any
-
 from torch import Tensor, norm, stack, tensor, topk, zeros
 from torch.nn import Module
 import torch.nn.functional as F

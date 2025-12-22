@@ -7,7 +7,7 @@ perceptual quality refinement, and image-to-image translation.
 from __future__ import annotations
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class PatchGANDiscriminator(nn.Module):

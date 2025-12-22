@@ -1,11 +1,18 @@
-"""Device module."""
+"""Device selection utilities (TPU/XLA, CUDA, MPS, CPU)."""
+
 
 import torch
 
-DEVICE = None
+# Optional TPU/XLA support
+try:  # pragma: no cover - optional dependency
+    import torch_xla.core.xla_model as xm  # type: ignore
+except Exception:
+    xm = None  # type: ignore
+
+DEVICE: torch.device | None = None
 
 
-def get_best_device(force: str = None) -> torch.device:
+def get_best_device(force: str | None = None) -> torch.device:
     """Selects the best available device: TPU (XLA) > CUDA > MPS > CPU.
 
     Args:
@@ -14,7 +21,7 @@ def get_best_device(force: str = None) -> torch.device:
     Returns:
         torch.device: The selected device
     """
-    global DEVICE
+    global DEVICE  # noqa: PLW0603
 
     if force:
         DEVICE = torch.device(force)
@@ -24,13 +31,9 @@ def get_best_device(force: str = None) -> torch.device:
         return DEVICE
 
     # 1. Try TPU/XLA
-    try:
-        import torch_xla.core.xla_model as xm
-
-        DEVICE = xm.xla_device()
+    if xm is not None:
+        DEVICE = xm.xla_device()  # type: ignore[attr-defined]
         return DEVICE
-    except ImportError:
-        pass  # torch_xla not available
 
     # 2. Try CUDA (NVIDIA GPU)
     if torch.cuda.is_available():
@@ -45,18 +48,18 @@ def get_best_device(force: str = None) -> torch.device:
     return DEVICE
 
 
-def set_device(device_str: str):
-    """Manuell Gerät setzen (z.B. 'cuda', 'cpu')."""
-    global DEVICE
+def set_device(device_str: str) -> None:
+    """Set device manually (e.g., 'cuda', 'cpu')."""
+    global DEVICE  # noqa: PLW0603
     DEVICE = torch.device(device_str)
 
 
-def reset_device():
-    """Gerätewahl zurücksetzen (für Neu-Erkennung)."""
-    global DEVICE
+def reset_device() -> None:
+    """Reset device selection (triggers re-detection)."""
+    global DEVICE  # noqa: PLW0603
     DEVICE = None
 
 
-def is_tpu():
-    """Gibt True zurück, wenn aktuelles Gerät eine TPU ist."""
+def is_tpu() -> bool:
+    """Return True if the current device is a TPU/XLA device."""
     return str(get_best_device()).startswith("xla")

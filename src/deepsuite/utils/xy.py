@@ -1,9 +1,11 @@
 """Xy module."""
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
-from numpy.typing import NDArray
+
+if TYPE_CHECKING:  # Avoid importing heavy typing modules at runtime
+    from numpy.typing import NDArray
 import torch
 
 from deepsuite.typing import ArrayOrTensor

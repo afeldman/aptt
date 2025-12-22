@@ -7,6 +7,7 @@ Includes helpers for copying, freezing, and loading a teacher model
 import copy
 from typing import Any, cast
 
+from loguru import logger
 import torch
 from torch import nn
 
@@ -29,7 +30,7 @@ def copy_teacher(student_model: nn.Module) -> nn.Module:
     return teacher_model
 
 
-def freeze_teacher(model: nn.Module):
+def freeze_teacher(model: nn.Module) -> None:
     """Freeze all parameters of a model (no gradients will be computed).
 
     Args:
@@ -72,7 +73,11 @@ def load_teacher(
     missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)  # type: ignore
 
     if missing_keys or unexpected_keys:
-        print(f"Warnung: Missing keys {missing_keys}, Unexpected keys {unexpected_keys}")
+        logger.warning(
+            "Missing keys %s, Unexpected keys %s",
+            missing_keys,
+            unexpected_keys,
+        )
 
     model.eval()
     freeze_teacher(model)

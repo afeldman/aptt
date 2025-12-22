@@ -46,15 +46,10 @@ Example:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-
 import torch
 from torch import nn
 
 from deepsuite.model.feature.efficientnet import EfficientNetBackbone
-
-if TYPE_CHECKING:
-    from torch import Tensor
 
 
 class EfficientNet(EfficientNetBackbone):

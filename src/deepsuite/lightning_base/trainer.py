@@ -24,32 +24,32 @@ if TYPE_CHECKING:
 
 
 class BaseTrainer(pl.Trainer):
-    """Basisklasse für Trainer in PyTorch Lightning.
+    """Convenience trainer with sensible defaults and optional exports.
 
-    Diese Klasse erweitert die Standardfunktionalität von PyTorch Lightning
-    um folgende Features:
-    - Automatische Batch-Größen-Optimierung
-    - Integration von MLflow für Experiment-Logging
-    - Export des Modells nach ONNX, TensorRT und TorchScript (optional)
-    - Anzeige eines Rich Progress Bar während des Trainings
+    This class extends PyTorch Lightning's ``Trainer`` by adding:
+    - Automatic batch size scaling
+    - Optional MLflow experiment logging
+    - Optional export callbacks (ONNX, TensorRT, TorchScript, etc.)
+    - Rich progress bar for training
 
     Args:
-        log_dir: Verzeichnis für Log-Dateien.
-        mlflow_experiment: Name des MLflow-Experiments.
-        auto_batch_size: Automatische Batch-Größe aktivieren.
-        model_output_dir: Verzeichnis für gespeicherte Modell-Exporte.
-        export_formats: Liste der aktivierten Export-Formate,
-            z. B. ["onnx", "tensor_rt"].
-        onnx_opset_version: OpSet-Version für ONNX-Export (Standard: 11).
-        **kwargs: Weitere Argumente für den Trainer.
+        log_dir: Directory for log files.
+        auto_batch_size: Enable automatic batch size scaling.
+        mlflow_experiment: Optional MLflow experiment name.
+        model_output_dir: Directory for exported models.
+        export_formats: Optional list of export formats (e.g., ["onnx", "tensor_rt"]).
+        early_stopping: Optional custom ``EarlyStopping`` callback.
+        model_checkpoint: Optional custom ``ModelCheckpoint`` callback.
+        **kwargs: Additional ``Trainer`` keyword arguments.
 
     Attributes:
-        auto_batch_size: Automatische Batch-Größe aktiv.
+        auto_batch_size: Whether automatic batch size scaling is enabled.
 
-    Beispiel:
-        trainer = BaseTrainer(log_dir="logs", use_mlflow=True,
-                              mlflow_experiment="my_experiment")
-        trainer.fit(model, datamodule=datamodule)
+    Example:
+        .. code-block:: python
+
+            trainer = BaseTrainer(log_dir="logs", mlflow_experiment="my_experiment")
+            trainer.fit(model, datamodule=datamodule)
     """
 
     def __init__(

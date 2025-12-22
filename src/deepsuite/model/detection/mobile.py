@@ -32,8 +32,6 @@ Example:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-
 import torch
 from torch import nn
 
@@ -42,9 +40,6 @@ from deepsuite.model.feature.mobile import (
     MobileNetV2Backbone,
     MobileNetV3Backbone,
 )
-
-if TYPE_CHECKING:
-    from torch import Tensor
 
 
 class MobileNetV1(MobileNetV1Backbone):

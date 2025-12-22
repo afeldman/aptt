@@ -1,6 +1,6 @@
 [project]
 name = "deepsuite"
-version = "1.0.2"
+version = "1.0.5"
 description = "Comprehensive deep learning framework with state-of-the-art implementations: GPT, DeepSeek-V3 with MLA/MoE, YOLO, CenterNet, and specialized audio/vision models built on PyTorch Lightning"
 authors = [{ name = "anton feldmann", email = "anton.feldmann@gmail.com" }]
 readme = "README.md"
@@ -230,6 +230,19 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "examples/**/*.py" = [
     "T20",     # Allow print statements in examples
     "INP001",  # Allow implicit namespace packages
+]
+"src/deepsuite/utils/taskAlignedAssigner.py" = [
+    "N999",    # CamelCase module filename is intentional for historical reasons
+    "E501",    # Long documentation lines acceptable
+    "W505",    # Long doc lines acceptable
+]
+"src/deepsuite/utils/hermite.py" = [
+    "E501",
+    "W505",
+]
+"src/deepsuite/utils/laguerre.py" = [
+    "E501",
+    "W505",
 ]
 
 [tool.ruff.lint.pydocstyle]

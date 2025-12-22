@@ -1,29 +1,30 @@
-"""Bounding Box Verlustfunktionen für Objektdetektion.
+"""Bounding box loss functions for object detection.
 
-Dieses Modul enthält verschiedene BBox-Loss-Klassen für das Training von
-Detektionsmodellen mit IoU- und Distribution Focal Loss (DFL).
+This module provides various loss functions for bounding box regression, including
+IoU-based losses and Distribution Focal Loss (DFL).
 
-Beispiel:
-    ```python
-    import torch
-    from deepsuite.loss.bbox import BboxLoss
+Example:
+    .. code-block:: python
 
-    criterion = BboxLoss(reg_max=16)
-    loss = criterion(pred_dist, pred_bboxes, anchor_points,
-                     target_bboxes, target_scores, target_scores_sum, fg_mask)
-    ```
+        import torch
+        from deepsuite.loss.bbox import BboxLoss
+
+        criterion = BboxLoss(reg_max=16)
+        iou_loss, dfl_loss = criterion(
+            pred_dist, pred_bboxes, anchor_points,
+            target_bboxes, target_scores, target_scores_sum, fg_mask
+        )
 
 Classes:
-    BboxLoss: Basis-Verlustfunktion für Bounding Boxes.
-    RotatedBboxLoss: Verlustfunktion für rotierte BBoxen.
-    AnkerloserBboxLoss: Ankerlose BBox Loss mit optionaler Skalierung.
+    BboxLoss: Base loss combining IoU and DFL for box regression.
+    RotatedBboxLoss: Loss for rotated bounding boxes.
+    AnkerloserBboxLoss: Anchor-free loss with optional logarithmic scaling.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from loguru import logger
 import torch
 from torch import Tensor, nn
 import torch.nn.functional as F  # noqa: N812
@@ -39,30 +40,29 @@ if TYPE_CHECKING:
 
 
 class BboxLoss(nn.Module):
-    """IoU und Distribution Focal Loss für Bounding Box Regression.
+    """IoU and Distribution Focal Loss for bounding box regression.
 
-    Diese Klasse berechnet die Intersection over Union (IoU) Loss und die
-    Distribution Focal Loss (DFL) für Bounding Box Regression in
-    Detektionsmodellen.
+    Computes Intersection over Union (IoU) loss and optional Distribution Focal
+    Loss (DFL) for training detection models.
 
     Attributes:
-        dfl_loss: DFLoss-Instanz falls `reg_max` > 1, sonst None.
+        dfl_loss: Instance of :class:`DFLoss` when `reg_max` > 1, otherwise ``None``.
 
-    Beispiel:
-        ```python
-        bbox_loss = BboxLoss(reg_max=16)
-        iou_loss, dfl_loss = bbox_loss(
-            pred_dist, pred_bboxes, anchor_points,
-            target_bboxes, target_scores, target_scores_sum, fg_mask
-        )
-        ```
+    Example:
+        .. code-block:: python
+
+            bbox_loss = BboxLoss(reg_max=16)
+            iou_loss, dfl_loss = bbox_loss(
+                pred_dist, pred_bboxes, anchor_points,
+                target_bboxes, target_scores, target_scores_sum, fg_mask
+            )
     """
 
     def __init__(self, reg_max: int = 16) -> None:
-        """Initialisiert die BboxLoss mit Regularisierungsparameter.
+        """Initialize the loss.
 
         Args:
-            reg_max: Maximaler Regularisierungswert, bestimmt DFL-Bins.
+            reg_max: Maximum regularization (number of DFL bins).
         """
         super().__init__()
         self.dfl_loss = DFLoss(reg_max) if reg_max > 1 else None
@@ -77,19 +77,19 @@ class BboxLoss(nn.Module):
         target_scores_sum: float,
         fg_mask: Tensor,
     ) -> tuple[Tensor, Tensor]:
-        """Berechnet IoU Loss und DFL Loss.
+        """Compute IoU loss and DFL loss.
 
         Args:
-            pred_dist: Vorhergesagte Distanzen (batch, anchors, reg_max).
-            pred_bboxes: Vorhergesagte BBoxen (batch, anchors, 4).
-            anchor_points: Ankerpunkte (anchors, 2).
-            target_bboxes: Ziel-BBoxen (batch, targets, 4).
-            target_scores: Ziel-Scores (batch, targets, num_classes).
-            target_scores_sum: Summe der Ziel-Scores für Normalisierung.
-            fg_mask: Vordergrund-Maske (batch, anchors).
+            pred_dist: Predicted distances (batch, anchors, reg_max).
+            pred_bboxes: Predicted boxes (batch, anchors, 4).
+            anchor_points: Anchor points (anchors, 2).
+            target_bboxes: Target boxes (batch, targets, 4).
+            target_scores: Target scores (batch, targets, num_classes).
+            target_scores_sum: Sum of target scores for normalization.
+            fg_mask: Foreground mask (batch, anchors).
 
         Returns:
-            tuple[Tensor, Tensor]: (IoU Loss, DFL Loss) als skalare Tensoren.
+            Tuple of scalar tensors: (IoU loss, DFL loss).
         """
         if fg_mask.sum() == 0:
             return torch.tensor(0.0, device=pred_dist.device), torch.tensor(
@@ -117,7 +117,7 @@ class BboxLoss(nn.Module):
 
 
 class RotatedBboxLoss(BboxLoss):
-    """Loss-Funktion für rotierte Bounding Boxes.
+    """Loss function for rotated bounding boxes."""
 
     def forward(
         self,
@@ -158,7 +158,7 @@ class RotatedBboxLoss(BboxLoss):
 
 
 class AnkerloserBboxLoss(nn.Module):
-    """Ankerlose Bounding Box Loss-Funktion mit optionaler logarithmischer Skalierung."""
+    """Anchor-free bounding box loss with optional logarithmic scaling."""
 
     def __init__(
         self, log_reg: bool = False, use_rotated_iou: bool = True, reduction: str = "mean"
@@ -174,21 +174,18 @@ class AnkerloserBboxLoss(nn.Module):
         target_bboxes: Tensor,
         weights: tuple[float, float, float] = (0.4, 0.2, 0.4),
     ) -> Tensor:
-        """Berechnet den kombinierten Verlust für ankerlose Bounding Box Regression."""
-        # Falls `weights` nicht genau 3 Werte hat, Standardwerte setzen
-        if len(weights) != 3:
-            logger.warning(
-                f"⚠️ `weights` hat {len(weights)} Werte. Ersetze mit Standardwerten (0.4, 0.2, 0.4)."
-            )
-            weights = (0.4, 0.2, 0.4)
+        """Compute the combined loss for anchor-free bounding box regression."""
+        # weights is typed as a 3-tuple; normalization by length is unnecessary here.
 
-        if bbox_pred.shape[-1] == 4:
-            if self.use_rotated_iou:
-                logger.warning(
-                    "⚠️ Rotated IoU aktiv, aber Bounding Boxes haben kein Theta! Fallback auf normalen IoU."
-                )
-            loss_theta = 0.0
-            self.use_rotated_iou = False
+        has_theta = bbox_pred.shape[-1] > 4
+        use_rot_iou = self.use_rotated_iou and has_theta
+        # If rotation IoU is requested but boxes have no angle, silently fall back.
+        loss_theta: Tensor
+        if not has_theta:
+            loss_theta = torch.tensor(0.0, device=bbox_pred.device)
+        else:
+            # will be computed below in the dedicated block
+            loss_theta = torch.tensor(0.0, device=bbox_pred.device)
 
         # Falls die Summe der Gewichte nicht 1.0 ist, normalisieren
         weight_sum = sum(weights)
@@ -196,33 +193,33 @@ class AnkerloserBboxLoss(nn.Module):
 
         # 📌 **1. L1-Regressionsverlust für W, H & θ**
         if self.log_reg:
-            loss_wh = f.smooth_l1_loss(
+            loss_wh = F.smooth_l1_loss(
                 torch.log1p(bbox_pred[..., 2:4]),
                 torch.log1p(target_bboxes[..., 2:4]),
                 reduction=self.reduction,
             )
         else:
-            loss_wh = f.smooth_l1_loss(
+            loss_wh = F.smooth_l1_loss(
                 bbox_pred[..., 2:4], target_bboxes[..., 2:4], reduction=self.reduction
             )
 
         # 🔄 **L1-Verlust für die Rotation (θ)**
-        if bbox_pred.shape[-1] == 4:  # Kein θ vorhanden
-            loss_theta = 0.0
-        else:
-            loss_theta = f.smooth_l1_loss(
+        if has_theta:  # rotation present
+            loss_theta = F.smooth_l1_loss(
                 bbox_pred[..., 4], target_bboxes[..., 4], reduction=self.reduction
             )
 
         # 📌 **2. IoU-Verlust für Rotation oder Standard-IoU**
         loss_iou = (
             1 - rotated_bbox_iou(bbox_pred, target_bboxes)
-            if self.use_rotated_iou
+            if use_rot_iou
             else 1 - bbox_iou(bbox_pred, target_bboxes, xywh=True)
         )
         loss_iou = loss_iou.mean()
 
         # 📌 **3. Gesamtverlust mit normalisierten Gewichtungen**
-        loss = norm_weights[0] * loss_wh + norm_weights[1] * loss_theta + norm_weights[2] * loss_iou
+        loss: Tensor = (
+            norm_weights[0] * loss_wh + norm_weights[1] * loss_theta + norm_weights[2] * loss_iou
+        )
 
         return loss

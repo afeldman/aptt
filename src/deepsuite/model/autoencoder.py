@@ -9,8 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 import torch
-import torch.nn as nn
-import pytorch_lightning as pl
+from torch import nn
 
 from deepsuite.lightning_base import BaseModule
 

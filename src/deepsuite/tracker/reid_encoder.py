@@ -1,7 +1,7 @@
 """Reid Encoder module."""
 
 import torch
-from torch import nn
+from torch import Tensor, nn
 
 
 class ReIDEncoder(nn.Module):
@@ -31,7 +31,7 @@ class ReIDEncoder(nn.Module):
             feat = self.encoder(dummy_input).view(1, -1)
             input_dim = feat.shape[1]
 
-        layers = [nn.Linear(input_dim, output_dim)]
+        layers: list[nn.Module] = [nn.Linear(input_dim, output_dim)]
         if use_bn:
             layers.append(nn.BatchNorm1d(output_dim))
         if dropout > 0:
@@ -39,7 +39,7 @@ class ReIDEncoder(nn.Module):
 
         self.embedding = nn.Sequential(*layers)
 
-    def forward(self, x):  # x = [B, C, H, W]
+    def forward(self, x: Tensor) -> Tensor:  # x = [B, C, H, W]
         feat = self.encoder(x).view(x.size(0), -1)  # [B, C]
         emb = self.embedding(feat)  # [B, D]
         return nn.functional.normalize(emb, dim=1)  # L2-normalisiert

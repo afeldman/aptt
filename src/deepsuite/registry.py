@@ -5,7 +5,7 @@ Provides decorator-based registration for pluggable heads across projects.
 
 from __future__ import annotations
 
-from typing import Callable, Dict, Type
+from collections.abc import Callable
 
 
 class HeadRegistry:
@@ -14,10 +14,10 @@ class HeadRegistry:
     Allows dynamic registration, retrieval, and listing of head classes.
     """
 
-    _registry: Dict[str, Type] = {}
+    _registry: dict[str, type] = {}
 
     @classmethod
-    def register(cls, name: str) -> Callable[[Type], Type]:
+    def register(cls, name: str) -> Callable[[type], type]:
         """Decorator to register a head class under a given name.
 
         Args:
@@ -27,7 +27,7 @@ class HeadRegistry:
             Callable: Class decorator that registers the class.
         """
 
-        def decorator(head_cls: Type) -> Type:
+        def decorator(head_cls: type) -> type:
             if name in cls._registry:
                 raise ValueError(f"Head '{name}' already registered")
             cls._registry[name] = head_cls
@@ -36,7 +36,7 @@ class HeadRegistry:
         return decorator
 
     @classmethod
-    def get(cls, name: str) -> Type:
+    def get(cls, name: str) -> type:
         """Retrieve a registered head class by name.
 
         Args:
@@ -50,7 +50,7 @@ class HeadRegistry:
         return cls._registry[name]
 
     @classmethod
-    def list(cls) -> Dict[str, Type]:
+    def list(cls) -> dict[str, type]:
         """List all registered heads.
 
         Returns:

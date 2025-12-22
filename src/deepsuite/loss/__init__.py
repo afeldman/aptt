@@ -1,4 +1,8 @@
-"""Init   module."""
+"""Loss package initializers and factory utilities."""
+
+from typing import Any, cast
+
+from torch import nn
 
 from deepsuite.loss.bbox import BboxLoss
 from deepsuite.loss.centernet import CenterNetLoss
@@ -26,7 +30,7 @@ from deepsuite.loss.snr import (
 from deepsuite.loss.varifocal import VarifocalLoss
 
 
-def get_loss(name: str, **kwargs):
+def get_loss(name: str, **kwargs: Any) -> nn.Module:
     loss_map = {
         "bbox": BboxLoss,
         "keypoint": KeypointLoss,
@@ -51,4 +55,5 @@ def get_loss(name: str, **kwargs):
     }
     if name not in loss_map:
         raise ValueError(f"Loss '{name}' nicht gefunden. Verfügbare: {list(loss_map.keys())}")
-    return loss_map[name](**kwargs)
+    ctor = loss_map[name]
+    return cast("nn.Module", ctor(**kwargs))

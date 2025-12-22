@@ -44,14 +44,14 @@ class ExportBaseCallback(pl.callbacks.ModelCheckpoint):
         Returns:
             Optional[Any]: Beispielinputbatch (ggf. Tensor oder Strukturen) oder None.
 
-        Beispiel:
-            ```python
-            from pytorch_lightning import Trainer
-            from deepsuite.callbacks.base import ExportBaseCallback
+        Example:
+            .. code-block:: python
 
-            trainer = Trainer(callbacks=[ExportBaseCallback()])
-            trainer.fit(model)
-            ```
+                from pytorch_lightning import Trainer
+                from deepsuite.callbacks.base import ExportBaseCallback
+
+                trainer = Trainer(callbacks=[ExportBaseCallback()])
+                trainer.fit(model)
         """
         if self.example_input is None:  # Nur einmal laden
             try:

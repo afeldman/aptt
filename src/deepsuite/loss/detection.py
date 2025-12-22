@@ -1,30 +1,21 @@
 """Detection Loss.
---------------
 
-This module contains the detection loss class for computing training losses for object detection tasks.
+Loss computation for object detection including bbox regression, classification
+and optional DFL.
 
 Example:
->>> import torch
->>> from deepsuite.loss import DetectionLoss
->>> criterion = DetectionLoss(model)
->>> preds = torch.randn(2, 10)
->>> batch = {"cls": torch.randint(0, 10, (2,))}
->>> loss, loss_items = criterion(preds, batch)
->>> loss
-tensor(2.4175)
->>> loss_items
-tensor(2.4175)
+    .. code-block:: python
 
-Attributes:
-DetectionLoss: The class for computing detection losses.
-
-Methods:
-__call__: Compute the detection loss between predictions and true labels.
+        criterion = DetectionLoss(model)
+        loss, items = criterion(preds, batch)
 
 References:
-https://pytorch.org/docs/stable/generated/torch.nn.BCEWithLogitsLoss.html
-https://pytorch.org/docs/stable/generated/torch.nn.functional.cross_entropy.html
+    https://pytorch.org/docs/stable/generated/torch.nn.BCEWithLogitsLoss.html
+    https://pytorch.org/docs/stable/generated/torch.nn.functional.cross_entropy.html
 """
+
+from collections.abc import Mapping, Sequence
+from typing import Any, Protocol, cast
 
 import torch
 from torch import nn
@@ -34,6 +25,25 @@ from deepsuite.utils.anchor import make_anchors
 from deepsuite.utils.bbox import dist2bbox
 from deepsuite.utils.taskAlignedAssigner import TaskAlignedAssigner
 from deepsuite.utils.xy import xywh2xyxy
+
+
+class HypParams(Protocol):
+    box: float
+    cls: float
+    dfl: float
+    overlap_mask: bool
+
+
+class DetectModule(Protocol):
+    stride: Sequence[int]
+    nc: int
+    reg_max: int
+
+
+class DetectModel(Protocol):
+    args: HypParams
+    model: Sequence[DetectModule]
+    def parameters(self) -> Any: ...
 
 
 class DetectionLoss:
@@ -56,7 +66,7 @@ class DetectionLoss:
         proj (torch.Tensor): Projection tensor for DFL.
     """
 
-    def __init__(self, model, tal_topk=10) -> None:
+    def __init__(self, model: DetectModel, tal_topk: int = 10) -> None:
         """Initializes DetectionLoss with the model, defining model-related properties and BCE loss function.
 
         Args:
@@ -64,12 +74,12 @@ class DetectionLoss:
             tal_topk (int): Top-k value for task-aligned assignment. Default is 10.
         """
         device = next(model.parameters()).device  # get model device
-        h = model.args  # hyperparameters
+        h: HypParams = model.args  # hyperparameters
 
-        m = model.model[-1]  # Detect() module
+        m: DetectModule = model.model[-1]  # Detect() module
         self.bce = nn.BCEWithLogitsLoss(reduction="none")
         self.hyp = h
-        self.stride = m.stride  # model strides
+        self.strides: Sequence[int] = m.stride  # model strides
         self.nc = m.nc  # number of classes
         self.no = m.nc + m.reg_max * 4
         self.reg_max = m.reg_max
@@ -81,7 +91,9 @@ class DetectionLoss:
         self.bbox_loss = BboxLoss(m.reg_max).to(device)
         self.proj = torch.arange(m.reg_max, dtype=torch.float, device=device)
 
-    def preprocess(self, targets, batch_size, scale_tensor):
+    def preprocess(
+        self, targets: torch.Tensor, batch_size: int, scale_tensor: torch.Tensor
+    ) -> torch.Tensor:
         """Preprocesses the target counts and matches with the input batch size to output a tensor.
 
         Args:
@@ -97,7 +109,7 @@ class DetectionLoss:
             out = torch.zeros(batch_size, 0, ne - 1, device=self.device)
         else:
             i = targets[:, 0]  # image index
-            _, counts = i.unique(return_counts=True)
+            _, counts = torch.unique(i, return_counts=True)
             counts = counts.to(dtype=torch.int32)
             out = torch.zeros(batch_size, counts.max(), ne - 1, device=self.device)
             for j in range(batch_size):
@@ -107,7 +119,7 @@ class DetectionLoss:
             out[..., 1:5] = xywh2xyxy(out[..., 1:5].mul_(scale_tensor))
         return out
 
-    def bbox_decode(self, anchor_points, pred_dist):
+    def bbox_decode(self, anchor_points: torch.Tensor, pred_dist: torch.Tensor) -> torch.Tensor:
         """Decode predicted object bounding box coordinates from anchor points and distribution.
 
         Args:
@@ -123,9 +135,11 @@ class DetectionLoss:
                 pred_dist.view(b, a, 4, c // 4).softmax(3).matmul(self.proj.type(pred_dist.dtype))
             )
 
-        return dist2bbox(pred_dist, anchor_points, xywh=False)
+        return cast("torch.Tensor", dist2bbox(pred_dist, anchor_points, xywh=False))
 
-    def __call__(self, preds, batch):
+    def __call__(
+        self, preds: torch.Tensor | tuple[torch.Tensor, ...], batch: Mapping[str, torch.Tensor]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Calculate the sum of the loss for box, cls and dfl multiplied by batch size.
 
         Args:
@@ -137,9 +151,13 @@ class DetectionLoss:
         """
         loss = torch.zeros(3, device=self.device)  # box, cls, dfl
         feats = preds[1] if isinstance(preds, tuple) else preds
-        pred_distri, pred_scores = torch.cat(
-            [xi.view(feats[0].shape[0], self.no, -1) for xi in feats], 2
-        ).split((self.reg_max * 4, self.nc), 1)
+        split_out: tuple[torch.Tensor, torch.Tensor] = cast(
+            "tuple[torch.Tensor, torch.Tensor]",
+            torch.cat([xi.view(feats[0].shape[0], self.no, -1) for xi in feats], 2).split(  # type: ignore[no-untyped-call]
+                (self.reg_max * 4, self.nc), 1
+            ),
+        )
+        pred_distri, pred_scores = split_out
 
         pred_scores = pred_scores.permute(0, 2, 1).contiguous()
         pred_distri = pred_distri.permute(0, 2, 1).contiguous()
@@ -147,9 +165,9 @@ class DetectionLoss:
         dtype = pred_scores.dtype
         batch_size = pred_scores.shape[0]
         imgsz = (
-            torch.tensor(feats[0].shape[2:], device=self.device, dtype=dtype) * self.stride[0]
+            torch.tensor(feats[0].shape[2:], device=self.device, dtype=dtype) * self.strides[0]
         )  # image size (h,w)
-        anchor_points, stride_tensor = make_anchors(feats, self.stride, 0.5)
+        anchor_points, stride_tensor = make_anchors(feats, self.strides, 0.5)
 
         # Targets
         targets = torch.cat(
@@ -158,7 +176,7 @@ class DetectionLoss:
         targets = self.preprocess(
             targets.to(self.device), batch_size, scale_tensor=imgsz[[1, 0, 1, 0]]
         )
-        gt_labels, gt_bboxes = targets.split((1, 4), 2)  # cls, xyxy
+        gt_labels, gt_bboxes = targets.split((1, 4), 2)  # type: ignore[no-untyped-call]  # cls, xyxy
         mask_gt = gt_bboxes.sum(2, keepdim=True).gt_(0.0)
 
         # Pboxes

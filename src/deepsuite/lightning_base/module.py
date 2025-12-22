@@ -1,67 +1,13 @@
-"""Module module."""
+"""Base Lightning module with Ray Tune integration and metrics.
 
-r"""(deepsuite.lightning_base.module) - BaseModule.
------------------------------------------------------
+This module provides a convenient base class for training models with
+PyTorch Lightning, optional MLflow logging, Ray Tune-based hyperparameter
+search, and common classification metrics.
 
-A PyTorch Lightning-based model for training and hyperparameter optimization using Ray Tune.
-
-**Features:**
-- Supports Ray Tune for automatic hyperparameter tuning.
-- Logs metrics using TensorBoard and optionally MLflow.
-- Configurable optimizer and loss function.
-- Supports checkpointing via Ray Tune.
-
-**Mathematical Background**
-
-The model optimizes a loss function :math:`L(\theta)`, where :math:`\theta` represents the model parameters. The training objective is given by:
-
-.. math::
-    \theta^* = \arg\\min_\theta L(\theta)
-
-The loss function is computed as:
-
-.. math::
-    L(y, \\hat{y}) = \frac{1}{N} \\sum_{i=1}^{N} (y_i - \\hat{y}_i)^2
-
-where :math:`y` is the ground truth and :math:`\\hat{y}` is the model prediction.
-
-Parameters
-----------
-search_space : dict, optional
-    Dictionary defining the Ray Tune search space. Default: ``None``.
-log_every_n_steps : int, optional
-    Number of steps between logging metrics. Default: ``50``.
-use_mlflow : bool, optional
-    Whether to enable MLflow logging. Default: ``False``.
-loss_fn : callable, optional
-    Loss function to use. Default: ``torch.nn.functional.mse_loss``.
-optimizer : callable, optional
-    Optimizer function to use. Default: ``torch.optim.Adam``.
-metrics : list, optional
-    List of additional metrics to log. Default: ``['accuracy', 'precision', 'recall']``.
-batch_sizes : list, optional
-    List of batch sizes for hyperparameter tuning. Default: ``[4, 8, 16, 32, 64, 128]``.
-
-Methods:
--------
-training_step(batch, batch_idx)
-    Computes the loss for a training batch and logs metrics.
-
-validation_step(batch, batch_idx)
-    Computes the loss for a validation batch and logs metrics.
-
-configure_optimizers()
-    Returns the optimizer configured with the chosen learning rate.
-
-compute_loss(y_hat, y)
-    Computes the loss given model predictions and ground truth labels.
-
-ray_tune_train(config, datamodule, max_epochs=10)
-    Trains the model using Ray Tune with given hyperparameters.
-
-optimize_hyperparameters(datamodule, num_samples=10, max_epochs=10)
-    Runs hyperparameter optimization with Ray Tune and returns the best configuration.
-
+Mathematical background: the model optimizes a loss :math:`L(\theta)` over
+parameters :math:`\theta`, e.g. minimizing :math:`L(\theta)` such that
+:math:`\theta^* = \arg\\min_\theta L(\theta)`. For MSE this is
+:math:`L(y, \\hat{y}) = \frac{1}{N} \\sum_{i=1}^{N} (y_i - \\hat{y}_i)^2`.
 """
 
 from collections.abc import Sequence
@@ -102,12 +48,7 @@ except ImportError:
 
 
 class BaseModule(pl.LightningModule):
-    """BaseModule.
-    ==========
-
-    A PyTorch Lightning-based model for training and hyperparameter optimization using Ray Tune.
-
-    """
+    """PyTorch Lightning base module with metrics and tuning helpers."""
 
     def __init__(
         self,
@@ -214,12 +155,10 @@ class BaseModule(pl.LightningModule):
         return val_loss
 
     def configure_optimizers(self):
-        """Configures the optimizer with the hyperparameters.
+        """Configure and return the optimizer.
 
         Returns:
-        -------
-        torch.optim.Optimizer
-            Optimizer with the configured hyperparameters.
+            torch.optim.Optimizer: Optimizer initialized with configured learning rate.
         """
         # Uses the optimized hyperparameters from Ray Tune
         lr = self.hparams.get("lr", 1e-3)  # Use default value if not set

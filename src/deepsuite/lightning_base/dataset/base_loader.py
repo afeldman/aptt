@@ -34,6 +34,11 @@ class BaseDataLoader(LightningDataModule):
         """Initialize self.train_dataset and self.val_dataset."""
 
     def train_dataloader(self):
+        """Create and return the training ``DataLoader``.
+
+        Returns:
+            DataLoader: Training loader with shuffling enabled.
+        """
         return DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
@@ -42,6 +47,11 @@ class BaseDataLoader(LightningDataModule):
         )
 
     def val_dataloader(self):
+        """Create and return the validation ``DataLoader``.
+
+        Returns:
+            DataLoader: Validation loader with shuffling disabled.
+        """
         return DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,

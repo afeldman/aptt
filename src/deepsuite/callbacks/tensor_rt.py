@@ -3,14 +3,14 @@
 Dieses Modul enthält einen Callback, der das beste Modell zu TensorRT
 exportiert, nachdem es gespeichert wurde. Nur auf Linux und Windows verfügbar.
 
-Beispiel:
-    ```python
-    from pytorch_lightning import Trainer
-    from deepsuite.callbacks.tensor_rt import TensorRTExportCallback
+Example:
+    .. code-block:: python
 
-    trainer = Trainer(callbacks=[TensorRTExportCallback()])
-    trainer.fit(model)
-    ```
+        from pytorch_lightning import Trainer
+        from deepsuite.callbacks.tensor_rt import TensorRTExportCallback
+
+        trainer = Trainer(callbacks=[TensorRTExportCallback()])
+        trainer.fit(model)
 
 Hinweis:
     TensorRT wird nur auf Linux und Windows unterstützt.
@@ -33,7 +33,7 @@ from deepsuite.callbacks.torchscript import TorchScriptExportCallback
 # TensorRT ist nur auf Linux und Windows verfügbar
 if sys.platform in ("linux", "win32"):
     try:
-        import torch_tensorrt  # noqa: PLC0415, F401
+        import torch_tensorrt  # noqa: F401
 
         TENSORRT_AVAILABLE = True
     except ImportError:
@@ -124,7 +124,7 @@ class TensorRTExportCallback(ExportBaseCallback):
                     ts_path,
                     optimize=True,
                 )
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error(f"❌ TorchScript-Export fehlgeschlagen: {e}")
                 return
         else:
@@ -134,7 +134,7 @@ class TensorRTExportCallback(ExportBaseCallback):
         try:
             torchscript_model = torch.jit.load(str(ts_path))
             logger.info(f"✅ TorchScript-Modell geladen: {ts_path}")
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error(f"❌ TorchScript-Modell konnte nicht geladen werden: {e}")
             return
 
@@ -144,7 +144,7 @@ class TensorRTExportCallback(ExportBaseCallback):
 
         try:
             self._convert_to_tensorrt(torchscript_model, trt_path, example_input)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error(f"❌ TensorRT-Konvertierung fehlgeschlagen: {e}")
 
     def _convert_to_tensorrt(
@@ -176,22 +176,6 @@ class TensorRTExportCallback(ExportBaseCallback):
             torch.jit.save(trt_model, str(trt_path))
             logger.info(f"✅ TensorRT-Modell gespeichert: {trt_path}")
 
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error(f"❌ TensorRT-Konvertierung fehlgeschlagen: {e}")
             raise
-                torchscript_model,
-                inputs=[
-                    torch_tensorrt.Input(
-                        min_shape=example_input.shape,
-                        opt_shape=example_input.shape,
-                        max_shape=example_input.shape,
-                    )
-                ],
-                enabled_precisions={precision_type},
-                workspace_size=self.workspace_size,
-            )
-
-            torch.jit.save(trt_model, trt_path)
-            logger.info(f"✅ TensorRT model saved: {trt_path}")
-        except Exception as e:
-            logger.error(f"❌ TensorRT export failed: {e}")

@@ -41,7 +41,7 @@ class KeypointLoss(nn.Module):
         sigmas (torch.Tensor): Standard deviations for keypoint coordinates.
     """
 
-    def __init__(self, sigmas) -> None:
+    def __init__(self, sigmas: torch.Tensor) -> None:
         """Initialize the KeypointLoss class.
 
         Args:
@@ -69,4 +69,5 @@ class KeypointLoss(nn.Module):
         ).pow(2)
         kpt_loss_factor = kpt_mask.shape[1] / (torch.sum(kpt_mask != 0, dim=1) + 1e-9)
         e = d / ((2 * self.sigmas).pow(2) * (area + 1e-9) * 2)
-        return (kpt_loss_factor.view(-1, 1) * ((1 - torch.exp(-e)) * kpt_mask)).mean()
+        from typing import cast
+        return cast("torch.Tensor", (kpt_loss_factor.view(-1, 1) * ((1 - torch.exp(-e)) * kpt_mask)).mean())

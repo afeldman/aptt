@@ -2,6 +2,7 @@
 
 import io
 
+from loguru import logger
 import matplotlib.pyplot as plt
 import mlflow
 from PIL import Image
@@ -11,7 +12,7 @@ from torch import Tensor, isnan
 
 def log_embedding_plot_to_mlflow(
     embeddings: Tensor, labels: Tensor, step: int, components: int = 2
-):
+) -> None:
     """Log a TSNE embedding plot to MLflow as an image.
 
     This function reduces high-dimensional embeddings to 2D (or `components`-D),
@@ -19,7 +20,7 @@ def log_embedding_plot_to_mlflow(
     using `mlflow.log_image`.
 
     If the embedding tensor contains NaNs, the function exits early
-    and prints a warning.
+    and logs a warning.
 
     Args:
         embeddings (Tensor): The input embeddings tensor of shape (N, D),
@@ -32,7 +33,7 @@ def log_embedding_plot_to_mlflow(
         None
     """
     if isnan(embeddings).any():
-        print("⚠️ Warning: NaNs in embeddings – skipping TSNE logging.")
+        logger.warning("NaNs in embeddings - skipping TSNE logging.")
         return
 
     # Reduzieren auf 2D

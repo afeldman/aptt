@@ -12,24 +12,26 @@ References:
     https://ieeexplore.ieee.org/document/9792391
 
 Example:
-    ```python
-    import torch
-    from deepsuite.loss.dfl import DFLoss
+    .. code-block:: python
 
-    criterion = DFLoss(reg_max=16)
+        import torch
+        from deepsuite.loss.dfl import DFLoss
 
-    # Predicted distribution over 16 bins (batch=2)
-    pred_dist = torch.randn(2, 16, requires_grad=True)
+        criterion = DFLoss(reg_max=16)
 
-    # Continuous target values (can be between 0 and 16)
-    target = torch.tensor([3.2, 7.8])
+        # Predicted distribution over 16 bins (batch=2)
+        pred_dist = torch.randn(2, 16, requires_grad=True)
 
-    loss = criterion(pred_dist, target)
-    print(f"DFL Loss: {loss.item()}")
-    ```
+        # Continuous target values (can be between 0 and 16)
+        target = torch.tensor([3.2, 7.8])
+
+        loss = criterion(pred_dist, target)
+        print(f"DFL Loss: {loss.item()}")
 """
 
 from __future__ import annotations
+
+from typing import cast
 
 from torch import Tensor, nn
 import torch.nn.functional as F
@@ -48,16 +50,16 @@ class DFLoss(nn.Module):
                  Target values are clamped to [0, reg_max-1].
 
     Example:
-        ```python
-        # Initialize DFL with 16 bins (standard for YOLOv8)
-        dfl = DFLoss(reg_max=16)
+        .. code-block:: python
 
-        # Batch-wise predictions and targets
-        pred_dist = torch.randn(32, 16)  # 32 samples, 16 bins
-        target = torch.rand(32) * 15  # target values in [0, 15]
+            # Initialize DFL with 16 bins (standard for YOLOv8)
+            dfl = DFLoss(reg_max=16)
 
-        loss = dfl(pred_dist, target)
-        ```
+            # Batch-wise predictions and targets
+            pred_dist = torch.randn(32, 16)  # 32 samples, 16 bins
+            target = torch.rand(32) * 15  # target values in [0, 15]
+
+            loss = dfl(pred_dist, target)
     """
 
     def __init__(self, reg_max: int = 16) -> None:
@@ -92,12 +94,12 @@ class DFLoss(nn.Module):
             Tensor: Averaged DFL loss per sample. Shape (batch, 1).
 
         Example:
-            ```python
-            pred = torch.randn(8, 16)
-            target = torch.tensor([1.5, 3.2, 5.0, 7.8, 2.1, 4.3, 6.9, 8.5])
-            loss = dfl_loss(pred, target)  # Shape (8, 1)
-            mean_loss = loss.mean()
-            ```
+            .. code-block:: python
+
+                pred = torch.randn(8, 16)
+                target = torch.tensor([1.5, 3.2, 5.0, 7.8, 2.1, 4.3, 6.9, 8.5])
+                loss = dfl_loss(pred, target)  # Shape (8, 1)
+                mean_loss = loss.mean()
         """
         # Clamp target values to [0, reg_max - 1 - 0.01]
         # Small constant 0.01 prevents numerical issues at boundaries
@@ -119,4 +121,4 @@ class DFLoss(nn.Module):
         right_loss = F.cross_entropy(pred_dist, tr.view(-1), reduction="none").view(tl.shape)
 
         # Combine losses with interpolation weights
-        return (left_loss * wl + right_loss * wr).mean(-1, keepdim=True)
+        return cast("Tensor", (left_loss * wl + right_loss * wr).mean(-1, keepdim=True))

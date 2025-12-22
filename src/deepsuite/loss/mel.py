@@ -1,8 +1,9 @@
-"""Mel-Spektrum-basierter RMSE-Verlust.
+"""Mel-spectrum based RMSE loss.
+
+This loss computes RMSE on perceptual Mel-spectral features for audio.
 
 Author:
     Anton Feldmann
-
 """
 
 import torch
@@ -12,21 +13,21 @@ from deepsuite.utils.tsignal import perceptual_transform
 
 
 class MelLoss(torch.nn.Module):
-    """Verlustfunktion für Mel-Spektren basierend auf RMSE.
+    """RMSE-based loss on Mel spectra.
 
     Args:
-        mel_scales (tuple): Anzahl der Mel-Filterbänke.
-        n_fft (int): FFT-Größe.
-        sample_rate (int): Abtastrate des Audios.
-        eps (float): Kleiner Wert für numerische Stabilität.
+        mel_scales (tuple[int, ...]): Number of Mel filter banks.
+        n_fft (int): FFT size.
+        sample_rate (int): Audio sample rate.
+        eps (float): Small epsilon for numerical stability.
 
-    Examples:
-        >>> loss_fn = MelLoss()
-        >>> y_true = torch.rand(10, 512)  # Simulierte Audiodaten
-        >>> y_pred = torch.rand(10, 512)  # Vorhersagen
-        >>> loss = loss_fn(y_true, y_pred)
-        >>> loss
-        tensor(0.2321)
+    Example:
+        .. code-block:: python
+
+            loss_fn = MelLoss()
+            y_true = torch.rand(10, 512)
+            y_pred = torch.rand(10, 512)
+            loss = loss_fn(y_true, y_pred)
     """
 
     def __init__(self, mel_scales=(16, 32, 64), n_fft=512, sample_rate=44_100, eps=1e-7):
@@ -38,16 +39,16 @@ class MelLoss(torch.nn.Module):
         self.rmse_loss = RMSE(self.eps)
 
     def forward(self, y_true: torch.Tensor, y_pred: torch.Tensor) -> torch.Tensor:
-        """Berechnet den Mel-Spektrum-basierten RMSE-Loss.
+        """Compute Mel-spectrum-based RMSE loss.
 
         Args:
-            y_true (torch.Tensor): Wahre Audiodaten.
-            y_pred (torch.Tensor): Vorhergesagte Audiodaten.
+            y_true (torch.Tensor): Ground truth audio.
+            y_pred (torch.Tensor): Predicted audio.
 
         Returns:
-            torch.Tensor: Skalarer Loss-Wert.
+            torch.Tensor: Scalar loss value.
         """
-        # Mel-Spektren berechnen
+        # Mel-spectra features
         pvec_true = perceptual_transform(
             y_true, self.mel_scales, self.n_fft, self.sample_rate, self.eps
         )
@@ -55,8 +56,9 @@ class MelLoss(torch.nn.Module):
             y_pred, self.mel_scales, self.n_fft, self.sample_rate, self.eps
         )
 
-        # Direkt RMSE auf gesamte Batch anwenden (ohne Schleife)
+        # RMSE across batch
         distances = self.rmse_loss(pvec_pred, pvec_true)
 
-        # Mittelwert über alle Features und Batch berechnen
-        return distances.mean()
+        # Mean over features and batch
+        from typing import cast
+        return cast("torch.Tensor", distances.mean())

@@ -1,35 +1,79 @@
-"""Tracker module."""
+"""Object tracking utilities.
+
+This module provides multiple tracker implementations with a unified interface:
+
+- Kalman filter based tracker for fast, classical tracking.
+- LSTM-based tracker for simple sequence modeling on box trajectories.
+- Particle filters (CPU/GPU/TPU variants) for robust, non-linear tracking.
+
+All trackers implement the `TrackerBase` protocol with `update()` and `predict()`.
+Docstrings follow the Google style to integrate with Sphinx (napoleon).
+"""
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
+from typing import cast
 
 import torch
 from torch import nn
 
 
 class TrackerBase(ABC):
-    @abstractmethod
-    def update(self, box):
-        pass
+    """Abstract tracker interface.
+
+    Implementations must provide an `update()` step (ingesting an observation)
+    and a `predict()` step (returning the predicted bounding box as a tensor).
+    """
 
     @abstractmethod
-    def predict(self):
-        pass
+    def update(self, box: Sequence[float]) -> None:
+        """Ingest a new observation.
+
+        Args:
+            box: Observed bounding box as [x1, y1, x2, y2].
+        """
+
+    @abstractmethod
+    def predict(self) -> torch.Tensor:
+        """Predict the next bounding box.
+
+        Returns:
+            Predicted box as tensor [x1, y1, x2, y2].
+        """
 
 
 class Track(TrackerBase):
+    """High-level track wrapper around a concrete tracker implementation.
+
+    Manages basic metadata (id, age, update counters, appearance embedding) and
+    delegates predict/update to the chosen tracker backend.
+
+    Args:
+        track_id: Unique track identifier.
+        initial_box: Initial bounding box [x1, y1, x2, y2].
+        filter_type: One of {"kalman", "lstm", "particle", "particle_gpu", "particle_tpu"}.
+        device: Torch device string (e.g., "cpu", "cuda", "mps").
+        feature: Optional appearance embedding tensor.
+    """
+
     def __init__(
-        self, track_id, initial_box, filter_type="kalman", device="cpu", feature=None
+        self,
+        track_id: int,
+        initial_box: Sequence[float],
+        filter_type: str = "kalman",
+        device: str = "cpu",
+        feature: torch.Tensor | None = None,
     ) -> None:
-        self.id = track_id
-        self.boxes = [initial_box]
-        self.age = 1
-        self.time_since_update = 0
-        self.active = True
-        self.device = device
-        self.appearance = feature
+        self.id: int = track_id
+        self.boxes: list[Sequence[float]] = [initial_box]
+        self.age: int = 1
+        self.time_since_update: int = 0
+        self.active: bool = True
+        self.device: str = device
+        self.appearance: torch.Tensor | None = feature
 
         if filter_type == "kalman":
-            self.filter = KalmanFilter(initial_box, device=device)
+            self.filter: TrackerBase = KalmanFilter(initial_box, device=device)
         elif filter_type == "lstm":
             self.filter = LSTMTracker(device=device)
         elif filter_type == "particle":
@@ -41,13 +85,20 @@ class Track(TrackerBase):
         else:
             raise ValueError(
                 f"Unknown filter_type: {filter_type}. "
-                f"Choose from: kalman, lstm, particle, particle_gpu, particle_tpu"
+                "Choose from: kalman, lstm, particle, particle_gpu, particle_tpu"
             )
 
-    def predict(self):
+    def predict(self) -> torch.Tensor:
+        """Return the current predicted bounding box as a tensor."""
         return self.filter.predict()
 
-    def update(self, box, feature=None):
+    def update(self, box: Sequence[float], feature: torch.Tensor | None = None) -> None:
+        """Update the tracker with a new observation and optional appearance.
+
+        Args:
+            box: Observed bounding box [x1, y1, x2, y2].
+            feature: Optional appearance embedding.
+        """
         self.filter.update(box)
         self.boxes.append(box)
         self.time_since_update = 0
@@ -57,25 +108,32 @@ class Track(TrackerBase):
 
 
 class LSTMTracker(TrackerBase):
-    def __init__(self, input_dim=4, hidden_dim=64, device="cpu") -> None:
+    """LSTM-based tracker on past box sequences.
+
+    Uses a small LSTM to predict the next box from the last T observations.
+    """
+
+    def __init__(self, input_dim: int = 4, hidden_dim: int = 64, device: str = "cpu") -> None:
         super().__init__()
         self.device = torch.device(device)
         self.lstm = nn.LSTM(input_dim, hidden_dim, batch_first=True).to(self.device)
         self.fc = nn.Linear(hidden_dim, input_dim).to(self.device)
-        self.history = []
+        self.history: list[torch.Tensor] = []
 
-    def update(self, box):
+    def update(self, box: Sequence[float]) -> None:
         box_tensor = torch.tensor(box, dtype=torch.float32, device=self.device)
         self.history.append(box_tensor)
         if len(self.history) > 10:
             self.history.pop(0)
 
-    def predict(self):
+    def predict(self) -> torch.Tensor:
         if len(self.history) < 2:
             return self.history[-1]
         input_seq = torch.stack(self.history).unsqueeze(0)  # [1, T, 4]
-        output, _ = self.lstm(input_seq)
-        pred = self.fc(output[:, -1, :])
+        output_any, _ = self.lstm(input_seq)
+        output = cast("torch.Tensor", output_any)
+        pred_any = self.fc(output[:, -1, :])
+        pred = cast("torch.Tensor", pred_any)
         return pred.squeeze().detach()
 
 
@@ -86,20 +144,20 @@ class ParticleFilter(TrackerBase):
     For GPU-accelerated version with resampling, use ParticleFilterGPU.
     """
 
-    def __init__(self, initial_box, num_particles=100, device="cpu") -> None:
+    def __init__(self, initial_box: Sequence[float], num_particles: int = 100, device: str = "cpu") -> None:
         self.device = torch.device(device)
         self.num_particles = num_particles
         box_tensor = torch.tensor(initial_box, dtype=torch.float32, device=self.device)
         self.particles = box_tensor.unsqueeze(0).repeat(num_particles, 1).clone()
         self.weights = torch.ones(num_particles, device=self.device) / num_particles
 
-    def predict(self):
+    def predict(self) -> torch.Tensor:
         noise = torch.randn_like(self.particles)  # std ggf. parametrisierbar
         self.particles += noise
         estimate = torch.sum(self.particles * self.weights[:, None], dim=0)
         return estimate
 
-    def update(self, observation):
+    def update(self, observation: Sequence[float]) -> None:
         obs_tensor = torch.tensor(observation, dtype=torch.float32, device=self.device)
         dists = torch.norm(self.particles[:, :2] - obs_tensor[:2], dim=1)
         self.weights = torch.exp(-0.5 * dists**2)
@@ -134,7 +192,7 @@ class ParticleFilterGPU(TrackerBase):
 
     def __init__(
         self,
-        initial_box,
+        initial_box: Sequence[float],
         num_particles: int = 500,
         device: str = "cpu",
         process_noise_pos: float = 10.0,
@@ -223,7 +281,7 @@ class ParticleFilterGPU(TrackerBase):
         estimate_state = torch.sum(self.particles * self.weights[:, None], dim=0)
         return self._state_to_box(estimate_state)
 
-    def update(self, observation):
+    def update(self, observation: Sequence[float]) -> None:
         """Update step: weight particles based on observation likelihood.
 
         Uses IoU-based likelihood for robust measurement update.
@@ -333,7 +391,7 @@ class ParticleFilterGPU(TrackerBase):
         iou = inter_area / union_area
         return iou.squeeze()
 
-    def _systematic_resample(self):
+    def _systematic_resample(self) -> None:
         """Systematic resampling to avoid particle degeneracy.
 
         This is more efficient than multinomial resampling and has lower variance.
@@ -373,21 +431,39 @@ class ParticleFilterTPU(ParticleFilterGPU):
     Compatible with Apple Silicon (MPS) and Google Cloud TPU.
     """
 
-    def __init__(self, *args, **kwargs) -> None:
-        # Force device to appropriate accelerator
-        if "device" in kwargs:
-            device = kwargs["device"]
-            if device == "tpu":
-                # For Google Cloud TPU, would use torch_xla
-                kwargs["device"] = "cpu"  # Fallback if torch_xla not available
-            elif device == "mps" or device == "cuda":
-                # Apple Silicon or CUDA - use as is
-                pass
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        initial_box: Sequence[float],
+        num_particles: int = 1000,
+        device: str = "cpu",
+        process_noise_pos: float = 10.0,
+        process_noise_vel: float = 5.0,
+        process_noise_scale: float = 0.05,
+        measurement_noise: float = 20.0,
+        min_particles_ratio: float = 0.5,
+    ) -> None:
+        # Normalize device to appropriate accelerator
+        dev = device
+        if dev == "tpu":
+            # For Google Cloud TPU, would use torch_xla; fallback to CPU when not available
+            dev = "cpu"
+        # Initialize base GPU particle filter
+        super().__init__(
+            initial_box=initial_box,
+            num_particles=num_particles,
+            device=dev,
+            process_noise_pos=process_noise_pos,
+            process_noise_vel=process_noise_vel,
+            process_noise_scale=process_noise_scale,
+            measurement_noise=measurement_noise,
+            min_particles_ratio=min_particles_ratio,
+        )
 
 
 class KalmanFilter(TrackerBase):
-    def __init__(self, initial_box, device="cpu") -> None:
+    """Simple constant-velocity Kalman filter for box tracking."""
+
+    def __init__(self, initial_box: Sequence[float], device: str = "cpu") -> None:
         self.device = torch.device(device)
 
         x1, y1, x2, y2 = initial_box
@@ -412,12 +488,12 @@ class KalmanFilter(TrackerBase):
 
         self._I = torch.eye(8, device=self.device)  # für Update
 
-    def predict(self):
+    def predict(self) -> torch.Tensor:
         self.state = self.F @ self.state
         self.P = self.F @ self.P @ self.F.T + self.Q
         return self._state_to_box()
 
-    def update(self, box):
+    def update(self, box: Sequence[float]) -> None:
         x1, y1, x2, y2 = box
         cx = (x1 + x2) / 2
         cy = (y1 + y2) / 2
@@ -432,7 +508,7 @@ class KalmanFilter(TrackerBase):
         self.state = self.state + K @ y
         self.P = (self._I - K @ self.H) @ self.P
 
-    def _state_to_box(self):
+    def _state_to_box(self) -> torch.Tensor:
         cx, cy, w, h = self.state[:4]
         x1 = cx - w / 2
         y1 = cy - h / 2
