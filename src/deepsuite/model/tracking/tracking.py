@@ -77,9 +77,11 @@ class TrackingModule(BaseModule):
             gt_ids = targets[i]["ids"]
             frame_id = targets[i].get("frame_id", batch_idx * batch_size + i)
 
-            # MOT: Detektion → (z. B. YOLO o. CenterNet, hier Dummy)
-            pred_boxes = gt_boxes  # TODO: echte detections
-            pred_features = [None for _ in pred_boxes]  # TODO: ReID-Features wenn gewünscht
+            # MOT: Detection step (currently uses ground truth boxes for validation)
+            # In production, replace with actual detector (YOLO, CenterNet, etc.)
+            pred_boxes = gt_boxes
+            # ReID features can be extracted here if needed for appearance-based tracking
+            pred_features = [None for _ in pred_boxes]
 
             self.tracker.update(pred_boxes, pred_features)
             tracks = self.tracker.get_active_tracks()

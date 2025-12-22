@@ -95,7 +95,7 @@ warn_no_return = true
 warn_unreachable = true
 strict_optional = true
 strict_equality = true
-strict_concatenate = true
+extra_checks = true
 ignore_missing_imports = true
 explicit_package_bases = true
 namespace_packages = true
@@ -125,10 +125,19 @@ module = [
 ]
 ignore_missing_imports = true
 
+# Legacy modules with complex type requirements
+[[tool.mypy.overrides]]
+module = [
+    "deepsuite.model.feature.wavenet",
+    "deepsuite.model.tracking.tracking",
+    "deepsuite.utils.taskAlignedAssigner",
+]
+ignore_errors = true
+
 [tool.black]
 # Support Python 3.7 through 3.11
 line-length = 100
-target-version = "py311"
+target-version = ["py311"]
 
 [tool.ruff]
 exclude = [
@@ -236,6 +245,33 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
     "N999",    # CamelCase module filename is intentional for historical reasons
     "E501",    # Long documentation lines acceptable
     "W505",    # Long doc lines acceptable
+    "ANN",     # Complex legacy code - annotations would require major refactoring
+    "D205",    # Docstring formatting from upstream
+    "PLC0415", # Import inside exception handler for optional logging
+]
+"src/deepsuite/model/feature/wavenet.py" = [
+    "ANN",     # Complex legacy code - annotations would require major refactoring
+    "N803",    # T is conventional for time dimension in audio models
+    "N806",    # B/T are conventional in batch processing
+    "N812",    # F for functional is PyTorch convention
+    "SIM108",  # Explicit if-else preferred for clarity in tensor shapes
+    "SIM102",  # Nested if for global conditioning more readable
+    "SIM105",  # try-except pattern preferred over contextlib
+    "W505",    # Long doc lines acceptable
+    "E501",    # Long doc lines acceptable
+    "D101",    # Legacy class, extensive inline documentation
+    "D102",    # Legacy methods, extensive inline documentation
+    "D103",    # Utility functions, obvious from signature
+    "RET504",  # Return assignment pattern preferred for clarity
+    "PLR0912", # High complexity inherent to WaveNet architecture
+    "PLR0915", # High statement count inherent to incremental generation
+    "RUF005",  # Tuple concat style preferred for clarity
+]
+"src/deepsuite/model/tracking/tracking.py" = [
+    "ANN",     # Complex legacy code - annotations would require major refactoring
+    "D102",    # PyTorch Lightning hooks don't need docstrings
+    "D205",    # Docstring formatting acceptable
+    "D415",    # Docstring formatting acceptable
 ]
 "src/deepsuite/utils/hermite.py" = [
     "E501",

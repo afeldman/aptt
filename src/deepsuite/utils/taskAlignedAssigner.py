@@ -84,7 +84,11 @@ class TaskAlignedAssigner(nn.Module):
             return self._forward(pd_scores, pd_bboxes, anc_points, gt_labels, gt_bboxes, mask_gt)
         except torch.OutOfMemoryError:
             # Move tensors to CPU, compute, then move back to original device
-            # TODO: Logger
+            from loguru import logger
+
+            logger.warning(
+                "TaskAlignedAssigner: OutOfMemoryError encountered, falling back to CPU computation"
+            )
             cpu_tensors = [
                 t.cpu() for t in (pd_scores, pd_bboxes, anc_points, gt_labels, gt_bboxes, mask_gt)
             ]

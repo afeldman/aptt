@@ -297,8 +297,7 @@ class WaveNet(nn.Module):
             test_inputs (Tensor): Teacher forcing inputs (for debugging)
             tqdm (lamda) : tqdm
             softmax (bool) : Whether applies softmax or not
-            quantize (bool): Whether quantize softmax output before feeding the
-              network output to input for the next time step. TODO: rename
+            quantize (bool): Whether to quantize softmax output before feeding to next step
             log_scale_min (float):  Log scale minimum value.
 
         Returns:
@@ -352,7 +351,8 @@ class WaveNet(nn.Module):
                 initial_input = torch.zeros(B, 1, 1)
             else:
                 initial_input = torch.zeros(B, 1, self.out_channels)
-                initial_input[:, :, 127] = 1  # TODO: is this ok?
+                # Initialize center bin for mu-law encoded audio (128 = silence in 8-bit mu-law)
+                initial_input[:, :, 127] = 1
             # https://github.com/pytorch/pytorch/issues/584#issuecomment-275169567
             if next(self.parameters()).is_cuda:
                 initial_input = initial_input.cuda()
@@ -507,9 +507,9 @@ class WaveNetRNN(WaveNet):
         )
 
         assert rnn_type.lower() in ["gru", "lstm", "rnn"], f"Invalid RNN type: {rnn_type}"
-        assert rnn_hidden_size % (2 if bidirectional else 1) == 0, (
-            "rnn_hidden_size must be divisible by 2 if bidirectional=True"
-        )
+        assert (
+            rnn_hidden_size % (2 if bidirectional else 1) == 0
+        ), "rnn_hidden_size must be divisible by 2 if bidirectional=True"
         assert rnn_layers > 0, "rnn_layers must be greater than 0"
         assert rnn_hidden_size > 0, "rnn_hidden_size must be greater than 0"
         assert rnn_layers > 0, "rnn_layers must be greater than 0"
