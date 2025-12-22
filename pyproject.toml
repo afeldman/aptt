@@ -128,6 +128,8 @@ ignore_missing_imports = true
 # Legacy modules with complex type requirements
 [[tool.mypy.overrides]]
 module = [
+    "deepsuite.model.autoencoder",
+    "deepsuite.model.autoencoder_configs",
     "deepsuite.model.feature.wavenet",
     "deepsuite.model.tracking.tracking",
     "deepsuite.utils.taskAlignedAssigner",
