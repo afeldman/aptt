@@ -7,7 +7,7 @@ A PyTorch Lightning-based framework for deep learning with focus on:
 - Audio/Signal Processing
 """
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 # Core Lightning Modules
 from deepsuite.lightning_base.continual_learning_manager import ContinualLearningManager
@@ -20,6 +20,12 @@ from deepsuite.model.detection.centernet import CenterNetModel
 
 # Model Architectures
 from deepsuite.model.detection.yolo import YOLO
+from deepsuite.model.autoencoder import AutoencoderModule, ConvDecoder, ConvEncoder
+from deepsuite.model.discriminator import (
+    MultiScaleDiscriminator,
+    PatchGANDiscriminator,
+    PixelDiscriminator,
+)
 from deepsuite.modules.centernet import CenterNetModule
 from deepsuite.modules.tracking import TrackingModule
 from deepsuite.modules.yolo import Yolo
@@ -31,6 +37,7 @@ __all__ = [
     "Yolo",
     "CenterNetModule",
     "TrackingModule",
+    "AutoencoderModule",
     # Base Classes
     "BaseModule",
     "BaseTrainer",
@@ -39,4 +46,9 @@ __all__ = [
     "YOLO",
     "CenterNetModel",
     "BackboneAdapter",
+    "ConvEncoder",
+    "ConvDecoder",
+    "PatchGANDiscriminator",
+    "PixelDiscriminator",
+    "MultiScaleDiscriminator",
 ]
