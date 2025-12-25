@@ -147,6 +147,4 @@ class Bottleneck(nn.Module):
             x += self.projection(in_x)
 
         # final relu
-        x = self.relu(x)
-
-        return x
+        return self.relu(x)

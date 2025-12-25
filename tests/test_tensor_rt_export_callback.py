@@ -60,7 +60,7 @@ def test_tensor_rt_export(
     mock_build_torchscript,
     dummy_trainer,
 ):
-    trainer, model, callback, ckpt_path = dummy_trainer
+    trainer, model, callback, _ckpt_path = dummy_trainer
 
     mock_jit_load.return_value = model  # simulate loading TS model
     mock_tensorrt_compile.return_value = model  # simulate TRT conversion

@@ -13,7 +13,7 @@ Modell definieren
 
    from deepsuite.lightning_base.module import BaseModule
    import torch.nn as nn
-   
+
    class SimpleClassifier(BaseModule):
        def __init__(self, input_size=784, hidden_size=128, num_classes=10):
            super().__init__(
@@ -24,7 +24,7 @@ Modell definieren
            self.fc1 = nn.Linear(input_size, hidden_size)
            self.relu = nn.ReLU()
            self.fc2 = nn.Linear(hidden_size, num_classes)
-       
+
        def forward(self, x):
            x = x.view(x.size(0), -1)
            x = self.fc1(x)
@@ -38,7 +38,7 @@ DataModule erstellen
 .. code-block:: python
 
    from deepsuite.lightning_base.dataset.image_loader import ImageDataModule
-   
+
    datamodule = ImageDataModule(
        train_dir="data/train",
        val_dir="data/val",
@@ -53,15 +53,15 @@ Training starten
 .. code-block:: python
 
    from deepsuite.lightning_base.trainer import BaseTrainer
-   
+
    model = SimpleClassifier()
-   
+
    trainer = BaseTrainer(
        log_dir="logs",
        mlflow_experiment="classification_experiment",
        max_epochs=50
    )
-   
+
    trainer.fit(model, datamodule=datamodule)
 
 Hyperparameter-Tuning
@@ -73,13 +73,13 @@ Mit Ray Tune
 .. code-block:: python
 
    from ray import tune
-   
+
    search_space = {
        "lr": tune.loguniform(1e-5, 1e-2),
        "batch_size": tune.choice([16, 32, 64, 128]),
        "hidden_size": tune.choice([64, 128, 256, 512])
    }
-   
+
    model = SimpleClassifier(search_space=search_space)
    best_config = model.optimize_hyperparameters(
        datamodule=datamodule,
@@ -95,16 +95,16 @@ APTT bietet eine Vielzahl von Loss-Funktionen:
 .. code-block:: python
 
    from deepsuite.loss import get_loss
-   
+
    # Focal Loss für unbalancierte Datasets
    focal_loss = get_loss("focal", alpha=0.25, gamma=2.0)
-   
+
    # Binary Focal Loss
    binary_focal = get_loss("binaryfocal", alpha=0.25, gamma=2.0)
-   
+
    # Varifocal Loss
    varifocal = get_loss("varfocal", alpha=0.75, gamma=2.0)
-   
+
    # Bounding Box Loss
    bbox_loss = get_loss("bbox", iou_type="giou")
 
@@ -152,7 +152,7 @@ Model Export Callbacks
 
    from deepsuite.callbacks.torchscript import TorchScriptExportCallback
    from deepsuite.callbacks.tensor_rt import TensorRTExportCallback
-   
+
    trainer = BaseTrainer(
        export_formats=["torchscript", "tensor_rt"],
        model_output_dir="exported_models"
@@ -165,12 +165,12 @@ Visualization Callbacks
 
    from deepsuite.callbacks.embedding_logger import EmbeddingLoggerCallback
    from deepsuite.callbacks.tsne_laplace_callback import TSNELaplaceCallback
-   
+
    callbacks = [
        EmbeddingLoggerCallback(),
        TSNELaplaceCallback()
    ]
-   
+
    trainer = BaseTrainer(callbacks=callbacks)
 
 Early Stopping & Checkpointing
@@ -179,20 +179,20 @@ Early Stopping & Checkpointing
 .. code-block:: python
 
    from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
-   
+
    early_stop = EarlyStopping(
        monitor="val/loss",
        patience=10,
        mode="min"
    )
-   
+
    checkpoint = ModelCheckpoint(
        monitor="val/accuracy",
        mode="max",
        save_top_k=3,
        dirpath="checkpoints"
    )
-   
+
    trainer = BaseTrainer(
        early_stopping=early_stop,
        model_checkpoint=checkpoint
@@ -229,7 +229,7 @@ TensorBoard
    trainer = BaseTrainer(
        log_dir="logs/tensorboard"
    )
-   
+
    # TensorBoard starten:
    # tensorboard --logdir=logs/tensorboard
 

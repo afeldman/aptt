@@ -144,7 +144,9 @@ class ParticleFilter(TrackerBase):
     For GPU-accelerated version with resampling, use ParticleFilterGPU.
     """
 
-    def __init__(self, initial_box: Sequence[float], num_particles: int = 100, device: str = "cpu") -> None:
+    def __init__(
+        self, initial_box: Sequence[float], num_particles: int = 100, device: str = "cpu"
+    ) -> None:
         self.device = torch.device(device)
         self.num_particles = num_particles
         box_tensor = torch.tensor(initial_box, dtype=torch.float32, device=self.device)
@@ -154,8 +156,7 @@ class ParticleFilter(TrackerBase):
     def predict(self) -> torch.Tensor:
         noise = torch.randn_like(self.particles)  # std ggf. parametrisierbar
         self.particles += noise
-        estimate = torch.sum(self.particles * self.weights[:, None], dim=0)
-        return estimate
+        return torch.sum(self.particles * self.weights[:, None], dim=0)
 
     def update(self, observation: Sequence[float]) -> None:
         obs_tensor = torch.tensor(observation, dtype=torch.float32, device=self.device)
@@ -310,7 +311,7 @@ class ParticleFilterGPU(TrackerBase):
         obs_h = obs_tensor[3] - obs_tensor[1]
 
         # Estimate velocity from weighted particles
-        weighted_state = torch.sum(self.particles * self.weights[:, None], dim=0)
+        torch.sum(self.particles * self.weights[:, None], dim=0)
 
         # Update velocities based on difference
         self.particles[:, 4] = 0.7 * self.particles[:, 4] + 0.3 * (obs_cx - self.particles[:, 0])

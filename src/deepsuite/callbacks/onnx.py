@@ -105,8 +105,8 @@ class ONNXExportCallback(ExportBaseCallback):
 
         try:
             try:
-                import onnx  # noqa: PLC0415
-                from onnxsim import simplify  # noqa: PLC0415
+                import onnx
+                from onnxsim import simplify
             except ImportError:
                 logger.warning("⚠️ onnx oder onnxsim nicht installiert. Vereinfachung übersprungen.")
                 return

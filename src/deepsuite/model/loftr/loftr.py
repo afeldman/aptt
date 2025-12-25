@@ -13,7 +13,7 @@ from deepsuite.model.loftr.transformer import LocalFeatureTransformer
 
 
 class LoFTR(nn.Module):
-    """LoFTR (Detector-Free Local Feature Matching with Transformers)
+    """LoFTR (Detector-Free Local Feature Matching with Transformers).
 
     Dieses Modul kombiniert Feature-Extraktion, coarse-to-fine Matching
     und Transformer-basierte Verarbeitung zur robusten Bildpaar-Verknüpfung.
@@ -202,5 +202,5 @@ class LoFTR(nn.Module):
                 state_dict[k.replace("matcher.", "", 1)] = state_dict.pop(k)
         return super().load_state_dict(state_dict, *args, **kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"LoFTR(coarse_dim={self.loftr_coarse.d_model}, match_type={self.coarse_matching.match_type})"

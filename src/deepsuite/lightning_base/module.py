@@ -1,4 +1,4 @@
-"""Base Lightning module with Ray Tune integration and metrics.
+r"""Base Lightning module with Ray Tune integration and metrics.
 
 This module provides a convenient base class for training models with
 PyTorch Lightning, optional MLflow logging, Ray Tune-based hyperparameter
@@ -34,7 +34,6 @@ try:
     HAS_TORCHINFO = True
 except ImportError:
     HAS_TORCHINFO = False
-    print("⚠️  `torchinfo` not installed. `summary()` will not be available.")
 
 try:
     from torchviz import Digraph, make_dot  # type: ignore
@@ -44,7 +43,6 @@ except ImportError:
     HAS_TORCHVIZ = False
     Digraph = None  # type: ignore
     make_dot = None  # type: ignore
-    print("⚠️  `torchviz` not installed. Graph visualization will not be available.")
 
 
 class BaseModule(pl.LightningModule):
@@ -62,7 +60,7 @@ class BaseModule(pl.LightningModule):
         metrics: Sequence[str] = ("accuracy", "precision", "recall"),
         num_classes: int = 10,  # Default value added to docstring
         teacher_model: torch.nn.Module | None = None,  # Default value added to docstring
-    ):
+    ) -> None:
         """Initializes the BaseModel with the given parameters.
 
         Parameters
@@ -168,14 +166,14 @@ class BaseModule(pl.LightningModule):
         """Berechnet den Loss für die gegebenen Vorhersagen und Labels. Standard: MSE-Loss."""
         return self.loss_fn(y_hat, y)
 
-    def on_train_epoch_end(self):
+    def on_train_epoch_end(self) -> None:
         """Wird am Ende eines Trainings-Epochs aufgerufen.
         Setzt alle Metriken zurück.
         """
         for metric in self.active_metrics.values():
             metric.reset()
 
-    def on_validation_epoch_end(self):
+    def on_validation_epoch_end(self) -> None:
         """Wird am Ende einer Validierungs-Epoch aufgerufen.
         Setzt alle Metriken zurück.
         """
@@ -237,9 +235,9 @@ class BaseModule(pl.LightningModule):
         config, datamodule, max_epochs=10, model_class=None, save_name="best_config"
     ):
         """Trains the model with Ray Tune based on hyperparameters."""
-        assert isinstance(datamodule, pl.LightningDataModule), (
-            "datamodule must be a LightningDataModule."
-        )
+        assert isinstance(
+            datamodule, pl.LightningDataModule
+        ), "datamodule must be a LightningDataModule."
 
         model_class = model_class or BaseModule  # fallback
 

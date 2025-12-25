@@ -176,6 +176,7 @@ class SegmentationLoss(DetectionLoss):  # type: ignore[misc]
         )  # (n, 32) @ (32, 80, 80) -> (n, 80, 80)
         loss = F.binary_cross_entropy_with_logits(pred_mask, gt_mask, reduction="none")
         from typing import cast
+
         return cast("torch.Tensor", (crop_mask(loss, xyxy).mean(dim=(1, 2)) / area).sum())
 
     def calculate_segmentation_loss(
@@ -212,7 +213,9 @@ class SegmentationLoss(DetectionLoss):  # type: ignore[misc]
 
             .. code-block:: python
 
-                pred_mask = torch.einsum('in,nhw->ihw', pred, proto)  # (i, 32) @ (32, 160, 160) -> (i, 160, 160)
+                pred_mask = torch.einsum(
+                    "in,nhw->ihw", pred, proto
+                )  # (i, 32) @ (32, 160, 160) -> (i, 160, 160)
         """
         _, _, mask_h, mask_w = proto.shape
         loss: torch.Tensor = torch.tensor(0.0, device=proto.device)
@@ -229,7 +232,7 @@ class SegmentationLoss(DetectionLoss):  # type: ignore[misc]
         )
 
         for i, single_i in enumerate(
-            zip(fg_mask, target_gt_idx, pred_masks, proto, mxyxy, marea, masks)
+            zip(fg_mask, target_gt_idx, pred_masks, proto, mxyxy, marea, masks, strict=False)
         ):
             fg_mask_i, target_gt_idx_i, pred_masks_i, proto_i, mxyxy_i, marea_i, masks_i = single_i
             if fg_mask_i.any():

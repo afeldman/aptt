@@ -84,5 +84,3 @@ if __name__ == "__main__":
     # Neue Messungen kalibrieren
     new_signals = measured_signals * (1.1 + 0.05j)  # Zusätzliche Verzerrung
     calibrated_signals = calibration.apply_calibration(new_signals)
-
-    print(calibrated_signals.shape)  # Sollte (batch_size, num_sensors, num_samples) sein

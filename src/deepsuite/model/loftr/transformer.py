@@ -10,7 +10,7 @@ class LocalFeatureTransformer(nn.Module):
         nhead: int = 8,
         layer_names: list[str] = ("self", "cross"),
         attention: str = "linear",
-    ):
+    ) -> None:
         super().__init__()
         self.d_model = d_model
         self.nhead = nhead
@@ -26,7 +26,7 @@ class LocalFeatureTransformer(nn.Module):
 
         self._reset_parameters()
 
-    def _reset_parameters(self):
+    def _reset_parameters(self) -> None:
         for p in self.parameters():
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
@@ -34,7 +34,7 @@ class LocalFeatureTransformer(nn.Module):
     def forward(self, feat0, feat1, mask0=None, mask1=None):
         assert feat0.size(2) == self.d_model, "Input feature dim must match d_model"
 
-        for name, layer in zip(self.layer_names, self.layers):
+        for name, layer in zip(self.layer_names, self.layers, strict=False):
             if name == "self":
                 feat0 = layer(feat0, feat0, mask0, mask0)
                 feat1 = layer(feat1, feat1, mask1, mask1)

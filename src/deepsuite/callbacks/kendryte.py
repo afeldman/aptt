@@ -69,9 +69,7 @@ class KendryteExportCallback(ExportBaseCallback):
 
         # Schritt 1: ONNX-Export
         try:
-            ONNXExportCallback._export_onnx(  # noqa: SLF001
-                pl_module, example_input, onnx_path, self.opversion
-            )
+            ONNXExportCallback._export_onnx(pl_module, example_input, onnx_path, self.opversion)
         except Exception as e:
             logger.error(f"❌ ONNX-Export fehlgeschlagen: {e}")
             return
@@ -89,7 +87,7 @@ class KendryteExportCallback(ExportBaseCallback):
         Nutzt onnxruntime falls verfügbar, sonst wird eine Warnung geloggt.
         """
         try:
-            from onnxruntime.quantization import QuantType, quantize_dynamic  # noqa: PLC0415
+            from onnxruntime.quantization import QuantType, quantize_dynamic
         except ImportError:
             logger.warning("⚠️ onnxruntime nicht installiert. Quantisierung übersprungen.")
             return

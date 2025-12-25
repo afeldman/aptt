@@ -10,7 +10,7 @@ class FinePreprocess(nn.Module):
         fine_window_size: int = 5,
         coarse_model: int = 256,
         fine_model: int = 128,
-    ):
+    ) -> None:
         super().__init__()
 
         self.cat_c_feat = fine_concat_coarse_feat
@@ -26,7 +26,7 @@ class FinePreprocess(nn.Module):
 
         self._reset_parameters()
 
-    def _reset_parameters(self):
+    def _reset_parameters(self) -> None:
         for p in self.parameters():
             if p.dim() > 1:
                 nn.init.kaiming_normal_(p, mode="fan_out", nonlinearity="relu")
@@ -41,8 +41,11 @@ class FinePreprocess(nn.Module):
             return empty, empty
 
         # 1. Unfold local windows
-        unfold = lambda x: F.unfold(x, kernel_size=(W, W), stride=stride, padding=W // 2)
-        reshape_unfold = lambda x: x.view(x.size(0), self.d_model_f, W * W, -1).permute(0, 3, 2, 1)
+        def unfold(x):
+            return F.unfold(x, kernel_size=(W, W), stride=stride, padding=W // 2)
+
+        def reshape_unfold(x):
+            return x.view(x.size(0), self.d_model_f, W * W, -1).permute(0, 3, 2, 1)
 
         feat_f0_unfold = reshape_unfold(unfold(feat_f0))  # [N, L, W*W, C]
         feat_f1_unfold = reshape_unfold(unfold(feat_f1))
@@ -86,4 +89,3 @@ if __name__ == "__main__":
     }
 
     out0, out1 = module(feat_f0, feat_f1, feat_c0.permute(0, 2, 1), feat_c1.permute(0, 2, 1), data)
-    print(out0.shape)  # [2, 25, 128] bei W=5

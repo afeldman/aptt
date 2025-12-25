@@ -18,7 +18,6 @@ berechnet werden
 """
 
 
-
 def hermite(n: int, x: torch.Tensor) -> torch.Tensor:
     """Berechnet die Hermite-Polynome H_n(x) iterativ.
 

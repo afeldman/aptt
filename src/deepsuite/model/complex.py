@@ -34,13 +34,11 @@ class ComplexLearningModel(nn.Module):
             torch.Tensor: Vorhergesagte Longitude & Latitude.
         """
         if WITH_COMPLEXPYTORCH:
-            assert signal.dtype == torch.complex128, (
-                "Eingabe muss komplexwertig sein (torch.complex128)"
-            )
+            assert (
+                signal.dtype == torch.complex128
+            ), "Eingabe muss komplexwertig sein (torch.complex128)"
 
         x = self.dft_layer(signal.to(signal.device))  # DFT ausführen
         x = complex_relu(self.fc1(x.to(signal.device)))  # Komplexe Aktivierung
         x = complex_relu(self.fc2(x.to(signal.device)))  # Noch eine versteckte Schicht
-        x = self.output(x.to(signal.device))  # Longitude & Latitude vorhersagen
-
-        return x
+        return self.output(x.to(signal.device))  # Longitude & Latitude vorhersagen

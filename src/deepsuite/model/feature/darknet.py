@@ -61,7 +61,7 @@ class CSPDarknetBackbone(BackboneAdapter):
         channels_list=None,
         num_blocks_list=None,
         stage_indices=(2, 4, 6),  # CSPBlock-Schichten (nach Conv, CSP, Conv, CSP, ...)
-    ):
+    ) -> None:
         super().__init__()
         self.set_stage_indices(stage_indices)
 
@@ -70,13 +70,13 @@ class CSPDarknetBackbone(BackboneAdapter):
         if num_blocks_list is None:
             num_blocks_list = [1, 2, 8, 8, 4]
 
-        assert len(channels_list) == len(num_blocks_list) + 1, (
-            "channels_list and num_blocks_list must be compatible."
-        )
+        assert (
+            len(channels_list) == len(num_blocks_list) + 1
+        ), "channels_list and num_blocks_list must be compatible."
 
         self.layers = nn.ModuleList()
         in_ch = in_channels
-        for out_ch, num_blocks in zip(channels_list, num_blocks_list):
+        for out_ch, num_blocks in zip(channels_list, num_blocks_list, strict=False):
             self.layers.append(
                 ConvBlock(in_ch, out_ch, kernel_size=3, stride=2, padding=1)
             )  # index += 1

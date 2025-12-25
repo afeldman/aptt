@@ -20,7 +20,8 @@ class FPN(nn.Module):
     def forward(self, features):
         # Laterale Verbindungen
         laterals = [
-            lateral_conv(feature) for lateral_conv, feature in zip(self.lateral_convs, features)
+            lateral_conv(feature)
+            for lateral_conv, feature in zip(self.lateral_convs, features, strict=False)
         ]
 
         # Top-down Pfad
@@ -30,7 +31,7 @@ class FPN(nn.Module):
             )
 
         # Ausgabe
-        outputs = [
-            output_conv(lateral) for output_conv, lateral in zip(self.output_convs, laterals)
+        return [
+            output_conv(lateral)
+            for output_conv, lateral in zip(self.output_convs, laterals, strict=False)
         ]
-        return outputs

@@ -43,6 +43,7 @@ class DetectModule(Protocol):
 class DetectModel(Protocol):
     args: HypParams
     model: Sequence[DetectModule]
+
     def parameters(self) -> Any: ...
 
 

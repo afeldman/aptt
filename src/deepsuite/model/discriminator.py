@@ -6,8 +6,12 @@ perceptual quality refinement, and image-to-image translation.
 
 from __future__ import annotations
 
-import torch
+from typing import TYPE_CHECKING
+
 from torch import nn
+
+if TYPE_CHECKING:
+    import torch
 
 
 class PatchGANDiscriminator(nn.Module):
@@ -46,19 +50,37 @@ class PatchGANDiscriminator(nn.Module):
         for n in range(1, n_layers):
             nf_mult_prev = nf_mult
             nf_mult = min(2**n, 8)
-            layers.extend([
-                nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=4, stride=2, padding=1, bias=use_bias),
-                nn.BatchNorm2d(ndf * nf_mult),
-                nn.LeakyReLU(0.2, inplace=True),
-            ])
+            layers.extend(
+                [
+                    nn.Conv2d(
+                        ndf * nf_mult_prev,
+                        ndf * nf_mult,
+                        kernel_size=4,
+                        stride=2,
+                        padding=1,
+                        bias=use_bias,
+                    ),
+                    nn.BatchNorm2d(ndf * nf_mult),
+                    nn.LeakyReLU(0.2, inplace=True),
+                ]
+            )
 
         nf_mult_prev = nf_mult
         nf_mult = min(2**n_layers, 8)
-        layers.extend([
-            nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=4, stride=1, padding=1, bias=use_bias),
-            nn.BatchNorm2d(ndf * nf_mult),
-            nn.LeakyReLU(0.2, inplace=True),
-        ])
+        layers.extend(
+            [
+                nn.Conv2d(
+                    ndf * nf_mult_prev,
+                    ndf * nf_mult,
+                    kernel_size=4,
+                    stride=1,
+                    padding=1,
+                    bias=use_bias,
+                ),
+                nn.BatchNorm2d(ndf * nf_mult),
+                nn.LeakyReLU(0.2, inplace=True),
+            ]
+        )
 
         # Final layer: output patch predictions
         layers.append(nn.Conv2d(ndf * nf_mult, 1, kernel_size=4, stride=1, padding=1))
@@ -120,10 +142,9 @@ class MultiScaleDiscriminator(nn.Module):
     def __init__(self, in_channels: int = 3, num_scales: int = 3, ndf: int = 64) -> None:
         super().__init__()
         self.num_scales = num_scales
-        self.discriminators = nn.ModuleList([
-            PatchGANDiscriminator(in_channels=in_channels, ndf=ndf)
-            for _ in range(num_scales)
-        ])
+        self.discriminators = nn.ModuleList(
+            [PatchGANDiscriminator(in_channels=in_channels, ndf=ndf) for _ in range(num_scales)]
+        )
         self.downsample = nn.AvgPool2d(kernel_size=3, stride=2, padding=1, count_include_pad=False)
 
     def forward(self, x: torch.Tensor) -> list[torch.Tensor]:

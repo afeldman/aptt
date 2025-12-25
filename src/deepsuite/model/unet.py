@@ -29,7 +29,7 @@ class UNetBlock(nn.Module, UpsampleMixin):
 
     def __init__(
         self, height, in_ch, mid_ch, out_ch, dilated=False, flat=False, conv_type: str = "block"
-    ):
+    ) -> None:
         super().__init__()
 
         self.height = height
@@ -42,7 +42,7 @@ class UNetBlock(nn.Module, UpsampleMixin):
         self.pools = nn.ModuleList()
 
         in_c = out_ch
-        for i in range(height - 1):
+        for _i in range(height - 1):
             self.encoders.append(ConvNormAct(in_c, mid_ch, dilate=1, conv_type=conv_type))
             if not flat:
                 self.pools.append(nn.MaxPool2d(2, stride=2, ceil_mode=True))
@@ -98,7 +98,7 @@ class U2NetLike(nn.Module):
             - side_outputs (int, optional): Anzahl an Side-Ausgaben (Default: 6)
     """
 
-    def __init__(self, cfg):
+    def __init__(self, cfg) -> None:
         super().__init__()
 
         self.in_ch = cfg["in_ch"]
@@ -189,10 +189,9 @@ class U2NetLike(nn.Module):
 
 
 class U2Net(U2NetLike):
-    """Standard U²-Net-Konfiguration (groß), basierend auf UNetBlock-Stufen.
-    """
+    """Standard U²-Net-Konfiguration (groß), basierend auf UNetBlock-Stufen."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         cfg = {
             "in_ch": 3,
             "out_ch": 1,
@@ -261,10 +260,9 @@ class U2Net(U2NetLike):
 
 
 class U2NetP(U2NetLike):
-    """Kompakte U²-Net-Variante mit reduzierter Tiefe (U²-NetP).
-    """
+    """Kompakte U²-Net-Variante mit reduzierter Tiefe (U²-NetP)."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         cfg = {
             "in_ch": 3,
             "out_ch": 1,
@@ -301,11 +299,13 @@ class NestedUNet(nn.Module, UpsampleMixin):
         self,
         in_ch=3,
         out_ch=1,
-        filters=[64, 128, 256, 512],
+        filters=None,
         conv_type="block",
         deep_supervision=True,
         activaten=nn.Sigmoid,
-    ):
+    ) -> None:
+        if filters is None:
+            filters = [64, 128, 256, 512]
         super().__init__()
         self.deep_supervision = deep_supervision
         self.depth = len(filters)
@@ -355,7 +355,7 @@ class NestedUNet(nn.Module, UpsampleMixin):
         for j in range(1, self.depth):
             for i in range(self.depth - j):
                 ups = [self.upsample_like(x[f"x_{i + 1}_{k}"], x[f"x_{i}_{0}"]) for k in range(j)]
-                cat = torch.cat([x[f"x_{i}_{0}"]] + ups, dim=1)
+                cat = torch.cat([x[f"x_{i}_{0}"], *ups], dim=1)
                 x[f"x_{i}_{j}"] = self.nest_blocks[f"x_{i}_{j}"](cat)
 
         # Ausgang (Hauptpfad: x_0_{depth-1})
@@ -377,7 +377,7 @@ class NestedUNet(nn.Module, UpsampleMixin):
 
 
 class UNet(U2NetLike):
-    def __init__(self, in_ch=3, out_ch=1, base=64, depth=4, block=ConvNormAct):
+    def __init__(self, in_ch=3, out_ch=1, base=64, depth=4, block=ConvNormAct) -> None:
         stages = []
 
         # Encoder
@@ -412,7 +412,7 @@ class UNetFactory:
     Unterstützt:
         - U2Net
         - U2NetP
-        - NestedUNet (UNet++)
+        - NestedUNet (UNet++).
     """
 
     _registry = {

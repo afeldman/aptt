@@ -28,13 +28,18 @@ Example:
 
 from __future__ import annotations
 
-from torch import Tensor, norm, stack, tensor, topk, zeros
+from typing import TYPE_CHECKING
+
+from torch import norm, stack, tensor, topk, zeros
 from torch.nn import Module
 import torch.nn.functional as F
 from torchvision.ops import batched_nms
 
 from deepsuite.heads.centernet import MultiScaleCenterNetHead
 from deepsuite.model.feature.fpn import FPN
+
+if TYPE_CHECKING:
+    from torch import Tensor
 
 
 def topk_heatmap(heatmap: Tensor, k: int = 100) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
@@ -156,11 +161,13 @@ def apply_nms(boxes: Tensor, iou_thresh: float = 0.5) -> Tensor:
 
     Example:
         ```python
-        detections = torch.tensor([
-            [10, 20, 100, 120, 0.9, 1],  # High confidence, class 1
-            [15, 25, 105, 125, 0.85, 1],  # Overlaps with above, lower score
-            [200, 200, 300, 300, 0.95, 2],  # Different class, high score
-        ])
+        detections = torch.tensor(
+            [
+                [10, 20, 100, 120, 0.9, 1],  # High confidence, class 1
+                [15, 25, 105, 125, 0.85, 1],  # Overlaps with above, lower score
+                [200, 200, 300, 300, 0.95, 2],  # Different class, high score
+            ]
+        )
         filtered = apply_nms(detections, iou_thresh=0.5)
         # Output: keeps boxes 0 and 2, removes 1 (overlap with 0)
         ```
@@ -170,7 +177,7 @@ def apply_nms(boxes: Tensor, iou_thresh: float = 0.5) -> Tensor:
 
     # Extrahiere Komponenten
     coords = boxes[:, :4]  # [x1, y1, x2, y2]
-    scores = boxes[:, 4]   # Confidence scores
+    scores = boxes[:, 4]  # Confidence scores
     classes = boxes[:, 5]  # Class labels
 
     # Wende batched NMS an (clustert pro Klasse)
@@ -212,8 +219,7 @@ class CenterNetModel(Module):
     def forward(self, x):
         features = self.backbone(x)  # [C3, C4, C5]
         pyramid = self.neck(features)  # [P3, P4, P5]
-        outputs = self.head(pyramid)  # list of dicts
-        return outputs
+        return self.head(pyramid)  # list of dicts
 
 
 class CenterNetDecoder(Module):

@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class LinearAttention(nn.Module):
-    def __init__(self, eps=1e-6):
+    def __init__(self, eps=1e-6) -> None:
         super().__init__()
         self.feature_map = lambda x: F.elu(x) + 1  # Inlined for speed
         self.eps = eps
@@ -17,7 +17,7 @@ class LinearAttention(nn.Module):
             q_mask:  [N, L] or None
             kv_mask: [N, S] or None
         Returns:
-            output:  [N, L, H, D]
+            output:  [N, L, H, D].
         """
         Q = self.feature_map(queries)
         K = self.feature_map(keys)

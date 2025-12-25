@@ -15,7 +15,7 @@ class TwinBlock(nn.Module):
         >>> ausgabe = model(eingabe)  # Form: (32, 512)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.fc1 = nn.Linear(784, 1024)
         self.fc2 = nn.Linear(1024, 1024)
@@ -32,8 +32,7 @@ class TwinBlock(nn.Module):
         """
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        return x
+        return F.relu(self.fc3(x))
 
 
 class TwinBlockCNN(nn.Module):
@@ -46,7 +45,7 @@ class TwinBlockCNN(nn.Module):
         >>> embedding = model(bild)  # Form: (16, 512)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
@@ -71,8 +70,7 @@ class TwinBlockCNN(nn.Module):
         x = x.view(x.size(0), -1)  # Flatten
         x = F.relu(self.fc1(x))  # Erste Dense-Schicht
         x = self.dropout(x)  # Dropout (nur im Training)
-        x = self.fc2(x)  # Letzte Dense-Schicht
-        return x
+        return self.fc2(x)  # Letzte Dense-Schicht
 
 
 class SiameseNet(nn.Module):
@@ -92,14 +90,14 @@ class SiameseNet(nn.Module):
 
     def __init__(
         self, is_image: bool = True, comparison_type: Literal["subtract", "concat"] = "subtract"
-    ):
+    ) -> None:
         """Initialisiert das Siamese-Netzwerk.
 
         Args:
             is_image: True für Bilddaten (CNN), False für Vektordaten (Dense).
             comparison_type: 'subtract' oder 'concat' zur Vergleichsbildung.
         """
-        super(SiameseNet, self).__init__()
+        super().__init__()
         self.comparison_type = comparison_type
 
         # Twin-Netzwerk entsprechend dem Datentyp wählen

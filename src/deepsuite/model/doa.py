@@ -38,6 +38,4 @@ class DoA(torch.nn.Module):
         # Sicherstellen, dass die Tensorform gleich bleibt
         x_real = torch.cat([x.real, x.imag], dim=-1)  # Stabile Konvertierung in reelle Werte
 
-        angles = self.fc3(x_real)  # Ausgabe sind reale Azimuth- & Elevationswerte
-
-        return angles
+        return self.fc3(x_real)  # Ausgabe sind reale Azimuth- & Elevationswerte

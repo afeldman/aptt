@@ -17,20 +17,22 @@ class DetectionMetrics:
         self.max_detections = max_detections
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         self.tp = defaultdict(int)
         self.fp = defaultdict(int)
         self.fn = defaultdict(int)
         self.classwise_ap = defaultdict(list) if self.per_class_ap else None
         self.recalls = []
 
-    def update(self, pred_boxes, gt_boxes):
+    def update(self, pred_boxes, gt_boxes) -> None:
         # Limit detections for AR@K
         if self.max_detections:
             pred_boxes = [
-                preds[torch.argsort(preds[:, 4], descending=True)[: self.max_detections]]
-                if preds.shape[0] > self.max_detections
-                else preds
+                (
+                    preds[torch.argsort(preds[:, 4], descending=True)[: self.max_detections]]
+                    if preds.shape[0] > self.max_detections
+                    else preds
+                )
                 for preds in pred_boxes
             ]
 

@@ -75,15 +75,15 @@ class DFT(nn.Module):
         Returns:
             torch.Tensor: Frequenzdarstellung des Signals.
         """
-        assert signal.shape[-1] == self.n_fft, (
-            f"Expected last dimension {self.n_fft}, got {signal.shape[-1]}"
-        )
+        assert (
+            signal.shape[-1] == self.n_fft
+        ), f"Expected last dimension {self.n_fft}, got {signal.shape[-1]}"
         assert isinstance(self.dft_matrix, torch.Tensor), "DFT matrix must be a torch.Tensor"
 
         if Complex.has_complex():
-            assert signal.dtype == torch.complex128, (
-                "Signal must be complex-valued (torch.complex128)"
-            )
+            assert (
+                signal.dtype == torch.complex128
+            ), "Signal must be complex-valued (torch.complex128)"
 
         return signal @ self.dft_matrix.to(signal.device)  # GPU-Kompatibilität
 

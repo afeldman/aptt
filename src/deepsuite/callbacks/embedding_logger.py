@@ -33,7 +33,7 @@ class EmbeddingLoggerCallback(Callback):
 
     def on_validation_batch_end(
         self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx=0
-    ):
+    ) -> None:
         """Collects embeddings and labels from the current batch during validation.
 
         Args:
@@ -57,7 +57,7 @@ class EmbeddingLoggerCallback(Callback):
         self.embeddings.append(features.cpu())
         self.labels.append(y.cpu())
 
-    def on_validation_epoch_end(self, trainer, pl_module):
+    def on_validation_epoch_end(self, trainer, pl_module) -> None:
         """Logs collected embeddings to TensorBoard and optionally to MLflow.
 
         At the end of the validation epoch, this method concatenates the stored

@@ -21,7 +21,7 @@ class ContinualLearningManager:
         save_path = self.model_save_dir / f"teacher_stage_{stage_idx + 1}_{num_classes}_classes.pt"
         model.eval()
         example_input = (
-            torch.randn(1, 3, 224, 224, device=model.device) if not example_input else example_input
+            example_input if example_input else torch.randn(1, 3, 224, 224, device=model.device)
         )
         traced_model = torch.jit.trace(model, example_input)
         traced_model.save(str(save_path))

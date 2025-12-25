@@ -1,6 +1,5 @@
 """Type definitions for unified NumPy and PyTorch array handling."""
 
-
 import numpy as np
 from numpy.typing import NDArray
 import torch

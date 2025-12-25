@@ -31,10 +31,13 @@ Example:
 
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-from torch import Tensor, nn
+from torch import nn
 import torch.nn.functional as F
+
+if TYPE_CHECKING:
+    from torch import Tensor
 
 
 class DFLoss(nn.Module):

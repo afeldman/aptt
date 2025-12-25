@@ -8,7 +8,7 @@ import torch.nn.functional as F
 
 
 class RotationOnlySTN(nn.Module):
-    def __init__(self, in_channels: int, max_deg: float = 15.0):
+    def __init__(self, in_channels: int, max_deg: float = 15.0) -> None:
         super().__init__()
         self.max_rad = math.radians(max_deg)
         self.fc = nn.Sequential(
@@ -23,7 +23,7 @@ class RotationOnlySTN(nn.Module):
         nn.init.zeros_(self.fc[-1].bias)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        B, C, H, W = x.shape
+        _B, _C, _H, _W = x.shape
         angle = torch.tanh(self.fc(x)) * self.max_rad  # (B,1)
         cos, sin = torch.cos(angle), torch.sin(angle)
         zeros = torch.zeros_like(cos)
@@ -38,7 +38,7 @@ class RotationOnlySTN(nn.Module):
 class AffineSTN(nn.Module):
     """Full affine STN (rotation/scale/shear/translation). Useful for arbitrarily rotated tattoos."""
 
-    def __init__(self, in_channels: int):
+    def __init__(self, in_channels: int) -> None:
         super().__init__()
         self.reg = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),

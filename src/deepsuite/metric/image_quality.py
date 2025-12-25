@@ -81,9 +81,15 @@ def ssim(
     mu1_mu2 = mu1 * mu2
 
     # Compute variances and covariance
-    sigma1_sq = F.conv2d(pred * pred, window, padding=window_size // 2, groups=pred.size(1)) - mu1_sq
-    sigma2_sq = F.conv2d(target * target, window, padding=window_size // 2, groups=target.size(1)) - mu2_sq
-    sigma12 = F.conv2d(pred * target, window, padding=window_size // 2, groups=pred.size(1)) - mu1_mu2
+    sigma1_sq = (
+        F.conv2d(pred * pred, window, padding=window_size // 2, groups=pred.size(1)) - mu1_sq
+    )
+    sigma2_sq = (
+        F.conv2d(target * target, window, padding=window_size // 2, groups=target.size(1)) - mu2_sq
+    )
+    sigma12 = (
+        F.conv2d(pred * target, window, padding=window_size // 2, groups=pred.size(1)) - mu1_mu2
+    )
 
     ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / (
         (mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2)
@@ -123,7 +129,6 @@ def ms_ssim(
 
     levels = len(weights)
     mssim = []
-    mcs = []
 
     for _ in range(levels):
         ssim_val = ssim(pred, target, window_size, sigma, data_range)

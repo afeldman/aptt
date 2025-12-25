@@ -15,7 +15,7 @@ Modell erstellen
 
    from deepsuite.modules.yolo import Yolo
    from deepsuite.model.feature.efficientnet import EfficientNetBackbone
-   
+
    # Backbone erstellen
    backbone = EfficientNetBackbone(
        resolution_coefficient=1.0,
@@ -23,7 +23,7 @@ Modell erstellen
        depth_coefficient=1.0,
        version="b0"
    )
-   
+
    # YOLO Modul erstellen
    model = Yolo(
        backbone=backbone,
@@ -38,13 +38,13 @@ Mit ResNet Backbone
 .. code-block:: python
 
    from deepsuite.model.feature.resnet import ResNetBackbone
-   
+
    backbone = ResNetBackbone(
        resnet_variant=[[64, 128, 256, 512], [3, 4, 6, 3], 4, True],
        in_channels=3,
        stage_indices=(3, 4, 5)
    )
-   
+
    model = Yolo(
        backbone=backbone,
        num_classes=20  # VOC hat 20 Klassen
@@ -57,13 +57,13 @@ Training
 
    from deepsuite.lightning_base.trainer import BaseTrainer
    from pytorch_lightning import LightningDataModule
-   
+
    trainer = BaseTrainer(
        max_epochs=300,
        mlflow_experiment="yolo_training",
        export_formats=["torchscript"]
    )
-   
+
    trainer.fit(model, datamodule=detection_datamodule)
 
 CenterNet
@@ -78,14 +78,14 @@ Modell erstellen
 
    from deepsuite.modules.centernet import CenterNetModule
    from deepsuite.model.feature.resnet import ResNetBackbone
-   
+
    # Backbone
    backbone = ResNetBackbone(
        resnet_variant=[[64, 128, 256, 512], [3, 4, 6, 3], 4, True],
        in_channels=3,
        stage_indices=(2, 3, 4)
    )
-   
+
    # CenterNet Modul
    model = CenterNetModule(
        backbone=backbone,
@@ -104,7 +104,7 @@ Training
        max_epochs=140,
        mlflow_experiment="centernet_training"
    )
-   
+
    trainer.fit(model, datamodule=detection_datamodule)
 
 Detection Losses
@@ -116,16 +116,16 @@ Bounding Box Loss
 .. code-block:: python
 
    from deepsuite.loss.bbox import BboxLoss
-   
+
    # Standard IoU
    loss = BboxLoss(iou_type="iou")
-   
+
    # GIoU (Generalized IoU)
    loss = BboxLoss(iou_type="giou")
-   
+
    # DIoU (Distance IoU)
    loss = BboxLoss(iou_type="diou")
-   
+
    # CIoU (Complete IoU)
    loss = BboxLoss(iou_type="ciou")
 
@@ -137,9 +137,9 @@ Für rotierte Bounding Boxes:
 .. code-block:: python
 
    from deepsuite.loss.bbox import RotatedBboxLoss
-   
+
    loss = RotatedBboxLoss()
-   
+
    model = Yolo(
        backbone=backbone,
        use_rotated_loss=True
@@ -151,7 +151,7 @@ CenterNet Loss
 .. code-block:: python
 
    from deepsuite.loss.centernet import CenterNetLoss
-   
+
    loss = CenterNetLoss(
        heatmap_loss_weight=1.0,
        offset_loss_weight=1.0,
@@ -167,7 +167,7 @@ mAP (Mean Average Precision)
 .. code-block:: python
 
    from deepsuite.metric.map import evaluate_map
-   
+
    map_score = evaluate_map(
        pred_boxes=predictions,
        gt_boxes=ground_truth,
@@ -180,13 +180,13 @@ IoU Metrics
 .. code-block:: python
 
    from deepsuite.metric.bbox_iou import bbox_iou
-   
+
    # Standard IoU
    iou = bbox_iou(boxes1, boxes2, xywh=True, iou_type="iou")
-   
+
    # GIoU
    giou = bbox_iou(boxes1, boxes2, xywh=True, iou_type="giou")
-   
+
    # Rotated IoU
    from deepsuite.metric.bbox_iou import rotated_bbox_iou
    rot_iou = rotated_bbox_iou(rotated_boxes1, rotated_boxes2)
@@ -197,16 +197,16 @@ Detection Metrics Module
 .. code-block:: python
 
    from deepsuite.metric.detection import DetectionMetrics
-   
+
    metrics = DetectionMetrics(num_classes=80)
-   
+
    # Im Validation Step
    def validation_step(self, batch, batch_idx):
        x, targets = batch
        predictions = self(x)
-       
+
        metrics.update(predictions, targets)
-   
+
    def on_validation_epoch_end(self):
        results = metrics.compute()
        self.log("val/map", results["map"])
@@ -222,11 +222,11 @@ YOLO Inference
    import torch
    from PIL import Image
    import torchvision.transforms as T
-   
+
    # Modell laden
    model = Yolo.load_from_checkpoint("checkpoint.ckpt")
    model.eval()
-   
+
    # Bild vorbereiten
    image = Image.open("image.jpg")
    transform = T.Compose([
@@ -234,11 +234,11 @@ YOLO Inference
        T.ToTensor(),
    ])
    x = transform(image).unsqueeze(0)
-   
+
    # Prediction
    with torch.no_grad():
        outputs = model(x)
-   
+
    boxes = outputs["bbox"]
    classes = outputs["class"]
 
@@ -250,11 +250,11 @@ CenterNet Inference
    # Modell laden
    model = CenterNetModule.load_from_checkpoint("checkpoint.ckpt")
    model.eval()
-   
+
    # Prediction
    with torch.no_grad():
        outputs = model(x)
-   
+
    # Decode predictions
    detections = model.decoder(outputs, img_size=(640, 640))
 
@@ -264,14 +264,14 @@ Nachbearbeitung
 .. code-block:: python
 
    from deepsuite.utils.bbox import xywh2xyxy, xyxy2xywh
-   
+
    # Convert zwischen Formaten
    xyxy_boxes = xywh2xyxy(xywh_boxes)
    xywh_boxes = xyxy2xywh(xyxy_boxes)
-   
+
    # NMS (Non-Maximum Suppression)
    from torchvision.ops import nms
-   
+
    keep = nms(boxes, scores, iou_threshold=0.5)
    filtered_boxes = boxes[keep]
    filtered_scores = scores[keep]
@@ -283,7 +283,7 @@ Custom Detection Head
 
    from deepsuite.heads.box import BBoxHead
    import torch.nn as nn
-   
+
    class CustomDetectionHead(nn.Module):
        def __init__(self, in_channels, num_classes):
            super().__init__()
@@ -293,7 +293,7 @@ Custom Detection Head
                num_classes,
                kernel_size=1
            )
-       
+
        def forward(self, x):
            bbox = self.bbox_head(x)
            classes = self.class_head(x)

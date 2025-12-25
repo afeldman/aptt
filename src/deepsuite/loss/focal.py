@@ -75,7 +75,7 @@ class FocalLoss(nn.Module):
         )
 
     @alpha.setter
-    def alpha(self, value):
+    def alpha(self, value) -> None:
         self._alpha = value
 
     def forward(self, pred: Tensor, label: Tensor) -> Tensor:
@@ -208,10 +208,10 @@ class MulticlassFocalLoss(FocalLoss):
 
         self.epsilon = epsilon
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         arg_keys = ["alpha", "gamma", "ignore_index", "reduction"]
         arg_vals = [self.__dict__[k] for k in arg_keys]
-        arg_strs = [f"{k}={v!r}" for k, v in zip(arg_keys, arg_vals)]
+        arg_strs = [f"{k}={v!r}" for k, v in zip(arg_keys, arg_vals, strict=False)]
         arg_str = ", ".join(arg_strs)
         return f"{type(self).__name__}({arg_str})"
 

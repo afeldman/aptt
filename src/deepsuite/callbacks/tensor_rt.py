@@ -21,14 +21,16 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
-import pytorch_lightning as pl
 import torch
 
 from deepsuite.callbacks.base import ExportBaseCallback
 from deepsuite.callbacks.torchscript import TorchScriptExportCallback
+
+if TYPE_CHECKING:
+    import pytorch_lightning as pl
 
 # TensorRT ist nur auf Linux und Windows verfügbar
 if sys.platform in ("linux", "win32"):
@@ -158,7 +160,7 @@ class TensorRTExportCallback(ExportBaseCallback):
             example_input: Beispiel-Input für Konvertierung.
         """
         try:
-            import torch_tensorrt  # noqa: PLC0415
+            import torch_tensorrt
 
             precision_map = {
                 "fp32": torch.float32,

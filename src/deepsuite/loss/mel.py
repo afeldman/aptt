@@ -30,7 +30,7 @@ class MelLoss(torch.nn.Module):
             loss = loss_fn(y_true, y_pred)
     """
 
-    def __init__(self, mel_scales=(16, 32, 64), n_fft=512, sample_rate=44_100, eps=1e-7):
+    def __init__(self, mel_scales=(16, 32, 64), n_fft=512, sample_rate=44_100, eps=1e-7) -> None:
         super().__init__()
         self.mel_scales = mel_scales
         self.n_fft = n_fft
@@ -61,4 +61,5 @@ class MelLoss(torch.nn.Module):
 
         # Mean over features and batch
         from typing import cast
+
         return cast("torch.Tensor", distances.mean())

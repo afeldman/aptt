@@ -47,21 +47,21 @@ Basic Usage
 
    from deepsuite import YOLO, BaseTrainer
    from deepsuite.heads import ClassificationHead
-   
+
    # Create a YOLO model
    model = YOLO(
        num_classes=80,
        backbone="darknet53",
        pretrained=True
    )
-   
+
    # Initialize trainer
    trainer = BaseTrainer(
        max_epochs=100,
        accelerator="gpu",
        devices=1
    )
-   
+
    # Train the model
    trainer.fit(model, datamodule)
 

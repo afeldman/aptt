@@ -21,10 +21,10 @@ Installation mit uv
    # Repository klonen
    git clone https://github.com/afeldman/deepsuite.git
    cd deepsuite
-   
+
    # Mit CPU-Support installieren
    uv install --extra cpu
-   
+
    # Mit CUDA 12.4 Support installieren (Linux/Windows)
    uv install --extra cu124
 
@@ -37,7 +37,7 @@ Für die Entwicklung:
 
    # Development Dependencies installieren
    uv install --extra dev
-   
+
    # Dokumentation bauen
    uv install --extra doc
    cd docs
@@ -49,7 +49,7 @@ Grundkonzepte
 BaseModule
 ~~~~~~~~~~
 
-Das ``BaseModule`` ist die Grundlage für alle Modelle in APTT. Es erweitert 
+Das ``BaseModule`` ist die Grundlage für alle Modelle in APTT. Es erweitert
 ``pytorch_lightning.LightningModule`` mit zusätzlichen Features:
 
 - Automatisches Hyperparameter-Tuning mit Ray Tune
@@ -63,7 +63,7 @@ Beispiel:
 
    from deepsuite.lightning_base.module import BaseModule
    import torch.nn as nn
-   
+
    class MyModel(BaseModule):
        def __init__(self, num_classes=10):
            super().__init__(
@@ -76,7 +76,7 @@ Beispiel:
                nn.ReLU(),
                nn.Linear(128, num_classes)
            )
-       
+
        def forward(self, x):
            return self.model(x)
 
@@ -95,14 +95,14 @@ Beispiel:
 .. code-block:: python
 
    from deepsuite.lightning_base.trainer import BaseTrainer
-   
+
    trainer = BaseTrainer(
        log_dir="logs",
        mlflow_experiment="my_experiment",
        export_formats=["torchscript", "tensor_rt"],
        max_epochs=100
    )
-   
+
    trainer.fit(model, datamodule=datamodule)
 
 Konfigurationsmanagement
@@ -113,9 +113,9 @@ APTT bietet einen ``ConfigManager`` für einfache Konfigurationsverwaltung:
 .. code-block:: python
 
    from deepsuite.config.config_manager import ConfigManager
-   
+
    config_manager = ConfigManager(config_dir="configs")
-   
+
    # Konfiguration speichern
    config = {
        "learning_rate": 0.001,
@@ -123,7 +123,7 @@ APTT bietet einen ``ConfigManager`` für einfache Konfigurationsverwaltung:
        "num_epochs": 100
    }
    config_manager.save_yaml(config, "training_config")
-   
+
    # Konfiguration laden
    config = config_manager.load_yaml("training_config")
 

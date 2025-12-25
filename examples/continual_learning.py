@@ -1,4 +1,4 @@
-"""Continual Learning Example
+"""Continual Learning Example.
 ===========================
 
 This example demonstrates continual learning (lifelong learning)
@@ -35,7 +35,7 @@ class ContinualClassificationModule(BaseLightningModule):
         weight_decay: float = 1e-4,
         lwf_alpha: float = 1.0,
         lwf_temperature: float = 2.0,
-    ):
+    ) -> None:
         super().__init__()
         self.save_hyperparameters()
 
@@ -114,7 +114,7 @@ class ContinualClassificationModule(BaseLightningModule):
             "lr_scheduler": {"scheduler": scheduler, "monitor": "val/loss"},
         }
 
-    def store_old_model(self):
+    def store_old_model(self) -> None:
         """Store current model for knowledge distillation."""
         self.old_model = type(self)(
             num_classes=self.num_classes,
@@ -127,7 +127,7 @@ class ContinualClassificationModule(BaseLightningModule):
         self.old_model.requires_grad_(False)
         print("   📦 Stored old model for LWF")
 
-    def expand_head(self, new_classes: int):
+    def expand_head(self, new_classes: int) -> None:
         """Expand classification head for new classes."""
         old_classes = self.num_classes
         self.num_classes = old_classes + new_classes
@@ -198,7 +198,7 @@ def create_task_datasets(
     return task_loaders
 
 
-def main():
+def main() -> None:
     print("🧠 APTT Continual Learning Example")
     print("=" * 60)
 

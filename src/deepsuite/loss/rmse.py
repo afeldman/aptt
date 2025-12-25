@@ -49,5 +49,4 @@ class RMSE(nn.Module):
         Returns:
             torch.Tensor: RMSE-Wert.
         """
-        loss = torch.sqrt(self.criterion(x, y) + self.esp)
-        return loss
+        return torch.sqrt(self.criterion(x, y) + self.esp)

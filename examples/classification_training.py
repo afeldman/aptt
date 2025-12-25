@@ -1,4 +1,4 @@
-"""Image Classification Training Example
+"""Image Classification Training Example.
 ======================================
 
 This example demonstrates how to train an image classification model
@@ -26,7 +26,7 @@ from deepsuite.model.detection.resnet import ResNetBackbone
 class ClassificationModel(torch.nn.Module):
     """Simple classification model with ResNet backbone."""
 
-    def __init__(self, num_classes: int = 10, backbone_depth: int = 18):
+    def __init__(self, num_classes: int = 10, backbone_depth: int = 18) -> None:
         super().__init__()
         self.backbone = ResNetBackbone(depth=backbone_depth)
         # ResNet18 outputs 512 channels
@@ -49,7 +49,7 @@ class ClassificationModule(BaseLightningModule):
         backbone_depth: int = 18,
         learning_rate: float = 1e-3,
         weight_decay: float = 1e-4,
-    ):
+    ) -> None:
         super().__init__()
         self.save_hyperparameters()
 
@@ -137,7 +137,7 @@ def prepare_data(data_dir: str = "./data", batch_size: int = 128):
     return train_loader, val_loader
 
 
-def main():
+def main() -> None:
     """Main training loop."""
     print("🎯 APTT Classification Training Example")
     print("=" * 60)

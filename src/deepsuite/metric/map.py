@@ -7,14 +7,14 @@ def evaluate_map(pred_boxes, gt_boxes, iou_thresh=0.5):
     """Args:
         pred_boxes (List[Tensor]): pro Bild, Tensor[N, 6] mit (x1, y1, x2, y2, score, cls)
         gt_boxes (List[Tensor]): pro Bild, Tensor[M, 5] mit (x1, y1, x2, y2, cls)
-        iou_thresh (float): IoU Threshold für einen True Positive
+        iou_thresh (float): IoU Threshold für einen True Positive.
 
     Returns:
         dict: {"precision": ..., "recall": ..., "AP": ...}
     """
     TP, FP, FN = 0, 0, 0
 
-    for preds, gts in zip(pred_boxes, gt_boxes):
+    for preds, gts in zip(pred_boxes, gt_boxes, strict=False):
         if preds.numel() == 0 and gts.numel() == 0:
             continue
         if preds.numel() == 0:
@@ -28,7 +28,7 @@ def evaluate_map(pred_boxes, gt_boxes, iou_thresh=0.5):
         max_ious, max_idxs = ious.max(dim=1)
 
         matched_gt = set()
-        for i, (iou, gt_idx) in enumerate(zip(max_ious, max_idxs)):
+        for i, (iou, gt_idx) in enumerate(zip(max_ious, max_idxs, strict=False)):
             if iou >= iou_thresh and int(gt_idx.item()) not in matched_gt:
                 if preds[i, 5] == gts[gt_idx, 4]:  # class match
                     TP += 1

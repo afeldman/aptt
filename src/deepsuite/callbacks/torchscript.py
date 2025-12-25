@@ -16,21 +16,21 @@ Beispiel:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
-import pytorch_lightning as pl
 import torch
 
 from deepsuite.callbacks.base import ExportBaseCallback
+
+if TYPE_CHECKING:
+    import pytorch_lightning as pl
 
 
 class TorchScriptExportCallback(ExportBaseCallback):
     """Exportiert das Modell nach TorchScript (.pt)."""
 
-    def __init__(
-        self, output_dir: str = "models", optimize: bool = True, **kwargs: Any
-    ) -> None:
+    def __init__(self, output_dir: str = "models", optimize: bool = True, **kwargs: Any) -> None:
         """Initialisiert den TorchScript-Export-Callback.
 
         Args:

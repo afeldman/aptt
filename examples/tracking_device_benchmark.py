@@ -32,7 +32,7 @@ def generate_synthetic_trajectory(num_frames: int = 100) -> list[list[float]]:
     x, y = 100.0, 100.0
     vx, vy = 2.0, 1.5
 
-    for i in range(num_frames):
+    for _i in range(num_frames):
         # Add some randomness
         x += vx + (torch.randn(1).item() * 0.5)
         y += vy + (torch.randn(1).item() * 0.5)
@@ -86,7 +86,7 @@ def benchmark_filter(filter_class, filter_name: str, device: str, num_frames: in
     start_time = time.time()
 
     predictions = []
-    for i, obs_box in enumerate(trajectory):
+    for _i, obs_box in enumerate(trajectory):
         pred_box = filter_obj.predict()
         predictions.append(
             pred_box.cpu().detach().numpy() if torch.is_tensor(pred_box) else pred_box
@@ -105,10 +105,10 @@ def benchmark_filter(filter_class, filter_name: str, device: str, num_frames: in
 
     # Compute tracking error (simplified)
     total_error = 0.0
-    for pred, gt in zip(predictions, trajectory):
+    for pred, gt in zip(predictions, trajectory, strict=False):
         if torch.is_tensor(pred):
             pred = pred.cpu().numpy()
-        error = sum(abs(p - g) for p, g in zip(pred[:2], gt[:2]))  # Center error
+        error = sum(abs(p - g) for p, g in zip(pred[:2], gt[:2], strict=False))  # Center error
         total_error += error
 
     avg_error = total_error / num_frames
@@ -129,7 +129,7 @@ def benchmark_filter(filter_class, filter_name: str, device: str, num_frames: in
     return results
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Benchmark tracking filters")
     parser.add_argument(
         "--device", type=str, default=None, help="Device to use (cuda, mps, cpu, or auto)"

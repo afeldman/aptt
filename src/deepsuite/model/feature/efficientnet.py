@@ -131,7 +131,7 @@ class EfficientNetBackbone(BackboneAdapter):
         dropout_rate: float = 0.2,
         stage_indices: Sequence[int] = (3, 4, 5),
         version: str = "b0",
-    ):
+    ) -> None:
         """Initialize the EfficientNet model.
 
         Args:
@@ -247,7 +247,7 @@ class EfficientNetBackbone(BackboneAdapter):
         return int(new_filters)
 
     def _round_repeats(self, repeats, depth_coefficient):
-        return int(math.ceil(repeats * depth_coefficient))
+        return math.ceil(repeats * depth_coefficient)
 
     def get_block_args(self, version: str = "b0") -> list[tuple[int, int, int, int, int, float]]:
         base_blockargs = (

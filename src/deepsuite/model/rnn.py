@@ -76,7 +76,7 @@ class BNReluRNN(nn.Module):
 
         self.init_weights()
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         """Initialisiert Gewichte mit Xavier Uniform für stabileres Training."""
         for param in self.parameters():
             if param.dim() > 1:

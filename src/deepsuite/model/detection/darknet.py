@@ -6,7 +6,7 @@ from deepsuite.model.feature.darknet import CSPDarknetBackbone
 
 
 class CSPDarknet(CSPDarknetBackbone):
-    def __init__(self, num_classes=1000, stage_indices=(5,)):
+    def __init__(self, num_classes=1000, stage_indices=(5,)) -> None:
         super().__init__(stage_indices=stage_indices)
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.flatten = nn.Flatten()
@@ -16,5 +16,4 @@ class CSPDarknet(CSPDarknetBackbone):
         x = super().forward(x, return_stages=False)
         x = self.pool(x)
         x = self.flatten(x)
-        x = self.fc(x)
-        return x
+        return self.fc(x)

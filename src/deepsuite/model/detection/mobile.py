@@ -24,7 +24,7 @@ Example:
     import torch
     from deepsuite.model.detection.mobile import MobileNetV3
 
-    model = MobileNetV3(n_classes=1000, config='large')
+    model = MobileNetV3(n_classes=1000, config="large")
     x = torch.randn(2, 3, 224, 224)
     output = model(x)  # Shape (2, 1000)
     ```
@@ -32,7 +32,8 @@ Example:
 
 from __future__ import annotations
 
-import torch
+from typing import TYPE_CHECKING
+
 from torch import nn
 
 from deepsuite.model.feature.mobile import (
@@ -40,6 +41,9 @@ from deepsuite.model.feature.mobile import (
     MobileNetV2Backbone,
     MobileNetV3Backbone,
 )
+
+if TYPE_CHECKING:
+    import torch
 
 
 class MobileNetV1(MobileNetV1Backbone):
@@ -117,8 +121,7 @@ class MobileNetV1(MobileNetV1Backbone):
         x = super().forward(x, return_stages=False, return_pooled=False)
         x = self.avgpool(x)
         x = self.flatten(x)
-        x = self.fc(x)
-        return x
+        return self.fc(x)
 
 
 class MobileNetV2(MobileNetV2Backbone):
@@ -195,8 +198,7 @@ class MobileNetV2(MobileNetV2Backbone):
         x = self.pool(x)
         x = self.flatten(x)
         x = self.dropout(x)
-        x = self.fc(x)
-        return x
+        return self.fc(x)
 
 
 class MobileNetV3(MobileNetV3Backbone):
@@ -225,10 +227,10 @@ class MobileNetV3(MobileNetV3Backbone):
         from deepsuite.model.detection.mobile import MobileNetV3
 
         # Large variant for higher accuracy
-        model_large = MobileNetV3(n_classes=1000, config='large')
+        model_large = MobileNetV3(n_classes=1000, config="large")
 
         # Small variant for minimal footprint
-        model_small = MobileNetV3(n_classes=1000, config='small')
+        model_small = MobileNetV3(n_classes=1000, config="small")
 
         x = torch.randn(2, 3, 224, 224)
         logits = model_large(x)  # Shape (2, 1000)
@@ -255,10 +257,10 @@ class MobileNetV3(MobileNetV3Backbone):
         Example:
             ```python
             # Standard MobileNetV3-Large
-            model = MobileNetV3(n_classes=1000, config='large', dropout=0.8)
+            model = MobileNetV3(n_classes=1000, config="large", dropout=0.8)
 
             # Compact MobileNetV3-Small version
-            compact = MobileNetV3(n_classes=1000, config='small', dropout=0.5)
+            compact = MobileNetV3(n_classes=1000, config="small", dropout=0.5)
             ```
 
         Raises:
@@ -289,7 +291,7 @@ class MobileNetV3(MobileNetV3Backbone):
 
         Example:
             ```python
-            model = MobileNetV3(n_classes=1000, config='large')
+            model = MobileNetV3(n_classes=1000, config="large")
             x = torch.randn(8, 3, 224, 224)
             logits = model(x)  # Shape (8, 1000)
             probs = torch.softmax(logits, dim=1)  # Normalize probabilities
@@ -298,5 +300,4 @@ class MobileNetV3(MobileNetV3Backbone):
         x = super().forward(x, return_stages=False, return_pooled=False)
         x = self.pool(x)
         x = self.flatten(x)
-        x = self.fc(x)
-        return x
+        return self.fc(x)

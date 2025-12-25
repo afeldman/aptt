@@ -1,4 +1,4 @@
-"""Audio Beamforming Example
+"""Audio Beamforming Example.
 ==========================
 
 This example demonstrates how to use the beamforming capabilities
@@ -36,7 +36,7 @@ class AudioBeamformingPipeline:
         sample_rate: int = 16000,
         array_type: str = "circular",
         device: str | None = None,
-    ):
+    ) -> None:
         self.n_mics = n_mics
         self.sample_rate = sample_rate
         self.device = device or str(get_best_device())
@@ -122,11 +122,13 @@ class AudioBeamformingPipeline:
 
         return output.cpu().numpy()[0, 0]
 
-    def visualize_spatial_spectrum(self, spectrum: np.ndarray, save_path: str | None = None):
+    def visualize_spatial_spectrum(
+        self, spectrum: np.ndarray, save_path: str | None = None
+    ) -> None:
         """Visualize spatial spectrum (DOA)."""
         angles = np.linspace(0, 360, len(spectrum))
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+        _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
         # Polar plot
         ax1 = plt.subplot(121, projection="polar")
@@ -176,7 +178,7 @@ class AudioBeamformingPipeline:
         return [(angles[idx], spectrum[idx]) for idx in peaks_idx]
 
 
-def demo_doa_estimation(args):
+def demo_doa_estimation(args) -> None:
     """Demo: Estimate direction of arrival."""
     print("\n" + "=" * 60)
     print("🎯 DOA Estimation Demo")
@@ -211,7 +213,7 @@ def demo_doa_estimation(args):
     pipeline.visualize_spatial_spectrum(spectrum, str(output_path))
 
 
-def demo_beamforming(args):
+def demo_beamforming(args) -> None:
     """Demo: Apply beamforming to extract audio from specific direction."""
     print("\n" + "=" * 60)
     print("🎯 Beamforming Demo")
@@ -245,7 +247,7 @@ def demo_beamforming(args):
     print(f"✅ Saved beamformed audio to {output_path}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="APTT Audio Beamforming Example")
     parser.add_argument(
         "--mode", type=str, default="doa", choices=["doa", "beamform"], help="Demo mode"

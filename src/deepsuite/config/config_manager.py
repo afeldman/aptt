@@ -13,13 +13,13 @@ class ConfigManager:
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(exist_ok=True, parents=True)
 
-    def save_yaml(self, config: dict, name: str):
+    def save_yaml(self, config: dict, name: str) -> None:
         path = self.config_dir / f"{name}.yaml"
         with open(path, "w") as f:
             yaml.safe_dump(config, f)
         logger.success(f"✅ Config gespeichert als YAML: {path}")
 
-    def save_json(self, config: dict, name: str):
+    def save_json(self, config: dict, name: str) -> None:
         path = self.config_dir / f"{name}.json"
         with open(path, "w") as f:
             json.dump(config, f, indent=4)
@@ -35,7 +35,7 @@ class ConfigManager:
         with open(path) as f:
             return json.load(f)
 
-    def save_toml(self, config: dict, name: str):
+    def save_toml(self, config: dict, name: str) -> None:
         path = self.config_dir / f"{name}.toml"
         with open(path, "w") as f:
             toml.dump(config, f)

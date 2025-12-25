@@ -3,7 +3,7 @@ from torch import nn
 
 
 class FullAttention(nn.Module):
-    def __init__(self, use_dropout=False, attention_dropout=0.1):
+    def __init__(self, use_dropout=False, attention_dropout=0.1) -> None:
         super().__init__()
         self.use_dropout = use_dropout
         self.dropout = nn.Dropout(attention_dropout) if use_dropout else nn.Identity()
@@ -16,7 +16,7 @@ class FullAttention(nn.Module):
             q_mask:  [N, L] or None
             kv_mask: [N, S] or None
         Returns:
-            output:  [N, L, H, D]
+            output:  [N, L, H, D].
         """
         d_k = queries.size(-1)
         scale = 1.0 / d_k**0.5

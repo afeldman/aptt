@@ -3,7 +3,7 @@
 import motmetrics as mm
 
 from deepsuite.lightning_base.module import BaseModule
-from deepsuite.model.tracking import Tracker
+from deepsuite.model.tracking.tracker import Tracker
 from deepsuite.tracker.tracker_manager import TrackerManager
 
 

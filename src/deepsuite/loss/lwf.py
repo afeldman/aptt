@@ -28,4 +28,7 @@ class LwF(torch.nn.Module):
     ) -> torch.Tensor:
         ce_loss = self.new_class_loss(new_logits, targets)
         distill_loss = self.loss(new_logits, old_logits)
-        return cast("torch.Tensor", (self.alpha * distill_loss + (1 - self.alpha) * ce_loss).to(new_logits.dtype))
+        return cast(
+            "torch.Tensor",
+            (self.alpha * distill_loss + (1 - self.alpha) * ce_loss).to(new_logits.dtype),
+        )

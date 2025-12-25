@@ -137,5 +137,4 @@ class DetectionModel(nn.Module):
         fpn_features = self.neck(features)
 
         # Head
-        outputs = [self.head(feature) for feature in fpn_features]
-        return outputs
+        return [self.head(feature) for feature in fpn_features]

@@ -9,7 +9,7 @@ from deepsuite.model.residual import InverseResidualBlock
 
 
 class MobileNetV1Backbone(BackboneAdapter):
-    def __init__(self, width_multiplier=1.0, stage_indices=(3, 6, 11)):
+    def __init__(self, width_multiplier=1.0, stage_indices=(3, 6, 11)) -> None:
         super().__init__()
         self.set_stage_indices(stage_indices)
 
@@ -45,7 +45,7 @@ class MobileNetV1Backbone(BackboneAdapter):
 
 
 class MobileNetV2Backbone(BackboneAdapter):
-    def __init__(self, stage_indices=(3, 6, 13), dropout=0.2):
+    def __init__(self, stage_indices=(3, 6, 13), dropout=0.2) -> None:
         super().__init__()
         self.set_stage_indices(stage_indices)
 
@@ -100,7 +100,7 @@ class MobileNetV2Backbone(BackboneAdapter):
 class MobileNetV3Backbone(BackboneAdapter):
     def __init__(
         self, config: str = "large", stage_indices: tuple = (3, 6, 11), dropout: float = 0.8
-    ):
+    ) -> None:
         super().__init__()
         self.set_stage_indices(stage_indices)
 

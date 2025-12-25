@@ -1,4 +1,4 @@
-"""Object Detection Inference Example
+"""Object Detection Inference Example.
 ===================================
 
 This example demonstrates how to use a trained object detection model
@@ -35,7 +35,7 @@ class DetectionInference:
         conf_threshold: float = 0.5,
         iou_threshold: float = 0.45,
         device: str | None = None,
-    ):
+    ) -> None:
         self.conf_threshold = conf_threshold
         self.iou_threshold = iou_threshold
         self.device = device or str(get_best_device())
@@ -144,7 +144,7 @@ class DetectionInference:
         """Draw bounding boxes on image."""
         vis_image = image.copy()
 
-        for box, score, cls in zip(boxes, scores, classes):
+        for box, score, cls in zip(boxes, scores, classes, strict=False):
             x1, y1, x2, y2 = box.astype(int)
 
             # Color based on class
@@ -166,7 +166,7 @@ class DetectionInference:
         return vis_image
 
 
-def process_image(args):
+def process_image(args) -> None:
     """Process single image."""
     detector = DetectionInference(
         model_path=args.model,
@@ -199,7 +199,7 @@ def process_image(args):
     print(f"✅ Saved to {output_path}")
 
 
-def process_video(args):
+def process_video(args) -> None:
     """Process video file or webcam."""
     detector = DetectionInference(
         model_path=args.model,
@@ -266,7 +266,7 @@ def process_video(args):
     print(f"\n✅ Processed {frame_count} frames, saved to {output_path}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="APTT Object Detection Inference")
     parser.add_argument("--model", type=str, required=True, help="Path to trained model checkpoint")
     parser.add_argument(

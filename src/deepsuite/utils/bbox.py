@@ -99,6 +99,4 @@ def bbox2dist(
         tensor([[2., 3., 2., 3.]])
     """
     x1y1, x2y2 = bbox.chunk(2, -1)
-    return torch.cat((anchor_points - x1y1, x2y2 - anchor_points), -1).clamp_(
-        0, reg_max - 0.01
-    )
+    return torch.cat((anchor_points - x1y1, x2y2 - anchor_points), -1).clamp_(0, reg_max - 0.01)

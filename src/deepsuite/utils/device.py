@@ -1,6 +1,5 @@
 """Device selection utilities (TPU/XLA, CUDA, MPS, CPU)."""
 
-
 import torch
 
 # Optional TPU/XLA support

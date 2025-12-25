@@ -31,24 +31,24 @@ from deepsuite.modules.tracking import TrackingModule
 from deepsuite.modules.yolo import Yolo
 
 __all__ = [
-    # Version
-    "__version__",
-    # Lightning Modules (end-to-end trainable)
-    "Yolo",
-    "CenterNetModule",
-    "TrackingModule",
+    # Model Architectures
+    "YOLO",
     "AutoencoderModule",
+    "BackboneAdapter",
     # Base Classes
     "BaseModule",
     "BaseTrainer",
-    "ContinualLearningManager",
-    # Model Architectures
-    "YOLO",
     "CenterNetModel",
-    "BackboneAdapter",
-    "ConvEncoder",
+    "CenterNetModule",
+    "ContinualLearningManager",
     "ConvDecoder",
+    "ConvEncoder",
+    "MultiScaleDiscriminator",
     "PatchGANDiscriminator",
     "PixelDiscriminator",
-    "MultiScaleDiscriminator",
+    "TrackingModule",
+    # Lightning Modules (end-to-end trainable)
+    "Yolo",
+    # Version
+    "__version__",
 ]

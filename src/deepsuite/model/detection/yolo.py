@@ -14,7 +14,7 @@ Example:
         classification_model=classification_model,
         backbone=backbone,
         reg_max=16,
-        use_rotated_loss=False
+        use_rotated_loss=False,
     )
     x = torch.randn(2, 3, 640, 640)
     output = model(x)
@@ -26,16 +26,19 @@ Classes:
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import torch
 from torch import nn
 
 from deepsuite.heads.box import BBoxHead
 from deepsuite.loss.bbox import BboxLoss, RotatedBboxLoss
-from deepsuite.model.backend_adapter import BackboneAdapter
 from deepsuite.model.feature.fpn import FPN
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from deepsuite.model.backend_adapter import BackboneAdapter
 
 
 class YOLO(nn.Module):
@@ -59,7 +62,7 @@ class YOLO(nn.Module):
             backbone=backbone,
             reg_max=16,
             use_rotated_loss=False,
-            stage_indices=(3, 4, 5)
+            stage_indices=(3, 4, 5),
         )
         output = model(x)  # Returns dict with 'bbox' and 'cls' predictions
         ```
@@ -164,7 +167,7 @@ class YOLO(nn.Module):
         crop_indices = []
         xyxy_boxes = []
 
-        for batch_idx, (img, img_boxes) in enumerate(zip(images, boxes)):
+        for batch_idx, (img, img_boxes) in enumerate(zip(images, boxes, strict=False)):
             for box_idx, box in enumerate(img_boxes):
                 cx, cy, w, h, angle = box.tolist()
 
@@ -208,7 +211,7 @@ class YOLO(nn.Module):
         crop_indices = []
         xyxy_boxes = []
 
-        for batch_idx, (img, img_boxes) in enumerate(zip(images, boxes)):
+        for batch_idx, (img, img_boxes) in enumerate(zip(images, boxes, strict=False)):
             for box_idx, box in enumerate(img_boxes):
                 cx, cy, w, h, _ = box.tolist()
 

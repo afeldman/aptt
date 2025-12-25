@@ -27,5 +27,4 @@ class RNNTracker(nn.Module):
         rnn_out_any, _ = self.rnn(x)
         rnn_out = cast("Tensor", rnn_out_any)
         out_any = self.fc(rnn_out[:, -1, :])
-        out = cast("Tensor", out_any)
-        return out
+        return cast("Tensor", out_any)

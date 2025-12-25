@@ -7,7 +7,7 @@ from deepsuite.model.feature.resnet import ResNetBackbone
 class ResnetWithFPN(nn.Module):
     def __init__(
         self, resnet_variant: str = "resnet50", in_channels: int = 1, fpn_out_channels: int = 256
-    ):
+    ) -> None:
         super().__init__()
 
         self.resnet = ResNetBackbone(

@@ -16,10 +16,10 @@ class ResNetBackbone(BackboneAdapter):
         "resnet152": ([64, 128, 256, 512], [3, 8, 36, 3], 4, True),
     }
 
-    def __init__(self, resnet_variant: str, in_channels: int, stage_indices=(3, 6, 11)):
-        assert resnet_variant in self.model_parameters.keys(), (
-            f"{resnet_variant} not in {self.model_parameters.keys()}"
-        )
+    def __init__(self, resnet_variant: str, in_channels: int, stage_indices=(3, 6, 11)) -> None:
+        assert (
+            resnet_variant in self.model_parameters
+        ), f"{resnet_variant} not in {self.model_parameters.keys()}"
 
         super().__init__()
         self.set_stage_indices(stage_indices)

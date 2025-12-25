@@ -23,7 +23,7 @@ class FineMatching(nn.Module):
     - Nur aktiv, wenn `M > 0` (also grobes Matching gefunden wurde).
     """
 
-    def __init__(self, temperature: float = 1.0):
+    def __init__(self, temperature: float = 1.0) -> None:
         super().__init__()
         self.dsnt = Spatial2Numeric(temperature=temperature, normalized_coordinates=True)
 

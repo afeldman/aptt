@@ -49,20 +49,16 @@ class CenterNetModule(BaseModule):
         loss = self.loss_fn(outputs, targets)
 
         pred_boxes = self.decoder(outputs, img_size=x.shape[2:])
-        if isinstance(targets, dict):
-            gt_boxes = targets["boxes"]
-        else:
-            gt_boxes = [t for t in targets]
+        gt_boxes = targets["boxes"] if isinstance(targets, dict) else list(targets)
 
         self.metrics.update(pred_boxes, gt_boxes)
         self.log("val/loss", loss, prog_bar=True)
         return loss
 
-    def on_validation_epoch_end(self):
+    def on_validation_epoch_end(self) -> None:
         results = self.metrics.compute()
         for key, val in results.items():
             self.log(f"val/{key}", val, prog_bar=True)
-            print(f"[val] {key}: {val:.4f}")
         self.metrics.reset()
 
     def configure_optimizers(self):

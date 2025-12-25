@@ -1,7 +1,51 @@
-"""Text/LLM Dataset Loader für Language Modeling.
+"""Text and language model dataset loader module.
 
-Unterstützt verschiedene Text-Datasets für Pre-Training und Fine-Tuning
-von Language Models wie GPT und DeepSeek-V3.
+This module provides PyTorch Dataset and Lightning DataModule implementations
+for language modeling tasks. It supports various input formats including raw
+text files, JSONL files, and pre-tokenized PyTorch tensors.
+
+Supports advanced features:
+- Multi-Token Prediction (MTP) for improved language model training
+- Flexible tokenization with multiple tokenizer backends
+- Sliding window sampling for long sequences
+- Multiple data format loaders (txt, jsonl, pt)
+
+Example:
+    Loading a text dataset for language model training::
+
+        from pathlib import Path
+        from tokenizers import Tokenizer
+        from deepsuite.lightning_base.dataset.text_loader import TextDataset, TextDataLoader
+
+        # Load tokenizer
+        tokenizer = Tokenizer.from_file("tokenizer.json")
+
+        # Create dataset
+        dataset = TextDataset(
+            data_path=Path("data/train.txt"),
+            tokenizer=tokenizer,
+            max_seq_len=512,
+            stride=256,
+            return_mtp=True,
+            mtp_depth=4,
+        )
+
+        # Create data module for Lightning
+        dataloader = TextDataLoader(
+            train_path=Path("data/train"),
+            val_path=Path("data/val"),
+            tokenizer=tokenizer,
+            batch_size=32,
+            max_seq_len=512,
+        )
+
+    Using with HuggingFace transformers::
+
+        from transformers import AutoTokenizer
+        from deepsuite.lightning_base.dataset.text_loader import TextDataset
+
+        tokenizer = AutoTokenizer.from_pretrained("gpt2")
+        dataset = TextDataset(data_path="data/corpus.txt", tokenizer=tokenizer, max_seq_len=1024)
 """
 
 from __future__ import annotations
@@ -19,32 +63,30 @@ if TYPE_CHECKING:
 
 
 class TextDataset(Dataset):
-    """Dataset für Language Modeling mit Tokenization.
+    """PyTorch Dataset for language modeling with flexible tokenization.
 
-    Unterstützt verschiedene Formate:
-    - Raw text files (.txt)
-    - JSONL files ({"text": "..."})
-    - Pre-tokenized files (.pt)
+    Supports multiple data formats and provides advanced sampling strategies
+    including sliding window sampling and multi-token prediction targets.
 
-    Args:
-        data_path: Path zu Daten (file oder directory).
-        tokenizer: Tokenizer mit encode/decode methods.
-        max_seq_len: Maximale Sequenzlänge. Defaults to 512.
-        stride: Sliding window stride für lange Texte. Defaults to 256.
-        return_mtp: Return Multi-Token Prediction targets. Defaults to False.
-        mtp_depth: MTP lookahead depth. Defaults to 1.
+    Supported input formats:
+        - Raw text files (.txt)
+        - JSONL files (one JSON object per line with "text" field)
+        - Pre-tokenized PyTorch tensors (.pt)
 
-    Examples:
-        >>> from tokenizers import Tokenizer
-        >>> tokenizer = Tokenizer.from_file("tokenizer.json")
-        >>> dataset = TextDataset(
-        ...     data_path="data/train.txt",
-        ...     tokenizer=tokenizer,
-        ...     max_seq_len=512,
-        ... )
-        >>> sample = dataset[0]
-        >>> print(sample["input_ids"].shape)
-        torch.Size([512])
+    Supports both directory and single file inputs. When given a directory,
+    loads all compatible files found within.
+
+    Attributes:
+        data_path: Path to input file or directory.
+        tokenizer: Tokenizer object with encode/decode methods.
+        max_seq_len: Maximum sequence length for model input.
+        stride: Sliding window stride for chunking long sequences.
+        return_mtp: Whether to return Multi-Token Prediction targets.
+        mtp_depth: Number of future tokens to predict for MTP.
+        samples: List of tokenized samples ready for model input.
+
+    Raises:
+        ValueError: If data_path doesn't exist or file format is unsupported.
     """
 
     def __init__(
@@ -56,7 +98,43 @@ class TextDataset(Dataset):
         return_mtp: bool = False,
         mtp_depth: int = 1,
     ) -> None:
-        """Initialize text dataset."""
+        """Initialize text dataset with tokenization and sampling.
+
+        Args:
+            data_path: Path to input file or directory containing text data.
+                Supports .txt, .jsonl, and .pt files.
+            tokenizer: Tokenizer object with encode() method. Compatible with
+                HuggingFace transformers and tokenizers library.
+            max_seq_len: Maximum sequence length for model input. Sequences
+                longer than this will be chunked. Defaults to 512.
+            stride: Sliding window stride for creating overlapping samples
+                from long sequences. If None, defaults to max_seq_len
+                (non-overlapping chunks). Defaults to None.
+            return_mtp: If True, return Multi-Token Prediction targets where
+                the model predicts multiple future tokens. Defaults to False.
+            mtp_depth: Number of future tokens to include in MTP targets.
+                Ignored if return_mtp=False. Defaults to 1.
+
+        Raises:
+            ValueError: If data_path doesn't exist or file format is unsupported.
+
+        Example:
+            >>> from transformers import AutoTokenizer
+            >>> tokenizer = AutoTokenizer.from_pretrained("gpt2")
+            >>> dataset = TextDataset(
+            ...     data_path="data/corpus.txt",
+            ...     tokenizer=tokenizer,
+            ...     max_seq_len=512,
+            ...     stride=256,
+            ...     return_mtp=True,
+            ...     mtp_depth=4,
+            ... )
+            >>> sample = dataset[0]
+            >>> sample["input_ids"].shape
+            torch.Size([512])
+            >>> sample["labels"].shape if return_mtp else None
+            torch.Size([512, 4])
+        """
         self.data_path = Path(data_path)
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
@@ -123,10 +201,7 @@ class TextDataset(Dataset):
 
                     if hasattr(self.tokenizer, "encode"):
                         encoded = self.tokenizer.encode(text)
-                        if hasattr(encoded, "ids"):
-                            token_ids = encoded.ids
-                        else:
-                            token_ids = encoded
+                        token_ids = encoded.ids if hasattr(encoded, "ids") else encoded
                     else:
                         token_ids = self.tokenizer(text)
 

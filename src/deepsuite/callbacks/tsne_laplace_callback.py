@@ -27,7 +27,7 @@ class TSNELaplaceCallback(Callback):
 
         os.makedirs(save_dir, exist_ok=True)
 
-    def on_epoch_end(self, trainer, pl_module):
+    def on_epoch_end(self, trainer, pl_module) -> None:
         epoch = trainer.current_epoch
         if epoch % self.every_n_epochs != 0:
             return
@@ -52,7 +52,7 @@ class TSNELaplaceCallback(Callback):
 
         self._plot_tsne_laplace(embeddings_np, labels_np, epoch)
 
-    def _plot_tsne_laplace(self, embeddings, labels, epoch):
+    def _plot_tsne_laplace(self, embeddings, labels, epoch) -> None:
         tsne = TSNE(
             n_components=2, init="random", learning_rate="auto", perplexity=30, ithubrandom_state=42
         )

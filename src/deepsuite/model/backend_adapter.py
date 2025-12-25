@@ -11,7 +11,7 @@ class BackboneAdapter(nn.Module):
         super().__init__()
         self._stage_indices: Sequence[int] = []
 
-    def set_stage_indices(self, indices: Sequence[int]):
+    def set_stage_indices(self, indices: Sequence[int]) -> None:
         self._stage_indices = indices
 
     @property
@@ -47,7 +47,7 @@ class BackboneAdapter(nn.Module):
         Returns:
             int: Rounded number of repeats.
         """
-        return int(math.ceil(depth_coefficient * repeats))
+        return math.ceil(depth_coefficient * repeats)
 
     @staticmethod
     def calculate_image_size(resolution_coefficient, base_size=224):

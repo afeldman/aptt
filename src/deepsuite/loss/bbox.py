@@ -11,8 +11,13 @@ Example:
 
         criterion = BboxLoss(reg_max=16)
         iou_loss, dfl_loss = criterion(
-            pred_dist, pred_bboxes, anchor_points,
-            target_bboxes, target_scores, target_scores_sum, fg_mask
+            pred_dist,
+            pred_bboxes,
+            anchor_points,
+            target_bboxes,
+            target_scores,
+            target_scores_sum,
+            fg_mask,
         )
 
 Classes:
@@ -26,7 +31,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import torch
-from torch import Tensor, nn
+from torch import nn
 import torch.nn.functional as F  # noqa: N812
 
 from deepsuite.loss.dfl import DFLoss
@@ -36,7 +41,7 @@ from deepsuite.utils.bbox import bbox2dist
 from deepsuite.utils.xy import xywh2xyxy
 
 if TYPE_CHECKING:
-    import torch
+    from torch import Tensor
 
 
 class BboxLoss(nn.Module):
@@ -53,8 +58,13 @@ class BboxLoss(nn.Module):
 
             bbox_loss = BboxLoss(reg_max=16)
             iou_loss, dfl_loss = bbox_loss(
-                pred_dist, pred_bboxes, anchor_points,
-                target_bboxes, target_scores, target_scores_sum, fg_mask
+                pred_dist,
+                pred_bboxes,
+                anchor_points,
+                target_bboxes,
+                target_scores,
+                target_scores_sum,
+                fg_mask,
             )
     """
 

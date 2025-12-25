@@ -35,13 +35,15 @@ Example:
 
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-import torch
 from torch import nn
 import torch.nn.functional as F
 
 from deepsuite.utils.autocast import autocast
+
+if TYPE_CHECKING:
+    import torch
 
 
 class VarifocalLoss(nn.Module):

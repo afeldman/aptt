@@ -56,7 +56,7 @@ class CoarseMatching(nn.Module):
         else:
             raise NotImplementedError(f"Unbekannter Matching-Typ: {self.match_type}")
 
-    def forward(self, feat_c0, feat_c1, data, mask_c0=None, mask_c1=None):
+    def forward(self, feat_c0, feat_c1, data, mask_c0=None, mask_c1=None) -> None:
         """Führt das Matching zwischen zwei Featurekarten durch.
 
         Args:
@@ -65,7 +65,7 @@ class CoarseMatching(nn.Module):
             data (dict): Zusätzliche Daten für spätere Verarbeitung
             mask_c0/mask_c1 (Tensor): Optional gültige Masken [B, L] / [B, S]
         """
-        N, L, S, C = feat_c0.shape[0], feat_c0.shape[1], feat_c1.shape[1], feat_c0.shape[2]
+        _N, L, S, C = feat_c0.shape[0], feat_c0.shape[1], feat_c1.shape[1], feat_c0.shape[2]
 
         # Feature-Normalisierung
         scale = C**0.5
@@ -108,8 +108,8 @@ class CoarseMatching(nn.Module):
         data.update(self.get_coarse_match(conf_matrix, data))
 
     @staticmethod
-    def mask_border(m, b: int, v):
-        """Maskiert Ränder (z. B. zur Vermeidung von Artefakten)"""
+    def mask_border(m, b: int, v) -> None:
+        """Maskiert Ränder (z. B. zur Vermeidung von Artefakten)."""
         if b <= 0:
             return
         m[:, :b] = v
@@ -122,8 +122,8 @@ class CoarseMatching(nn.Module):
         m[:, :, :, :, -b:] = v
 
     @staticmethod
-    def mask_border_with_padding(m, bd, v, p_m0, p_m1):
-        """Maskiert Ränder unter Berücksichtigung von Padding-Masken"""
+    def mask_border_with_padding(m, bd, v, p_m0, p_m1) -> None:
+        """Maskiert Ränder unter Berücksichtigung von Padding-Masken."""
         if bd <= 0:
             return
         m[:, :bd] = v
@@ -136,7 +136,7 @@ class CoarseMatching(nn.Module):
         h1s = p_m1.sum(1).max(-1)[0].int()
         w1s = p_m1.sum(-1).max(-1)[0].int()
 
-        for b, (h0, w0, h1, w1) in enumerate(zip(h0s, w0s, h1s, w1s)):
+        for b, (h0, w0, h1, w1) in enumerate(zip(h0s, w0s, h1s, w1s, strict=False)):
             m[b, h0 - bd :] = v
             m[b, :, w0 - bd :] = v
             m[b, :, :, h1 - bd :] = v
@@ -144,7 +144,7 @@ class CoarseMatching(nn.Module):
 
     @staticmethod
     def compute_max_candidates(p_m0, p_m1):
-        """Berechnet die maximale Anzahl möglicher Matches anhand der gültigen Masken"""
+        """Berechnet die maximale Anzahl möglicher Matches anhand der gültigen Masken."""
         h0s = p_m0.sum(1).max(-1)[0]
         w0s = p_m0.sum(-1).max(-1)[0]
         h1s = p_m1.sum(1).max(-1)[0]
@@ -202,8 +202,7 @@ class CoarseMatching(nn.Module):
 
     @torch.no_grad()
     def get_coarse_match(self, conf_matrix, data):
-        """Ermittelt grobe Matches aus der Konfidenzmatrix.
-        """
+        """Ermittelt grobe Matches aus der Konfidenzmatrix."""
         _device = conf_matrix.device
         H0, W0 = data["hw0_c"]
         H1, W1 = data["hw1_c"]
@@ -257,7 +256,7 @@ class CoarseMatching(nn.Module):
             "mconf": mconf[mconf != 0],
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"CoarseMatching(match_type={self.match_type}, thr={self.thr}, "
             f"train_coarse_percent={self.train_coarse_percent}, "

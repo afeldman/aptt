@@ -53,15 +53,13 @@ class TFLiteExportCallback(ExportBaseCallback):
         checkpoint_name = Path(best_checkpoint_path).stem
         onnx_path = self.output_dir / f"{checkpoint_name}.onnx"
         try:
-            import torch  # noqa: PLC0415
+            import torch
 
             state = torch.load(best_checkpoint_path, map_location="cpu")
             pl_module.load_state_dict(state["state_dict"])  # type: ignore[index]
             pl_module.eval()
 
-            ONNXExportCallback._export_onnx(  # noqa: SLF001
-                pl_module, example_input, onnx_path, self.opversion
-            )
+            ONNXExportCallback._export_onnx(pl_module, example_input, onnx_path, self.opversion)
         except Exception as e:
             logger.error(f"❌ ONNX-Export fehlgeschlagen: {e}")
             return

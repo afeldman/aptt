@@ -1,6 +1,5 @@
 """Head expansion utilities for classification heads."""
 
-
 import torch
 from torch import nn
 

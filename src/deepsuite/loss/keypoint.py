@@ -70,4 +70,7 @@ class KeypointLoss(nn.Module):
         kpt_loss_factor = kpt_mask.shape[1] / (torch.sum(kpt_mask != 0, dim=1) + 1e-9)
         e = d / ((2 * self.sigmas).pow(2) * (area + 1e-9) * 2)
         from typing import cast
-        return cast("torch.Tensor", (kpt_loss_factor.view(-1, 1) * ((1 - torch.exp(-e)) * kpt_mask)).mean())
+
+        return cast(
+            "torch.Tensor", (kpt_loss_factor.view(-1, 1) * ((1 - torch.exp(-e)) * kpt_mask)).mean()
+        )

@@ -5,7 +5,7 @@ from deepsuite.model.loftr.linear_attention import LinearAttention
 
 
 class LoFTREncoderLayer(nn.Module):
-    def __init__(self, d_model, nhead, attention="linear"):
+    def __init__(self, d_model, nhead, attention="linear") -> None:
         assert d_model % nhead == 0, "d_model must be divisible by nhead"
         super().__init__()
         self.d_model = d_model
@@ -44,6 +44,4 @@ class LoFTREncoderLayer(nn.Module):
         x = x + self.norm1(attended)  # Residual 1
 
         # === Feed-forward ===
-        x = x + self.norm2(self.mlp(x))  # Residual 2
-
-        return x
+        return x + self.norm2(self.mlp(x))  # Residual 2

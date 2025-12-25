@@ -20,9 +20,7 @@ Example:
 
     # ResNet50 for classification with 1000 classes
     model = ResNet(
-        resnet_variant=[[64, 128, 256, 512], [3, 4, 6, 3], 4, True],
-        in_channels=3,
-        num_classes=1000
+        resnet_variant=[[64, 128, 256, 512], [3, 4, 6, 3], 4, True], in_channels=3, num_classes=1000
     )
     x = torch.randn(2, 3, 224, 224)
     output = model(x)  # Shape (2, 1000)
@@ -64,7 +62,7 @@ class ResNet(ResNetBackbone):
             resnet_variant=[[64, 128, 256, 512], [3, 4, 6, 3], 4, True],
             in_channels=3,
             num_classes=1000,
-            stage_indices=(3, 4, 5)
+            stage_indices=(3, 4, 5),
         )
 
         # Forward pass
@@ -100,14 +98,14 @@ class ResNet(ResNetBackbone):
             model18 = ResNet(
                 resnet_variant=[[64, 128, 256, 512], [2, 2, 2, 2], 1, False],
                 in_channels=3,
-                num_classes=1000
+                num_classes=1000,
             )
 
             # ResNet50
             model50 = ResNet(
                 resnet_variant=[[64, 128, 256, 512], [3, 4, 6, 3], 4, True],
                 in_channels=3,
-                num_classes=1000
+                num_classes=1000,
             )
             ```
         """
@@ -149,6 +147,4 @@ class ResNet(ResNetBackbone):
         x = torch.flatten(x, start_dim=1)
 
         # Classification
-        x = self.fc1(x)
-
-        return x
+        return self.fc1(x)

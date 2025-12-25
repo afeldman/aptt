@@ -55,7 +55,7 @@ except ImportError:
             )  # Phase als zusätzliches Feature
 
         def forward(self, signal: torch.Tensor) -> torch.Tensor:
-            batch_size, _, _ = signal.shape
+            _batch_size, _, _ = signal.shape
             real, imag = signal[:, :, 0], signal[:, :, 1]  # Real- & Imaginärteil extrahieren
 
             real_out = self.real_linear(real) - self.imag_linear(imag)

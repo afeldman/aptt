@@ -57,5 +57,4 @@ class ClassificationHead(nn.Module):
         """
         x = self.pool(x)
         x = torch.flatten(x, 1)
-        x = self.fc(x)
-        return x
+        return self.fc(x)

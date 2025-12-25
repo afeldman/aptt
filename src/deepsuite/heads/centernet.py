@@ -46,4 +46,4 @@ class MultiScaleCenterNetHead(Module):
         self.heads = ModuleList([CenterNetHead(ch, num_classes) for ch in in_channels_list])
 
     def forward(self, features):  # list of FPN outputs
-        return [head(f) for head, f in zip(self.heads, features)]
+        return [head(f) for head, f in zip(self.heads, features, strict=False)]

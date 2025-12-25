@@ -27,7 +27,7 @@ Example:
         width_coefficient=1.0,
         depth_coefficient=1.0,
         num_classes=1000,
-        version='b0'
+        version="b0",
     )
 
     # EfficientNet-B4 (better accuracy)
@@ -36,7 +36,7 @@ Example:
         width_coefficient=1.4,
         depth_coefficient=1.8,
         num_classes=1000,
-        version='b4'
+        version="b4",
     )
 
     x = torch.randn(2, 3, 224, 224)
@@ -46,10 +46,14 @@ Example:
 
 from __future__ import annotations
 
-import torch
+from typing import TYPE_CHECKING
+
 from torch import nn
 
 from deepsuite.model.feature.efficientnet import EfficientNetBackbone
+
+if TYPE_CHECKING:
+    import torch
 
 
 class EfficientNet(EfficientNetBackbone):
@@ -78,7 +82,7 @@ class EfficientNet(EfficientNetBackbone):
             width_coefficient=1.2,
             depth_coefficient=1.4,
             num_classes=1000,
-            version='b3'
+            version="b3",
         )
 
         x = torch.randn(8, 3, 300, 300)  # B3 uses higher resolution
@@ -123,7 +127,7 @@ class EfficientNet(EfficientNetBackbone):
                 width_coefficient=1.0,
                 depth_coefficient=1.0,
                 num_classes=1000,
-                version='b0'
+                version="b0",
             )
 
             # EfficientNet-B4 for better balance
@@ -132,7 +136,7 @@ class EfficientNet(EfficientNetBackbone):
                 width_coefficient=1.4,
                 depth_coefficient=1.8,
                 num_classes=1000,
-                version='b4'
+                version="b4",
             )
             ```
         """
@@ -166,7 +170,7 @@ class EfficientNet(EfficientNetBackbone):
                 resolution_coefficient=1.0,
                 width_coefficient=1.0,
                 depth_coefficient=1.0,
-                num_classes=1000
+                num_classes=1000,
             )
             x = torch.randn(8, 3, 224, 224)
             logits = model(x)  # Shape (8, 1000)
@@ -174,5 +178,4 @@ class EfficientNet(EfficientNetBackbone):
             ```
         """
         x = super().forward(x, return_pooled=False, return_stages=False)
-        x = self.fc(x)
-        return x
+        return self.fc(x)

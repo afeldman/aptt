@@ -192,8 +192,7 @@ class DepthwiseSeparableConv(nn.Module):
             Ausgabetensor nach Depthwise -> Pointwise Convolution.
         """
         x = self.depthwise(x)
-        x = self.pointwise(x)
-        return x
+        return self.pointwise(x)
 
 
 class SEBlock(nn.Module):
@@ -326,13 +325,9 @@ class Conv1d(nn.Conv1d):
 
     def conv1x1_forward(self, x, is_incremental) -> torch.Tensor:
         """Conv1x1 forward."""
-        if is_incremental:
-            x = self.incremental_forward(x)
-        else:
-            x = self(x)
-        return x
+        return self.incremental_forward(x) if is_incremental else self(x)
 
-    def clear_buffer(self):
+    def clear_buffer(self) -> None:
         """Clear the input buffer."""
         self.input_buffer = None
 
@@ -420,10 +415,7 @@ class ResidualConv1dGLU(nn.Module):
             skip_out_channels = residual_channels
         if padding is None:
             # no future time stamps available
-            if causal:
-                padding = (kernel_size - 1) * dilation
-            else:
-                padding = (kernel_size - 1) // 2 * dilation
+            padding = (kernel_size - 1) * dilation if causal else (kernel_size - 1) // 2 * dilation
         self.causal = causal
 
         self.conv = Conv1d(
@@ -549,7 +541,7 @@ class ResidualConv1dGLU(nn.Module):
         x = (x + residual) * math.sqrt(0.5)
         return x, s
 
-    def clear_buffer(self):
+    def clear_buffer(self) -> None:
         for c in [self.conv, self.conv1x1_out, self.conv1x1_skip, self.conv1x1c, self.conv1x1g]:
             if c is not None:
                 c.clear_buffer()

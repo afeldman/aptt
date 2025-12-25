@@ -5,7 +5,7 @@ from torch import nn
 
 
 class PositionEncodingSine(nn.Module):
-    def __init__(self, d_model=256, temp_bug_fix=True):
+    def __init__(self, d_model=256, temp_bug_fix=True) -> None:
         assert d_model % 4 == 0, "d_model must be divisible by 4"
         super().__init__()
         self.d_model = d_model
@@ -45,5 +45,3 @@ if __name__ == "__main__":
     pe = PositionEncodingSine(d_model=256)
     dummy = torch.randn(1, 256, 60, 80)
     out = pe(dummy)
-
-    print(out.shape)

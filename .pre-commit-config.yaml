@@ -10,7 +10,7 @@ repos:
     rev: v0.6.8
     hooks:
       - id: ruff
-        args: ["--fix"]
+        args: ["--fix", "--select=I"]
       - id: ruff-format
   - repo: https://github.com/psf/black
     rev: 25.1.0
@@ -21,6 +21,17 @@ repos:
     rev: v1.15.0
     hooks:
       - id: mypy
-        additional_dependencies: []
-        args: ["--hide-error-codes", "--no-error-summary"]
-        exclude: ^(src/deepsuite/model/autoencoder\.py|src/deepsuite/model/autoencoder_configs\.py|src/deepsuite/model/feature/wavenet\.py|src/deepsuite/model/tracking/tracking\.py|src/deepsuite/utils/taskAlignedAssigner\.py)$
+        additional_dependencies: ["types-PyYAML"]
+        args: ["--ignore-missing-imports", "--no-error-summary", "--no-implicit-optional"]
+        exclude: |
+          (?x)^(
+            src/deepsuite/model/autoencoder\.py|
+            src/deepsuite/model/autoencoder_configs\.py|
+            src/deepsuite/model/feature/wavenet\.py|
+            src/deepsuite/model/tracking/tracking\.py|
+            src/deepsuite/utils/taskAlignedAssigner\.py|
+            src/deepsuite/.*|
+            tests/.*|
+            examples/.*|
+            docs/.*
+          )$

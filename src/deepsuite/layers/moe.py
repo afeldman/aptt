@@ -152,9 +152,7 @@ class AuxiliaryLossFreeRouter(nn.Module):
                 - load_stats: Dict with load balancing statistics
 
         Examples:
-            >>> router = AuxiliaryLossFreeRouter(
-            ...     d_model=256, n_routed_experts=32, n_expert_per_token=4
-            ... )
+            >>> router = AuxiliaryLossFreeRouter(d_model=256, n_routed_experts=32, n_expert_per_token=4)
             >>> x = torch.randn(2, 64, 256)
             >>> weights, indices, stats = router(x)
         """
