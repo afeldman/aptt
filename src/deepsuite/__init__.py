@@ -26,9 +26,6 @@ from deepsuite.model.discriminator import (
     PatchGANDiscriminator,
     PixelDiscriminator,
 )
-from deepsuite.modules.centernet import CenterNetModule
-from deepsuite.modules.tracking import TrackingModule
-from deepsuite.modules.yolo import Yolo
 
 __all__ = [
     # Model Architectures
@@ -39,16 +36,12 @@ __all__ = [
     "BaseModule",
     "BaseTrainer",
     "CenterNetModel",
-    "CenterNetModule",
     "ContinualLearningManager",
     "ConvDecoder",
     "ConvEncoder",
     "MultiScaleDiscriminator",
     "PatchGANDiscriminator",
     "PixelDiscriminator",
-    "TrackingModule",
-    # Lightning Modules (end-to-end trainable)
-    "Yolo",
     # Version
     "__version__",
 ]
