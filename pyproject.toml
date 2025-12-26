@@ -1,6 +1,6 @@
 [project]
 name = "deepsuite"
-version = "1.0.6"
+version = "1.0.7"
 description = "Comprehensive deep learning framework with state-of-the-art implementations: GPT, DeepSeek-V3 with MLA/MoE, YOLO, CenterNet, and specialized audio/vision models built on PyTorch Lightning"
 authors = [{ name = "anton feldmann", email = "anton.feldmann@gmail.com" }]
 readme = "README.md"
@@ -25,6 +25,7 @@ dependencies = [
     "mlflow>=2.22.0",
     "plotly>=6.1.2",
     "motmetrics>=1.4.0",
+    "audiomentations>=0.43.1",
 ]
 
 [project.optional-dependencies]
