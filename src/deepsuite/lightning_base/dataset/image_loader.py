@@ -24,8 +24,17 @@ Example:
         datamodule = ImageLoader(batch_size=64, num_workers=8, randaugment=True, image_size=(256, 256))
 """
 
-import albumentations as A  # noqa: N812
-from albumentations.pytorch import ToTensorV2
+from typing import Any
+
+try:
+    import albumentations as A  # noqa: N812
+    from albumentations.pytorch import ToTensorV2
+
+    HAS_ALBUMENTATIONS = True
+except ImportError:
+    HAS_ALBUMENTATIONS = False
+    A = None  # type: ignore
+    ToTensorV2 = None  # type: ignore
 
 from deepsuite.lightning_base.dataset.base_loader import BaseDataLoader
 
@@ -74,7 +83,7 @@ class ImageLoader(BaseDataLoader):
         )
         self.image_size = image_size
 
-    def _get_train_transforms(self) -> A.Compose:
+    def _get_train_transforms(self) -> Any:
         """Return training transforms with optional RandAugment.
 
         If randaugment=True, applies an aggressive augmentation pipeline including:
@@ -96,6 +105,10 @@ class ImageLoader(BaseDataLoader):
             >>> transforms = loader._get_train_transforms()
             >>> augmented = transforms(image=image)
         """
+        if not HAS_ALBUMENTATIONS:
+            # Return identity transform if albumentations not available
+            return lambda image: image
+
         if self.randaugment:
             # RandAugment-style aggressive augmentation
             return A.Compose(
@@ -141,7 +154,7 @@ class ImageLoader(BaseDataLoader):
             ]
         )
 
-    def _get_val_transforms(self) -> A.Compose:
+    def _get_val_transforms(self) -> Any:
         """Return validation transforms without augmentation.
 
         Applies minimal preprocessing:
@@ -157,6 +170,10 @@ class ImageLoader(BaseDataLoader):
             >>> transforms = loader._get_val_transforms()
             >>> preprocessed = transforms(image=image)
         """
+        if not HAS_ALBUMENTATIONS:
+            # Return identity transform if albumentations not available
+            return lambda image: image
+
         return A.Compose(
             [
                 A.Resize(self.image_size[0], self.image_size[1]),

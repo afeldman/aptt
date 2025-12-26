@@ -25,7 +25,7 @@ dependencies = [
     "mlflow>=2.22.0",
     "plotly>=6.1.2",
     "motmetrics>=1.4.0",
-    "audiomentations>=0.43.1",
+    "albumentations>=2.0.8",
 ]
 
 [project.optional-dependencies]

@@ -26,7 +26,13 @@ Example:
 
 from typing import Any
 
-import audiomentations as am
+try:
+    import audiomentations as am
+
+    HAS_AUDIOMENTATIONS = True
+except ImportError:
+    HAS_AUDIOMENTATIONS = False
+    am = None  # type: ignore
 
 from deepsuite.lightning_base.dataset.base_loader import BaseDataLoader
 
@@ -92,6 +98,10 @@ class AudioLoader(BaseDataLoader):
             >>> transforms = loader._get_train_transforms()
             >>> augmented = transforms(samples=audio_waveform, sample_rate=16000)
         """
+        if not HAS_AUDIOMENTATIONS:
+            # Return identity transform if audiomentations not available
+            return lambda samples, sample_rate: samples
+
         if self.randaugment:
             return am.Compose(
                 [
@@ -138,6 +148,10 @@ class AudioLoader(BaseDataLoader):
             >>> transforms = loader._get_val_transforms()
             >>> preprocessed = transforms(samples=audio_waveform, sample_rate=16000)
         """
+        if not HAS_AUDIOMENTATIONS:
+            # Return identity transform if audiomentations not available
+            return lambda samples, sample_rate: samples
+
         return am.Compose(
             [
                 am.Normalize(p=1.0),
