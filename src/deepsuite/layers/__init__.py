@@ -3,6 +3,7 @@
 from deepsuite.layers.attention.kv_compression import KVCompression
 from deepsuite.layers.attention.mla import MultiHeadLatentAttention
 from deepsuite.layers.attention.rope import RotaryPositionEmbedding
+from deepsuite.layers.mel import MelSpectrogramExtractor
 from deepsuite.layers.moe import (
     AuxiliaryLossFreeRouter,
     DeepSeekMoE,
@@ -16,6 +17,7 @@ __all__ = [
     "EfficientDeepSeekMoE",
     "FFNExpert",
     "KVCompression",
+    "MelSpectrogramExtractor",
     "MultiHeadLatentAttention",
     "RotaryPositionEmbedding",
 ]

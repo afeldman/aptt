@@ -1,6 +1,6 @@
 [project]
 name = "deepsuite"
-version = "1.0.5"
+version = "1.0.6"
 description = "Comprehensive deep learning framework with state-of-the-art implementations: GPT, DeepSeek-V3 with MLA/MoE, YOLO, CenterNet, and specialized audio/vision models built on PyTorch Lightning"
 authors = [{ name = "anton feldmann", email = "anton.feldmann@gmail.com" }]
 readme = "README.md"
@@ -343,3 +343,15 @@ explicit = true
 [tool.pytest.ini_options]
 addopts = "-ra"
 filterwarnings = ["ignore::UserWarning", "ignore::DeprecationWarning"]
+
+[dependency-groups]
+dev = [
+    "albumentations>=2.0.8",
+    "audiomentations>=0.43.1",
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "pytorch-lightning>=2.6.0",
+    "torch>=2.6.0",
+    "torchvision>=0.21.0",
+]
